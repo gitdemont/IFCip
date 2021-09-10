@@ -1,0 +1,75 @@
+This package is released under the GNU General Public License, Version 3, GPL-3 
+YEAR: 2021
+COPYRIGHT HOLDERS: Yohann Demont, Jean-Pierre Marolleau, Loïc Garçon,
+                   CHU Amiens
+IFC: An R Package for Imaging Flow Cytometry Image Processing
+Copyright (C) 2021 Yohann Demont
+
+--------------------------------------------------------------------------------
+hpp_zernike1 and hpp_zernike2 are adapted from File src/features_zernike.c and
+gaussian and laplacian kernel in makeKernel is adapted from File R/morphology.R
+in EBImage R package in its version 3.12.0 available at
+https://www.bioconductor.org/packages/2.10/bioc/html/EBImage.html
+EBImage was authored by Oleg Sklyar, Gregoire Pau, Mike Smith, Wolfgang Huber,
+under LGPL license version 2.1
+
+EBImage with all of its C, C++ and R sources, all documentation files and 
+examples, is copyrighted to Oleg Sklyar, 2005-2007
+Copies of the license are available in LICENSE file in the sources of this
+package, as well as at https://www.r-project.org/Licenses/
+
+--------------------------------------------------------------------------------
+hpp_convexhull is adapted from Andrew's Monotone Chain Algorithm A. M. Andrew,
+'Another Efficient Algorithm for Convex Hulls in Two Dimension', Information
+Processing Letters, 9, 1979, pp216-219 reported in M. A. Jayaram, Hasan Fleyeh,
+'Convex Hulls in Image Processing: A Scoping Review', American Journal of
+Intelligent Systems, Vol. 6 No. 2, 2016, pp. 48-58.
+
+--------------------------------------------------------------------------------
+hpp_antipodalpairs is adapted from Computational geometry with the rotating 
+calipers authored by Pirzadeh, Hormoz under supervision of Toussaint, Godfried
+T. at McGill University. 
+Available at https://escholarship.mcgill.ca/concern/theses/fx719p46g
+
+--------------------------------------------------------------------------------
+ray_pnt_in_poly is adapted from the Ray Casting algorithm authored by 
+W. Randolph Franklin.
+Available at http://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of 
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+Software, and to permit persons to whom the Software is furnished to do so, 
+subject to the following conditions: 
+ 1.Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimers. 
+ 2.Redistributions in binary form must reproduce the above copyright notice in
+the documentation  and/or other materials provided with the distribution. 
+ 3.The name of W. Randolph Franklin may not be used to endorse or promote
+products derived from this Software without specific prior written permission. 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+--------------------------------------------------------------------------------
+hpp_ctl is adapted from 'A linear-time component-labeling algorithm using 
+contour tracing technique' from F. Change, CJ. Chen and CJ Lu. Described in
+Computer Vision and Image Understanding Volume 93, Issue 2, February 2004,
+Pages 206-220.
+Available at https://doi.org/10.1016/j.cviu.2003.09.002
+
+--------------------------------------------------------------------------------
+hpp_thinning_zs is adapted from 'A fast parallel algorithm for thinning digital 
+patterns' authored by T. Y. Zhang, C. Y. Suen. Desribed in Communications of the
+ACM, March 1984.
+Available at https://doi.org/10.1145/357994.358023
+
+--------------------------------------------------------------------------------
+hpp_thinning_bst is adapted from 'A new thinning algorithm for binary images'
+authored by L. Ben Boudaoud, A. Sider, A. Tari. Described in 3rd international 
+conference on control, engineering & information technology, May 2015.
+Available at https://doi.org/10.1109/CEIT.2015.7233099
