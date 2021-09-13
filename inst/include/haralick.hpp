@@ -122,7 +122,7 @@ Rcpp::List hpp_cooc(const Rcpp::IntegerMatrix img,
    Rcpp::stop("hpp_cooc: 'img' should be of class `IFCip_rescale`");
   }
 
-  uint16_t depth = std::pow(2.0, img.attr("bits"));
+  uint16_t depth = std::pow(2.0, as<int>(img.attr("bits")));
   R_len_t mat_r = img.nrow();
   R_len_t mat_c = img.ncol();
   if(mat_r != msk.nrow() || mat_c != msk.ncol()) {
