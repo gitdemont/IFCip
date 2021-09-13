@@ -110,7 +110,7 @@ Rcpp::IntegerMatrix hpp_rescale_M(const Rcpp::NumericMatrix mat,
 //' @param msk a LogicalMatrix, containing mask.
 //' @param delta uint8_t offset from which co-oocurence has to be computed to. Default is 1.
 //' @details See 'Textural Features for Image Classification', Haralick et. al (1979),
-//' available at: \url{http://haralick.org/journals/TexturalFeatures.pdf}
+//' available at: \url{https://haralick.org/journals/TexturalFeatures.pdf}
 //' @return a list whose members are normalized Gray-Level Co-occurrence Matrices at angles 0, 45, 90 and 315.
 //' @keywords internal
 ////' @export

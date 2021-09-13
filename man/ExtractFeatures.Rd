@@ -45,7 +45,7 @@ For very fine textures, this value is small (1-3 pixels), while for very coarse 
 In addition when parallelization is possible display_progress will be turned to FALSE.}
 }
 \value{
-a 3D array of features values whose dimensions are [object, features, channel].
+a 3D array of features values whose dimensions are [object, features, channel] of class `IFCip_features`.
 }
 \description{
 Function to extract features from objects stored within rif and cif files.

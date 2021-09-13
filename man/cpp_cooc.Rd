@@ -18,6 +18,6 @@ This function is designed to compute Haralick co-occurrence matrix
 }
 \details{
 See 'Textural Features for Image Classification', Haralick et. al (1979),
-available at: \url{http://haralick.org/journals/TexturalFeatures.pdf}
+available at: \url{https://haralick.org/journals/TexturalFeatures.pdf}
 }
 \keyword{internal}

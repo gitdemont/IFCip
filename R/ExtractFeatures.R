@@ -105,7 +105,7 @@
 #'                                'to use example of features extraction with parallelization.'))))
 #' }
 #' @details arguments of objectExtract() from IFC package will be deduced from \code{\link{ExtractFeatures}} input arguments.
-#' @return a 3D array of features values whose dimensions are [object, features, channel].
+#' @return a 3D array of features values whose dimensions are [object, features, channel] of class `IFCip_features`.
 #' @export
 ExtractFeatures <- function(...,
                             objects,

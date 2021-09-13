@@ -259,7 +259,7 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
 //' 2.Redistributions in binary form must reproduce the above copyright notice in the documentation and/or other materials provided with the distribution. 
 //' 3.The name of W. Randolph Franklin may not be used to endorse or promote products derived from this Software without specific prior written permission. 
 //' THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-//' @source adaptation from W. Randolph Franklin code \url{http://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html}
+//' @source adaptation from W. Randolph Franklin code \url{https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html}
 //' @param pnt a NumericVector with x and y coordinates.
 //' @param poly a 2-column matrix defining the locations (x and y) of vertices of the polygon of interest.
 //' @param include whether to include vertices of the polygon or not
