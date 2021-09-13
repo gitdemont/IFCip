@@ -15,3 +15,4 @@ Imports: Rcpp (>= 0.10.0), IFC (>= 0.1.0)
 Suggests: IFCdata, shiny, parallel, doParallel, foreach
 LinkingTo: Rcpp, IFC
 Additional_repositories: https://gitdemont.github.io/IFCdata
+SystemRequirements: C++11
