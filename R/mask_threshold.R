@@ -49,7 +49,7 @@ mask_threshold <- function(msk, img, threshold = 0, removal = 0) {
   foo = cpp_threshold(img = img, msk = msk, k = threshold, removal = removal)
   
   ATT = list("IFC_msk", "threshold", threshold, c(nrow(msk), ncol(msk)))
-  names(ATT) = c("class", "type", "area", "dim")
+  names(ATT) = c("class", "type", "threshold", "dim")
   attributes(foo) <- ATT
   return(foo)
 }
