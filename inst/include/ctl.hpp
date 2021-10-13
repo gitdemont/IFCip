@@ -60,8 +60,10 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
                    const bool global = false) {
   R_len_t mat_r = mat.nrow(), mat_c = mat.ncol();
   R_len_t i_cont = 0, i_per = -1, new_l = 2, max_count = (std::ceil(mat_r / 2) + 1) * (std::ceil(mat_c / 2) + 1) * 10;
+  
   // create output matrix with extra cols / rows
   Rcpp::IntegerMatrix out(mat_r + 2, mat_c + 2);
+  
   // create output contours vector
   // we consider we max size is when we have only isolated points
   // meaning that each point is separated by 1 background px
@@ -69,13 +71,9 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
   // so maximal final length should be
   // Rcpp::IntegerVector contours((ceil(mat_r / 2) + 1) * (ceil(mat_c / 2) + 1) * 10);
   Rcpp::IntegerVector contours(max_count);
+  
   // create output perimeter
   Rcpp::IntegerVector perimeter;
-  // add padding
-  // out(0, Rcpp::_) = Rcpp::IntegerVector(mat_c + 2, 0);
-  // out(mat_r + 1, Rcpp::_) = Rcpp::IntegerVector(mat_c + 2, 0);
-  // out(Rcpp::_, 0) = Rcpp::IntegerVector(mat_r + 2, 0);
-  // out(Rcpp::_, mat_c + 1) = Rcpp::IntegerVector(mat_r + 2, 0);
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     R_len_t i_out = (i_col + 1) * (mat_r + 2) + 1;
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
@@ -116,8 +114,10 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
               visit = (j + pos) % 8;
               nbr_x = i_col + ifcip_ctl_dx[visit];
               nbr_y = i_row + ifcip_ctl_dy[visit];
+              
               // for debugging
-              // Rcout << "go: " << visit << ", i_col: " << nbr_x + 1 << ", i_row: " << nbr_y + 1 << ", val: "<< out(nbr_y, nbr_x) << std::endl;
+              // Rcout << "go: " << visit << ", i_col: " << nbr_x << ", i_row: " << nbr_y << ", val: "<< out(nbr_y, nbr_x) << std::endl;
+              
               if(out(nbr_y, nbr_x) > 0) {
                 pos = ifcip_ctl_bk[visit];
                 out(i_row, i_col) = new_l;
@@ -145,10 +145,11 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
               contours[i_cont++] = 1;
               break; // isolated point
             }
-            if((contours[len + 0]== ori_c) && (contours[len + 1]== ori_r) && (contours[len + 5] == nbr_x) && (contours[len + 6] == nbr_y)) break; // escape contour
-            // if((contours[len + 5] == nbr_x) && (contours[len + 6] == nbr_y)) break; // escape contour
-            // record current contour point coordinates + its label
+            if((contours[len + 0]== ori_c) && (contours[len + 1]== ori_r) &&
+               (contours[len + 5] == nbr_x) && (contours[len + 6] == nbr_y) &&
+               (i_row == ori_r) && (i_col == ori_c)) break; // escape contour
             
+            // record current contour point coordinates + its label
             if(max_count - i_cont < 5) {
               Rcpp::stop("hpp_ctl: buffer overrun");
             }
@@ -195,8 +196,10 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
               visit = (j + pos) % 8;
               nbr_x = i_col + ifcip_ctl_dx[visit];
               nbr_y = i_row + ifcip_ctl_dy[visit];
+              
               // for debugging
-              // Rcout << "go: " << visit << ", i_col: " << nbr_x + 1 << ", i_row: " << nbr_y + 1 << ", val: "<< out(nbr_y, nbr_x) << std::endl;
+              // Rcout << "go: " << visit << ", i_col: " << nbr_x << ", i_row: " << nbr_y << ", val: "<< out(nbr_y, nbr_x) << std::endl;
+              
               if(out(nbr_y, nbr_x) > 0) {
                 pos = ifcip_ctl_bk[visit];
                 out(i_row, i_col) = exg_l;
@@ -205,8 +208,10 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
                 out(nbr_y, nbr_x) = -1;
               }
             }
-            if((contours[len + 0]== ori_c) && (contours[len + 1]== ori_r) && (contours[len + 5] == nbr_x) && (contours[len + 6] == nbr_y)) break; // escape contour
-            // if((contours[len + 5] == nbr_x) && (contours[len + 6] == nbr_y)) break; // escape contour
+            if((contours[len + 0]== ori_c) && (contours[len + 1]== ori_r) && 
+               (contours[len + 5] == nbr_x) && (contours[len + 6] == nbr_y) &&
+               (i_row == ori_r) && (i_col == ori_c)) break; // escape contour
+            
             // record current contour point coordinates + its label
             if(max_count - i_cont < 5) { // safer
               Rcpp::stop("hpp_ctl: buffer overrun");
