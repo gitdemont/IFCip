@@ -65,16 +65,14 @@ make_kernel <- function(size = 3, type = "box", sigma = 0.3) {
            sigma = na.omit(as.numeric(sigma)); assert(sigma, len = 1)
            x = seq(-(size - 1)/2, (size - 1)/2, length = size)
            x = matrix(x, ncol = size, nrow = size)
-           ans = exp(-(x^2 + t(x)^2) / (2*sigma^2)) / (pi*2*sigma^2) 
-           ans = ans/sum(ans)
+           ans = exp(-(x^2 + t(x)^2) / (2*sigma^2)) 
          },
          "laplacian" = { # TODO remains to be checked
            sigma = na.omit(as.numeric(sigma)); assert(sigma, len = 1)
            x = seq(-(size - 1)/2, (size - 1)/2, length = size)
            x = matrix(x, ncol = size, nrow = size)
-           ans = (x^2 + t(x)^2) / (2 * sigma^2)
-           ans = (ans-1)*exp(-ans)/(pi*sigma^4)
-           ans = ans/sum(ans)
+           ans = -(x^2 + t(x)^2) / (2*sigma^2)
+           ans = -(1+ans)*exp(ans)/(pi*sigma^4)
          },
          "sobelx" = { 
            ans = matrix(c( -1,  0,  1,
