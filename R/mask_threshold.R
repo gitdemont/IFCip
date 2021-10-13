@@ -42,7 +42,7 @@
 mask_threshold <- function(msk, img, threshold = 0, removal = 0) {
   assert(msk, cla = "IFC_msk")
   assert(img, cla = "IFC_img")
-  threshold = na.omit(as.integer(threshold)); threshol=threshold[(threshold>=0) & (threshold<=100)]
+  threshold = na.omit(as.integer(threshold)); threshold=threshold[(threshold>=0) & (threshold<=100)]
   assert(threshold, len=1, typ="integer")
   
   # TODO ask amnis what they used to detemine img range (within msk or not)
