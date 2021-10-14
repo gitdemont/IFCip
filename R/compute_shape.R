@@ -39,7 +39,7 @@
 compute_shape <- function(msk, mag = 40) {
   if(!any(inherits(msk, what = "IFC_msk"))) stop("When provided 'msk' should be of class `IFC_msk`")
   out_names = c("Perimeter", "Diameter", "Circularity", "convexity", "roundness", 
-                "Height", "Width", "Elongatedness", "convex perimeter", "convex cx", "comvex cy") # from bbox
+                "Height", "Width", "Elongatedness", "convex perimeter", "convex cx", "convex cy") # from bbox
   ctl = cpp_ctl(msk, global = TRUE)
   # no object masked
   if(ctl$nb_lab == 0) return(structure(rep(NA, length(out_names)), names = out_names))
