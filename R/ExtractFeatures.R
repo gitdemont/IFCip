@@ -195,9 +195,6 @@ ExtractFeatures <- function(...,
     param$channels$removal = rep(ifelse(removal == "masked", 3, 4), length(param$channels$removal))
     param$extract_msk = ifelse(removal == "masked", 3, 4)
   }
-  if(param$XIF_test != 1) {
-    stop("ExtractFeatures: There may be no mask within file.", call. = FALSE)
-  }
   fileName = param$fileName
   title_progress = basename(fileName)
   
@@ -216,6 +213,21 @@ ExtractFeatures <- function(...,
   }
   if(compute_offsets) {
     offsets = suppressMessages(getOffsets(fileName = param$fileName_image, fast = fast, display_progress = display_progress, verbose = verbose))
+  }
+  
+  compute_mask = FALSE
+  if(param$XIF_test != 1) {
+    compute_mask <- TRUE
+  } else {
+    ifd = getIFD(fileName = param$fileName_image, offsets = subsetOffsets(offsets = offsets, objects = 0, image_type = "msk"), display_progress = FALSE)
+    msk = objectExtract(ifd = ifd, param = param,  verbose = FALSE, bypass = TRUE)
+    if(attr(attr(msk[[1]][[1]], "mask"), "removal") == "invalid") compute_mask <- TRUE
+  }
+  if(compute_mask) {
+    param$removal = rep("none", length(param$chan_to_keep))
+    param$channels$removal = rep(0, length(param$channels$removal))
+    param$extract_msk = 0
+    message("ExtractBasic: can't find masks within file. They will be computed.")
   }
   
   # check objects to extract
@@ -310,7 +322,11 @@ ExtractFeatures <- function(...,
                                                        dots))
         bar = lapply(img, FUN=function(i_img) {
           foo = lapply(i_img, FUN=function(i_chan) {
-            msk = structure(!attr(i_chan, "mask"), class = "IFC_msk")
+            if(compute_mask) {
+              msk = structure(!(mask_component(mask_identify(i_chan))[[1]]), class = "IFC_msk")
+            } else {
+              msk = structure(!attr(i_chan, "mask"), class = "IFC_msk")
+            }
             hu = cpp_features_hu3(img = i_chan, msk = msk, components = 1, mag = mag)
             if((nrow(hu) == 0) || !is.finite(hu[1,1]) || (hu[1,1] == 0)) {
               hu = no_hu
@@ -385,7 +401,11 @@ ExtractFeatures <- function(...,
                                                                           dots))
         bar = lapply(img, FUN=function(i_img) {
           foo = lapply(i_img, FUN=function(i_chan) {
-            msk = structure(!attr(i_chan, "mask"), class = "IFC_msk")
+            if(compute_mask) {
+              msk = structure(!(mask_component(mask_identify(i_chan))[[1]]), class = "IFC_msk")
+            } else {
+              msk = structure(!attr(i_chan, "mask"), class = "IFC_msk")
+            }
             hu = cpp_features_hu3(img = i_chan, msk = msk, components = 1, mag = mag)
             if((nrow(hu) == 0) || !is.finite(hu[1,1]) || (hu[1,1] == 0)) {
               hu = no_hu

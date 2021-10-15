@@ -38,7 +38,7 @@
 #' This argument is not mandatory, if missing, the default, all objects will be used.
 #' @param offsets object of class `IFC_offset`. 
 #' This argument is not mandatory but it may allow to save time for repeated image export on same file.
-#' @param removal whether to compute features on "masked" object fo each individual channels or on the globally detected object "MC".
+#' @param removal whether to compute features on "masked" object for each individual channels or on the globally detected object "MC".
 #' Allowed are "masked" or "MC". Default is "masked". Please note that it will overwrite 'param' value if provided.
 #' @param display_progress whether to display a progress bar. Default is TRUE.
 #' @param batch number of objects to process at the same time. Default is 20.
@@ -186,13 +186,6 @@ ExtractBasic <- function(...,
     param$channels$removal = rep(ifelse(removal == "masked", 3, 4), length(param$channels$removal))
     param$extract_msk = ifelse(removal == "masked", 3, 4)
   }
-  if(param$XIF_test != 1) {
-    param$removal = rep("none", length(param$chan_to_keep))
-    param$channels$removal = rep(0, length(param$channels$removal))
-    param$extract_msk = 0
-    message("ExtractBasic: can't find masks within file. They will be computed.")
-  }
-  
   fileName = param$fileName
   title_progress = basename(fileName)
   
@@ -211,6 +204,21 @@ ExtractBasic <- function(...,
   }
   if(compute_offsets) {
     offsets = suppressMessages(getOffsets(fileName = param$fileName_image, fast = fast, display_progress = display_progress, verbose = verbose))
+  }
+  
+  compute_mask = FALSE
+  if(param$XIF_test != 1) {
+    compute_mask <- TRUE
+  } else {
+    ifd = getIFD(fileName = param$fileName_image, offsets = subsetOffsets(offsets = offsets, objects = 0, image_type = "msk"), display_progress = FALSE, bypass = TRUE)
+    msk = objectExtract(ifd = ifd, param = param,  verbose = FALSE, bypass = TRUE)
+    if(attr(attr(msk[[1]][[1]], "mask"), "removal") == "invalid") compute_mask <- TRUE
+  }
+  if(compute_mask) {
+    param$removal = rep("none", length(param$chan_to_keep))
+    param$channels$removal = rep(0, length(param$channels$removal))
+    param$extract_msk = 0
+    message("ExtractBasic: can't find masks within file. They will be computed.")
   }
   
   # check objects to extract
@@ -279,23 +287,30 @@ ExtractBasic <- function(...,
                                                        dots))
         bar = lapply(img, FUN=function(i_img) {
           foo = lapply(i_img, FUN=function(i_chan) {
-            if(param$XIF_test == 1) {
-              hu = cpp_basic(img = i_chan, msk = attr(i_chan, "mask"), mag = mag)
-              bg_mean = attr(i_chan, "BG_MEAN")
-              bg_sd = attr(i_chan, "BG_STD")
-            } else {
-              # compute backgroun
+            if(compute_mask) {
+              # # compute background
+              # back = cpp_background(i_chan)
+              # bg_mean = back["BG_MEAN"]
+              # bg_sd = back["BG_STD"]
+              # # apply x sobel
+              # sobx = cpp_convolve2d(i_chan, make_kernel(3, type = "sobelx"))
+              # # apply sobel y
+              # soby = cpp_convolve2d(i_chan, make_kernel(3, type = "sobely"))
+              # # canny edge
+              # msk = (sqrt(sobx * sobx + soby * soby) > (bg_mean - bg_sd))
+              # 
+              # hu = cpp_basic(img = i_chan, msk = !cpp_closing(msk, make_kernel(3, type = "box")), mag = mag)
+              
+              # identify object(s) and select the biggest one
               back = cpp_background(i_chan)
               bg_mean = back["BG_MEAN"]
               bg_sd = back["BG_STD"]
-              # apply x sobel
-              sobx = cpp_convolve2d(i_chan, make_kernel(3, type = "sobelx"))
-              # apply sobel y
-              soby = cpp_convolve2d(i_chan, make_kernel(3, type = "sobely"))
-              # canny edge
-              msk = (sqrt(sobx * sobx + soby * soby) > (bg_mean - bg_sd))
-              
-              hu = cpp_basic(img = i_chan, msk = !cpp_closing(msk, make_kernel(3, type = "box")), mag = mag)
+              msk = mask_component(mask_identify(i_chan))
+              hu = cpp_basic(img = i_chan, msk = !msk[[1]], mag = mag)
+            } else {
+              hu = cpp_basic(img = i_chan, msk = attr(i_chan, "mask"), mag = mag)
+              bg_mean = attr(i_chan, "BG_MEAN")
+              bg_sd = attr(i_chan, "BG_STD")
             }
             avg_intensity = hu["Raw Mean Pixel"] - bg_mean
             min_intensity = hu["Raw Min Pixel"] - bg_mean
@@ -328,23 +343,29 @@ ExtractBasic <- function(...,
                                                                           dots))
                            bar = lapply(img, FUN=function(i_img) {
                              foo = lapply(i_img, FUN=function(i_chan) {
-                               if(param$XIF_test == 1) {
-                                 hu = cpp_basic(img = i_chan, msk = attr(i_chan, "mask"), mag = mag)
-                                 bg_mean = attr(i_chan, "BG_MEAN")
-                                 bg_sd = attr(i_chan, "BG_STD")
-                               } else {
-                                 # compute backgroun
+                               if(compute_mask) {
+                                 # # compute background
+                                 # back = cpp_background(i_chan)
+                                 # bg_mean = back["BG_MEAN"]
+                                 # bg_sd = back["BG_STD"]
+                                 # # apply x sobel
+                                 # sobx = cpp_convolve2d(i_chan, make_kernel(3, type = "sobelx"))
+                                 # # apply sobel y
+                                 # soby = cpp_convolve2d(i_chan, make_kernel(3, type = "sobely"))
+                                 # # canny edge
+                                 # msk = (sqrt(sobx * sobx + soby * soby) > (bg_mean - bg_sd))
+                                 # hu = cpp_basic(img = i_chan, msk = !cpp_closing(msk, make_kernel(3, type = "box")), mag = mag)
+                                 
+                                 # identify object(s) and select the biggest one
                                  back = cpp_background(i_chan)
                                  bg_mean = back["BG_MEAN"]
                                  bg_sd = back["BG_STD"]
-                                 # apply x sobel
-                                 sobx = cpp_convolve2d(i_chan, make_kernel(3, type = "sobelx"))
-                                 # apply sobel y
-                                 soby = cpp_convolve2d(i_chan, make_kernel(3, type = "sobely"))
-                                 # canny edge
-                                 msk = (sqrt(sobx * sobx + soby * soby) > (bg_mean - bg_sd))
-                                 
-                                 hu = cpp_basic(img = i_chan, msk = !cpp_closing(msk, make_kernel(3, type = "box")), mag = mag)
+                                 msk = mask_component(mask_identify(i_chan))
+                                 hu = cpp_basic(img = i_chan, msk = !msk[[1]], mag = mag)
+                               } else {
+                                 hu = cpp_basic(img = i_chan, msk = attr(i_chan, "mask"), mag = mag)
+                                 bg_mean = attr(i_chan, "BG_MEAN")
+                                 bg_sd = attr(i_chan, "BG_STD")
                                }
                                avg_intensity = hu["Raw Mean Pixel"] - bg_mean
                                min_intensity = hu["Raw Min Pixel"] - bg_mean
