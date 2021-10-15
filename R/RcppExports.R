@@ -361,6 +361,16 @@ NULL
 #' @keywords internal
 NULL
 
+#' @title Image Standard Deviation Filtering
+#' @name cpp_sd
+#' @description
+#' This function applies standard deviation filtering on image.
+#' @param mat, a NumericMatrix.
+#' @param kernel, a NumericMatrix.
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
 #' @title Image Median Filtering
 #' @name cpp_median
 #' @description
@@ -759,6 +769,10 @@ cpp_flip <- function(mat, which = TRUE) {
 
 cpp_padding <- function(mat, kernel, method = 1L, k = 0.0) {
     .Call(`_IFCip_cpp_padding`, mat, kernel, method, k)
+}
+
+cpp_sd <- function(mat, kernel) {
+    .Call(`_IFCip_cpp_sd`, mat, kernel)
 }
 
 cpp_median <- function(mat, kernel) {

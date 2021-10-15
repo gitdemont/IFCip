@@ -323,7 +323,8 @@ ExtractFeatures <- function(...,
         bar = lapply(img, FUN=function(i_img) {
           foo = lapply(i_img, FUN=function(i_chan) {
             if(compute_mask) {
-              msk = structure(!(mask_component(mask_identify(i_chan))[[1]]), class = "IFC_msk")
+              msk = mask_identify2(i_chan)
+              msk = !cpp_k_equal_M(msk, which.max(attr(msk, "perimeter")))
             } else {
               msk = structure(!attr(i_chan, "mask"), class = "IFC_msk")
             }
@@ -402,7 +403,8 @@ ExtractFeatures <- function(...,
         bar = lapply(img, FUN=function(i_img) {
           foo = lapply(i_img, FUN=function(i_chan) {
             if(compute_mask) {
-              msk = structure(!(mask_component(mask_identify(i_chan))[[1]]), class = "IFC_msk")
+              msk = mask_identify2(i_chan)
+              msk = !cpp_k_equal_M(msk, which.max(attr(msk, "perimeter")))
             } else {
               msk = structure(!attr(i_chan, "mask"), class = "IFC_msk")
             }

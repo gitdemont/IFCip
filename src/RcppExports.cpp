@@ -327,6 +327,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_sd
+Rcpp::NumericMatrix cpp_sd(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel);
+RcppExport SEXP _IFCip_cpp_sd(SEXP matSEXP, SEXP kernelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_sd(mat, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_median
 Rcpp::NumericMatrix cpp_median(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel);
 RcppExport SEXP _IFCip_cpp_median(SEXP matSEXP, SEXP kernelSEXP) {
@@ -672,6 +684,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_shift", (DL_FUNC) &_IFCip_cpp_shift, 6},
     {"_IFCip_cpp_flip", (DL_FUNC) &_IFCip_cpp_flip, 2},
     {"_IFCip_cpp_padding", (DL_FUNC) &_IFCip_cpp_padding, 4},
+    {"_IFCip_cpp_sd", (DL_FUNC) &_IFCip_cpp_sd, 2},
     {"_IFCip_cpp_median", (DL_FUNC) &_IFCip_cpp_median, 2},
     {"_IFCip_cpp_mode", (DL_FUNC) &_IFCip_cpp_mode, 2},
     {"_IFCip_cpp_mid", (DL_FUNC) &_IFCip_cpp_mid, 2},

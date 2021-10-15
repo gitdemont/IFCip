@@ -584,6 +584,21 @@ Rcpp::List cpp_padding(const Rcpp::NumericMatrix mat,
 
 
 // FROM filter
+//' @title Image Standard Deviation Filtering
+//' @name cpp_sd
+//' @description
+//' This function applies standard deviation filtering on image.
+//' @param mat, a NumericMatrix.
+//' @param kernel, a NumericMatrix.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix cpp_sd(const Rcpp::NumericMatrix mat,
+                           const Rcpp::NumericMatrix kernel) {
+  return hpp_sd(mat, kernel);
+}
+
 //' @title Image Median Filtering
 //' @name cpp_median
 //' @description

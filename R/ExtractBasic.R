@@ -305,8 +305,8 @@ ExtractBasic <- function(...,
               back = cpp_background(i_chan)
               bg_mean = back["BG_MEAN"]
               bg_sd = back["BG_STD"]
-              msk = mask_component(mask_identify(i_chan))
-              hu = cpp_basic(img = i_chan, msk = !msk[[1]], mag = mag)
+              msk = mask_identify2(i_chan)
+              hu = cpp_basic(img = i_chan, msk = !cpp_k_equal_M(msk, which.max(attr(msk, "perimeter"))), mag = mag)
             } else {
               hu = cpp_basic(img = i_chan, msk = attr(i_chan, "mask"), mag = mag)
               bg_mean = attr(i_chan, "BG_MEAN")
@@ -360,8 +360,8 @@ ExtractBasic <- function(...,
                                  back = cpp_background(i_chan)
                                  bg_mean = back["BG_MEAN"]
                                  bg_sd = back["BG_STD"]
-                                 msk = mask_component(mask_identify(i_chan))
-                                 hu = cpp_basic(img = i_chan, msk = !msk[[1]], mag = mag)
+                                 msk = mask_identify2(i_chan)
+                                 hu = cpp_basic(img = i_chan, msk = !cpp_k_equal_M(msk, which.max(attr(msk, "perimeter"))), mag = mag)
                                } else {
                                  hu = cpp_basic(img = i_chan, msk = attr(i_chan, "mask"), mag = mag)
                                  bg_mean = attr(i_chan, "BG_MEAN")

@@ -34,6 +34,46 @@
 #include "padding.hpp"
 using namespace Rcpp;
 
+//' @title Image Standard Deviation Filtering
+//' @name cpp_sd
+//' @description
+//' This function applies standard deviation filtering on image.
+//' @param mat, a NumericMatrix.
+//' @param kernel, a NumericMatrix.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix hpp_sd(const Rcpp::NumericMatrix mat,
+                           const Rcpp::NumericMatrix kernel) {
+  R_len_t mat_r = mat.nrow();
+  R_len_t mat_c = mat.ncol();
+  // R_len_t i_row, i_col, f_row, f_col, k = 0;
+  Rcpp::List pad = hpp_padding(mat, kernel, 6, 0.0);
+  NumericMatrix out = pad["out"];
+  NumericMatrix foo = clone(out);
+  R_len_t pad_r = pad["ori_r"];
+  R_len_t pad_c = pad["ori_c"];
+  R_len_t k = 0;
+  for(R_len_t i = 0; i < kernel.size(); i++) if(kernel[i]) k++;
+  NumericVector K(k);
+  
+  for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
+    for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
+      k = 0;
+      for(R_len_t f_col = -pad_c; f_col <= pad_c; f_col++) {
+        for(R_len_t f_row = -pad_r; f_row <= pad_r; f_row++) {
+          if(kernel(pad_r + f_row, pad_c + f_col)) {
+            K[k++] = foo(i_row + f_row, i_col + f_col);
+          }
+        }
+      }
+      out(i_row, i_col) = Rcpp::sd(K);
+    }
+  }
+  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+}
+
 //' @title Image Median Filtering
 //' @name cpp_median
 //' @description
