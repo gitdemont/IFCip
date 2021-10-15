@@ -227,7 +227,7 @@ ExtractFeatures <- function(...,
     param$removal = rep("none", length(param$chan_to_keep))
     param$channels$removal = rep(0, length(param$channels$removal))
     param$extract_msk = 0
-    message("ExtractBasic: can't find masks within file. They will be computed.")
+    message("ExtractFeatures: can't find masks within file. They will be computed.")
   }
   
   # check objects to extract
@@ -323,11 +323,20 @@ ExtractFeatures <- function(...,
         bar = lapply(img, FUN=function(i_img) {
           foo = lapply(i_img, FUN=function(i_chan) {
             if(compute_mask) {
-              msk = mask_identify2(i_chan)
-              msk = !cpp_k_equal_M(msk, which.max(attr(msk, "perimeter")))
+              back = cpp_background(i_chan)
+              bg_mean = back["BG_MEAN"]
+              bg_sd = back["BG_STD"]
+              msk = mask_identify2(i_chan, 2 * bg_sd)
+              k = which.max(attr(msk, "perimeter"))
+              if(length(k) != 0) {
+                msk = cpp_k_equal_M(msk, k)
+              } else {
+                msk = msk
+              }
             } else {
-              msk = structure(!attr(i_chan, "mask"), class = "IFC_msk")
+              msk = !attr(i_chan, "mask")
             }
+            class(msk) = "IFC_msk"
             hu = cpp_features_hu3(img = i_chan, msk = msk, components = 1, mag = mag)
             if((nrow(hu) == 0) || !is.finite(hu[1,1]) || (hu[1,1] == 0)) {
               hu = no_hu
@@ -340,17 +349,18 @@ ExtractFeatures <- function(...,
               contours = contours[as.integer(names(contours)) > 0] 
               contours = contours[[1]]
               if(inherits(contours, what = "by")) contours = contours[[1]]
-
+              
               perimeter = k * sum(ctl$perimeter)
-
+              # if(length(perimeter) == 0) perimeter = NA
+              
               diameter = 2 * sqrt(hu["Area"] / pi)
-
+              
               center = apply(contours[,1:2], 2, mean)
               center = hu[c("pix cy", "pix cx")]
               distance = k * apply(contours[,1:2], 1, FUN =function(coord)  sqrt((coord[1] - center[1])^2 + (coord[2] - center[2])^2))
               radius = mean(distance)
               circularity = radius / sd(distance)
-
+              
               bbox = try(cpp_bbox(cpp_convexhull(as.matrix(contours)), k), silent = TRUE)
               if(inherits(x = bbox, what = "try-error")) {
                 shape = structure(c(perimeter, diameter, circularity, rep(NA, 8)), names = names_shape)
@@ -360,7 +370,6 @@ ExtractFeatures <- function(...,
                 shape = structure(c(perimeter, diameter, circularity, convexity, roundness, bbox), names = names_shape) 
               }
             }
-
             avg_intensity = hu["Raw Mean Pixel"] - attr(i_chan, "BG_MEAN")
             min_intensity = hu["Raw Min Pixel"] - attr(i_chan, "BG_MEAN")
             max_intensity = hu["Raw Max Pixel"] - attr(i_chan, "BG_MEAN")
@@ -403,11 +412,20 @@ ExtractFeatures <- function(...,
         bar = lapply(img, FUN=function(i_img) {
           foo = lapply(i_img, FUN=function(i_chan) {
             if(compute_mask) {
-              msk = mask_identify2(i_chan)
-              msk = !cpp_k_equal_M(msk, which.max(attr(msk, "perimeter")))
+              back = cpp_background(i_chan)
+              bg_mean = back["BG_MEAN"]
+              bg_sd = back["BG_STD"]
+              msk = mask_identify2(i_chan, 2 * bg_sd)
+              k = which.max(attr(msk, "perimeter"))
+              if(length(k) != 0) {
+                msk = cpp_k_equal_M(msk, k)
+              } else {
+                msk = msk
+              }
             } else {
-              msk = structure(!attr(i_chan, "mask"), class = "IFC_msk")
+              msk = !attr(i_chan, "mask")
             }
+            class(msk) = "IFC_msk"
             hu = cpp_features_hu3(img = i_chan, msk = msk, components = 1, mag = mag)
             if((nrow(hu) == 0) || !is.finite(hu[1,1]) || (hu[1,1] == 0)) {
               hu = no_hu
@@ -422,6 +440,7 @@ ExtractFeatures <- function(...,
               if(inherits(contours, what = "by")) contours = contours[[1]]
               
               perimeter = k * sum(ctl$perimeter)
+              # if(length(perimeter) == 0) perimeter = 0
               
               diameter = 2 * sqrt(hu["Area"] / pi)
               

@@ -4,12 +4,12 @@
 \alias{mask_identify2}
 \title{Identify Mask Version 2}
 \usage{
-mask_identify2(img, threshold = 2, size = 5)
+mask_identify2(img, threshold = 0, size = 5)
 }
 \arguments{
 \item{img}{the image matrix.}
 
-\item{threshold}{the multiplying factor of background standard deviation. Default is 2.}
+\item{threshold}{standard deviation above which object(s) should be kept. Default is 0.}
 
 \item{size}{the size of the kernel used to identify object(s). Default is 5. Should be higher than 3.}
 }

@@ -84,11 +84,11 @@ mask_identify1 <- function(img, threshold = 0.95, size = 5) {
 #' @description
 #' The identify mask identifies objects within image using algorithm 2.
 #' @param img the image matrix.
-#' @param threshold the multiplying factor of background standard deviation. Default is 2.
+#' @param threshold standard deviation above which object(s) should be kept. Default is 0.
 #' @param size the size of the kernel used to identify object(s). Default is 5. Should be higher than 3.
 #' @return an integer matrix of object(s) found.
 #' @keywords internal
-mask_identify2 <- function(img, threshold = 2, size = 5) {
+mask_identify2 <- function(img, threshold = 0, size = 5) {
   # TODO find better method to identify objects
   threshold = na.omit(threshold[threshold > 0]);assert(threshold, len=1)
   size = as.integer(size); size = na.omit(size[size > 3]); assert(size, len=1)

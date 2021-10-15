@@ -288,25 +288,18 @@ ExtractBasic <- function(...,
         bar = lapply(img, FUN=function(i_img) {
           foo = lapply(i_img, FUN=function(i_chan) {
             if(compute_mask) {
-              # # compute background
-              # back = cpp_background(i_chan)
-              # bg_mean = back["BG_MEAN"]
-              # bg_sd = back["BG_STD"]
-              # # apply x sobel
-              # sobx = cpp_convolve2d(i_chan, make_kernel(3, type = "sobelx"))
-              # # apply sobel y
-              # soby = cpp_convolve2d(i_chan, make_kernel(3, type = "sobely"))
-              # # canny edge
-              # msk = (sqrt(sobx * sobx + soby * soby) > (bg_mean - bg_sd))
-              # 
-              # hu = cpp_basic(img = i_chan, msk = !cpp_closing(msk, make_kernel(3, type = "box")), mag = mag)
-              
               # identify object(s) and select the biggest one
               back = cpp_background(i_chan)
               bg_mean = back["BG_MEAN"]
               bg_sd = back["BG_STD"]
-              msk = mask_identify2(i_chan)
-              hu = cpp_basic(img = i_chan, msk = !cpp_k_equal_M(msk, which.max(attr(msk, "perimeter"))), mag = mag)
+              msk = mask_identify2(i_chan, 2 * bg_sd)
+              k = which.max(attr(msk, "perimeter"))
+              if(length(k) != 0) {
+                msk = !cpp_k_equal_M(msk, k)
+              } else {
+                msk = !msk
+              }
+              hu = cpp_basic(img = i_chan, msk = msk, mag = mag)
             } else {
               hu = cpp_basic(img = i_chan, msk = attr(i_chan, "mask"), mag = mag)
               bg_mean = attr(i_chan, "BG_MEAN")
@@ -344,24 +337,18 @@ ExtractBasic <- function(...,
                            bar = lapply(img, FUN=function(i_img) {
                              foo = lapply(i_img, FUN=function(i_chan) {
                                if(compute_mask) {
-                                 # # compute background
-                                 # back = cpp_background(i_chan)
-                                 # bg_mean = back["BG_MEAN"]
-                                 # bg_sd = back["BG_STD"]
-                                 # # apply x sobel
-                                 # sobx = cpp_convolve2d(i_chan, make_kernel(3, type = "sobelx"))
-                                 # # apply sobel y
-                                 # soby = cpp_convolve2d(i_chan, make_kernel(3, type = "sobely"))
-                                 # # canny edge
-                                 # msk = (sqrt(sobx * sobx + soby * soby) > (bg_mean - bg_sd))
-                                 # hu = cpp_basic(img = i_chan, msk = !cpp_closing(msk, make_kernel(3, type = "box")), mag = mag)
-                                 
                                  # identify object(s) and select the biggest one
                                  back = cpp_background(i_chan)
                                  bg_mean = back["BG_MEAN"]
                                  bg_sd = back["BG_STD"]
-                                 msk = mask_identify2(i_chan)
-                                 hu = cpp_basic(img = i_chan, msk = !cpp_k_equal_M(msk, which.max(attr(msk, "perimeter"))), mag = mag)
+                                 msk = mask_identify2(i_chan, 2 * bg_sd)
+                                 k = which.max(attr(msk, "perimeter"))
+                                 if(length(k) != 0) {
+                                   msk = !cpp_k_equal_M(msk, k)
+                                 } else {
+                                   msk = !msk
+                                 }
+                                 hu = cpp_basic(img = i_chan, msk = msk, mag = mag)
                                } else {
                                  hu = cpp_basic(img = i_chan, msk = attr(i_chan, "mask"), mag = mag)
                                  bg_mean = attr(i_chan, "BG_MEAN")
