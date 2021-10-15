@@ -26,7 +26,7 @@ This argument is not mandatory, if missing, the default, all objects will be use
 \item{offsets}{object of class `IFC_offset`. 
 This argument is not mandatory but it may allow to save time for repeated image export on same file.}
 
-\item{removal}{whether to compute features on "masked" object fo each individual channels or on the globally detected object "MC".
+\item{removal}{whether to compute features on "masked" object for each individual channels or on the globally detected object "MC".
 Allowed are "masked" or "MC". Default is "masked". Please note that it will overwrite 'param' value if provided.}
 
 \item{display_progress}{whether to display a progress bar. Default is TRUE.}
