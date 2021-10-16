@@ -27,9 +27,11 @@
 ################################################################################
 
 ################################################################################
-#              function described hereunder are experimental                   #
+#             functions described hereunder are experimental                   #
 #              inputs and outputs may change in the future                     #
 ################################################################################
+
+# TODO find better method to identify objects
 
 #' @title Identify Mask Version 1
 #' @description
@@ -40,7 +42,6 @@
 #' @return an integer matrix of object(s) found.
 #' @keywords internal
 mask_identify1 <- function(img, threshold = 0.95, size = 5) {
-  # TODO find better method to identify objects
   threshold = na.omit(threshold[threshold >= 0 & threshold <= 1]);assert(threshold, len=1)
   size = as.integer(size); size = na.omit(size[size > 3]); assert(size, len=1)
 
@@ -89,7 +90,6 @@ mask_identify1 <- function(img, threshold = 0.95, size = 5) {
 #' @return an integer matrix of object(s) found.
 #' @keywords internal
 mask_identify2 <- function(img, threshold = 0, size = 5) {
-  # TODO find better method to identify objects
   threshold = na.omit(threshold[threshold > 0]);assert(threshold, len=1)
   size = as.integer(size); size = na.omit(size[size > 3]); assert(size, len=1)
   
@@ -102,4 +102,21 @@ mask_identify2 <- function(img, threshold = 0, size = 5) {
   names(ATT) = c("class", "type", "threshold", "size", "perimeter","dim")
   attributes(foo) <- ATT
   return(foo)
+}
+
+#' @title Identify Mask
+#' @description
+#' The identify mask identifies objects within image.
+#' @param img the image matrix.
+#' @param threshold threshold above which object(s) should be kept. Default is 0.
+#' @param size the size of the kernel used to identify object(s). Default is 5. Should be higher than 3.
+#' @param version version to be used. Default is 2. Allowed are 1 and 2.
+#' @details With version 1 object identification is done by percentage thresholding on Laplacian of Gaussian after Gaussian denoising.\cr
+#' Version 2 will perform thresholding on local standard deviation.
+#' @return an integer matrix of object(s) found.
+#' @keywords internal
+mask_identify <- function(img, threshold = 0, size = 5, version = 2) {
+  version = as.integer(version); assert(version, len = 1, alw = c(1,2))
+  if(version == 1) return(mask_identify1(img = img, threshold = threshold, size = size))
+  return(mask_identify2(img = img, threshold = threshold, size = size))
 }
