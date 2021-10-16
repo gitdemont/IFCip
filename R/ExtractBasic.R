@@ -293,9 +293,9 @@ ExtractBasic <- function(...,
               bg_mean = back["BG_MEAN"]
               bg_sd = back["BG_STD"]
               msk = mask_identify(i_chan, 2 * bg_sd)
-              k = which.max(attr(msk, "perimeter"))
-              if(length(k) != 0) {
-                msk = !cpp_k_equal_M(msk, k)
+              msk_i = which.max(attr(msk, "perimeter"))
+              if(length(msk_i) != 0) {
+                msk = !cpp_k_equal_M(msk, msk_i)
               } else {
                 msk = !msk
               }
@@ -342,9 +342,9 @@ ExtractBasic <- function(...,
                                  bg_mean = back["BG_MEAN"]
                                  bg_sd = back["BG_STD"]
                                  msk = mask_identify(i_chan, 2 * bg_sd)
-                                 k = which.max(attr(msk, "perimeter"))
-                                 if(length(k) != 0) {
-                                   msk = !cpp_k_equal_M(msk, k)
+                                 msk_i = which.max(attr(msk, "perimeter"))
+                                 if(length(msk_i) != 0) {
+                                   msk = !cpp_k_equal_M(msk, msk_i)
                                  } else {
                                    msk = !msk
                                  }

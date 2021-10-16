@@ -273,7 +273,7 @@ ExtractFeatures <- function(...,
                "inv1", "inv2", "inv3", "inv4", "inv5", "inv6", "inv7", 
                "Raw Mean Pixel", "Raw Min Pixel", "Raw Max Pixel", "Std Dev",
                "skewness", "kurtosis")
-  no_hu = structure(rep(NA, length(names_hu)), names = names_hu)
+  no_hu = structure(c(0.000, rep(NaN, 17), 0.000, rep(NaN, 8), +Inf, -Inf, NaN, NaN, NaN), names = names_hu)
   #####
   show_pb = display_progress
   if(display_progress && 
@@ -327,9 +327,9 @@ ExtractFeatures <- function(...,
               bg_mean = back["BG_MEAN"]
               bg_sd = back["BG_STD"]
               msk = mask_identify(i_chan, 2 * bg_sd)
-              k = which.max(attr(msk, "perimeter"))
-              if(length(k) != 0) {
-                msk = cpp_k_equal_M(msk, k)
+              msk_i = which.max(attr(msk, "perimeter"))
+              if(length(msk_i) != 0) {
+                msk = cpp_k_equal_M(msk, msk_i)
               } else {
                 msk = msk
               }
@@ -416,9 +416,9 @@ ExtractFeatures <- function(...,
               bg_mean = back["BG_MEAN"]
               bg_sd = back["BG_STD"]
               msk = mask_identify(i_chan, 2 * bg_sd)
-              k = which.max(attr(msk, "perimeter"))
-              if(length(k) != 0) {
-                msk = cpp_k_equal_M(msk, k)
+              msk_i = which.max(attr(msk, "perimeter"))
+              if(length(msk_i) != 0) {
+                msk = cpp_k_equal_M(msk, msk_i)
               } else {
                 msk = msk
               }
