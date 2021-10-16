@@ -280,7 +280,7 @@ ExtractFeatures <- function(...,
      parallel &&
      requireNamespace("foreach", quietly = TRUE) &&
      (foreach::getDoParWorkers() > 1)) {
-    display_progress = FALSE
+    show_pb = FALSE
     message("A parallel backend has been detected. 'display_progress' has been turned to FALSE")
   }
   
@@ -288,13 +288,6 @@ ExtractFeatures <- function(...,
     `%op%` <- foreach::`%dopar%`
   } else {
     `%op%` <- foreach::`%do%`
-  }
-  
-  if(!requireNamespace("foreach", quietly = TRUE)) {
-    if(!display_progress) {
-      show_pb = FALSE
-      display_progress = TRUE
-    } 
   }
   
   # extract objects
@@ -306,7 +299,7 @@ ExtractFeatures <- function(...,
     return(NULL)
   }
   tryCatch({
-    if(display_progress) {
+    if(show_pb) {
       pb = newPB(session = dots$session, min = 0, max = L, initial = 0, style = 3)
       ans = lapply(1:L, FUN=function(ifcip_iter) {
         setPB(pb, value = ifcip_iter, title = title_progress, label = "computing features from images")
@@ -398,7 +391,9 @@ ExtractFeatures <- function(...,
       if(show_pb) pb = newPB(session = dots$session, min = 0, max = L, initial = 0, style = 3)
       if(show_pb) setPB(pb, value = 0, title = title_progress, label = "progress bar will not update with parallel work but it is computing features from images")
       ans = list(foreach::foreach(ifcip_iter = 1:L, .combine = "c", .verbose = FALSE, .packages = c("IFC","IFCip"),
-                         .export = c("cpp_features_hu3", "compute_haralick","assert","cpp_h_features","cpp_cooc","cpp_ctl","cpp_getTAGS")) %op% { 
+                         .export = c("cpp_features_hu3", "compute_haralick","assert","cpp_h_features","cpp_cooc","cpp_ctl",
+                                     "cpp_background","cpp_closing","cpp_sd","cpp_fill","cpp_k_equal_M","mask_identify","mask_identify2","make_kernel",
+                                     "cpp_getTAGS")) %op% { 
                            img = do.call(what = "objectExtract", args = c(list(ifd = lapply(sel[[ifcip_iter]],
                                                                                             FUN = function(off) cpp_getTAGS(fname = param$fileName_image,
                                                                                                                             offset = off,
