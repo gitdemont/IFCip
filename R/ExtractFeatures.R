@@ -264,15 +264,18 @@ ExtractFeatures <- function(...,
                   "Height", "Width", "Elongatedness", "convex perimeter",
                   "convex cx", "convex cy")
   no_shape = structure(rep(NA, length(names_shape)), names = names_shape)
-  names_hu = c("Area", "circularity", 
-               "Minor Axis", "Major Axis", "Aspect Ratio",
-               "Angle", "theta", "eccentricity",
-               "Minor Axis Intensity", "Major Axis Intensity", "Aspect Ratio Intensity",
-               "Angle Intensity",  "theta intensity", "eccentricity intensity",
-               "pix cx", "pix cy","pix min axis", "pix maj axis", "pix count",
-               "inv1", "inv2", "inv3", "inv4", "inv5", "inv6", "inv7", 
-               "Raw Mean Pixel", "Raw Min Pixel", "Raw Max Pixel", "Std Dev",
-               "skewness", "kurtosis")
+  names_hu = c("Area", #0.000
+               "circularity", 
+               "Minor Axis","Major Axis","Aspect Ratio",
+               "Angle","theta","eccentricity",
+               "Minor Axis Intensity","Major Axis Intensity","Aspect Ratio Intensity",
+               "Angle Intensity","theta intensity","eccentricity intensity",
+               "pix cx","pix cy","pix min axis","pix maj axis",
+               "pix count", #0.000
+               "inv1","inv2","inv3","inv4","inv5","inv6","inv7",
+               "Raw Mean Pixel",
+               "Raw Min Pixel","Raw Max Pixel", #+Inf,-Inf
+               "Std Dev","skewness","kurtosis")
   no_hu = structure(c(0.000, rep(NaN, 17), 0.000, rep(NaN, 8), +Inf, -Inf, NaN, NaN, NaN), names = names_hu)
   #####
   show_pb = display_progress
