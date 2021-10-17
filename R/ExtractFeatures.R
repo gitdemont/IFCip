@@ -215,13 +215,13 @@ ExtractFeatures <- function(...,
     offsets = suppressMessages(getOffsets(fileName = param$fileName_image, fast = fast, display_progress = display_progress, verbose = verbose))
   }
   
-  compute_mask = FALSE
+  compute_mask <- FALSE
   if(param$XIF_test != 1) {
     compute_mask <- TRUE
   } else {
     ifd = getIFD(fileName = param$fileName_image, offsets = subsetOffsets(offsets = offsets, objects = 0, image_type = "msk"), display_progress = FALSE)
     msk = objectExtract(ifd = ifd, param = param,  verbose = FALSE, bypass = TRUE)
-    if(attr(attr(msk[[1]][[1]], "mask"), "removal") == "invalid") compute_mask <- TRUE
+    if(all(unname(unlist(msk)) == 0))  compute_mask <- TRUE
   }
   if(compute_mask) {
     param$removal = rep("none", length(param$chan_to_keep))
