@@ -94,8 +94,7 @@ mask_identify2 <- function(img, threshold = 0, size = 5) {
   size = as.integer(size); size = na.omit(size[size > 3]); assert(size, len=1)
   
   k = make_kernel(size, "box")
-  back = cpp_background(img)
-  ctl = cpp_ctl(cpp_closing(cpp_sd(img, k) > threshold * back["BG_STD"], k))
+  ctl = cpp_ctl(cpp_closing(cpp_sd(img, k) > threshold, k))
   foo = cpp_fill(ctl, inner = TRUE, outer = TRUE)
   
   ATT = list("IFC_msk", "identify", threshold, size, ctl$perimeter, c(nrow(foo), ncol(foo)))
