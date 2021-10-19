@@ -145,7 +145,7 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
               contours[i_cont++] = 1;
               break; // isolated point
             }
-            if((contours[len + 0]== ori_c) && (contours[len + 1]== ori_r) &&
+            if(//(contours[len + 0]== ori_c) && (contours[len + 1]== ori_r) &&
                (contours[len + 5] == nbr_x) && (contours[len + 6] == nbr_y) &&
                (i_row == ori_r) && (i_col == ori_c)) break; // escape contour
             
@@ -208,7 +208,7 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
                 out(nbr_y, nbr_x) = -1;
               }
             }
-            if((contours[len + 0]== ori_c) && (contours[len + 1]== ori_r) && 
+            if(//(contours[len + 0]== ori_c) && (contours[len + 1]== ori_r) && 
                (contours[len + 5] == nbr_x) && (contours[len + 6] == nbr_y) &&
                (i_row == ori_r) && (i_col == ori_c)) break; // escape contour
             
@@ -287,10 +287,10 @@ bool ray_pnt_in_poly(const Rcpp::NumericVector pnt,
   return inside;
 }
 
-//' @title Hull Filling
+//' @title Contours Filling
 //' @name cpp_fill
 //' @description
-//' This function is designed to fill hull.
+//' This function is designed to fill contours.
 //' @param mat an List, containing contour tracing labeling, object of class `IFCip_ctl`
 //' @param label an uint32_t corresponding to the label of desired set of contour to be filled.
 //' Default is 0 to fill all set of contours found.
@@ -418,6 +418,76 @@ Rcpp::IntegerMatrix hpp_fill(const List ctl,
       }
     }
     label_cur--;
+  }
+  return out(Rcpp::Range(1, dim[0]), Rcpp::Range(1, dim[1]));
+}
+
+//' @title Contours Filling Outer Only
+//' @name cpp_fill_out
+//' @description
+//' This function is designed to fill the most external contours.
+//' @param mat an List, containing contour tracing labeling, object of class `IFCip_ctl`
+//' @return an IntegerMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::IntegerMatrix hpp_fill_out(const List ctl) {
+  if(!Rf_inherits(ctl, "IFCip_ctl")) {
+    Rcpp::stop("hpp_fill: 'ctl' should be of class `IFCip_ctl`");
+  }
+  // retrieve max number of sets of contours identified by ctl
+  int label_max = as<uint32_t>(ctl["nb_lab"]);
+  
+  // retrieve contours coordinates
+  Rcpp::IntegerMatrix contours = Rcpp::clone(as<Rcpp::IntegerMatrix>(ctl["contours"]));
+  
+  // retrieve dimension of original image used to determine contours
+  Rcpp::IntegerVector dim = Rcpp::clone(as<Rcpp::IntegerVector>(ctl["dim"]));
+  
+  // create VV vector of external contours points length
+  Rcpp::IntegerVector VV(label_max);
+  for(R_len_t label_cur = 1; label_cur <= label_max; label_cur++) {
+    for(R_len_t k = Rcpp::sum(VV); k < contours.nrow(); k++) {
+      if((contours(k, 2) == label_cur) && (contours(k, 4) == 1)) VV[label_cur - 1]++;
+    }
+  }
+  
+  // create out 
+  Rcpp::IntegerMatrix out(dim[0] + 1, dim[1] + 1);
+  
+  // for each external contours
+  for(R_len_t i_V = 0; i_V < VV.size(); i_V++) {
+    // extract contours points coordinates
+    Rcpp::IntegerVector x = no_init_vector(VV[i_V]);
+    Rcpp::IntegerVector y = clone(x);
+    for(R_len_t i = 0, k = 0; k < contours.nrow(); k++) {
+      if((contours(k, 2) == i_V + 1) && (contours(k, 4) == 1)) {
+        x[i] = contours(k, 0);
+        y[i++] = contours(k, 1);
+      }
+    }
+    // extract all unique x (columns)
+    Rcpp::IntegerVector V1 = Rcpp::unique(x);
+    for(R_len_t i_V1 = 0; i_V1 < V1.size(); i_V1++) {
+      // for each unique x extract and sort all unique y (rows)
+      Rcpp::IntegerVector V2;
+      for(R_len_t i_x = 0; i_x < x.size(); i_x++) if(x[i_x] == V1[i_V1]) V2.push_back(y[i_x]);
+      Rcpp::IntegerVector V3 = sort_unique(V2);
+      // check if 1st contour point is background
+      // if not it means it belongs, i.e. it is inside, of another contour
+      // so we escape (do nothing)
+      if(!out(V3[0], V1[i_V1])) {
+        // fill contours
+        int color = i_V + 1;
+        out(V3[0], V1[i_V1]) = color;
+        for(R_len_t i_V3 = 1; i_V3 < V3.size(); i_V3++) {
+          for(R_len_t i_row = V3[i_V3 - 1]; i_row <= V3[i_V3]; i_row++) out(i_row, V1[i_V1]) = color;
+          // check if current i_row and former i_row are separated by at least one px
+          // in such case, we swap from foreground to background and reversely
+          if(V3[i_V3] - V3[i_V3 - 1] > 1) color = color ? 0 : i_V + 1;
+        }
+      }
+    }
   }
   return out(Rcpp::Range(1, dim[0]), Rcpp::Range(1, dim[1]));
 }

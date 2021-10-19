@@ -853,10 +853,10 @@ Rcpp::List cpp_ctl(const Rcpp::LogicalMatrix mat,
   return hpp_ctl(mat, global);
 }
 
-//' @title Hull Filling
+//' @title Contours Filling
 //' @name cpp_fill
 //' @description
-//' This function is designed to fill hull.
+//' This function is designed to fill contours.
 //' @param mat an List, containing contour tracing labeling, object of class `IFCip_ctl`
 //' @param label an uint32_t corresponding to the label of desired set of contour to be filled.
 //' Default is 0 to fill all set of contours found.
@@ -871,6 +871,19 @@ Rcpp::IntegerMatrix cpp_fill(const List ctl,
                              const bool inner = true,
                              const bool outer = true) {
   return hpp_fill(ctl, label, inner, outer);
+}
+
+//' @title Contours Filling Outer Only
+//' @name cpp_fill_out
+//' @description
+//' This function is designed to fill the most external contours.
+//' @param mat an List, containing contour tracing labeling, object of class `IFCip_ctl`
+//' @return an IntegerMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::IntegerMatrix cpp_fill_out(const List ctl) {
+  return hpp_fill_out(ctl);
 }
 // END ctl
 

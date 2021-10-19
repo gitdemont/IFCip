@@ -537,15 +537,24 @@ NULL
 #' @keywords internal
 NULL
 
-#' @title Hull Filling
+#' @title Contours Filling
 #' @name cpp_fill
 #' @description
-#' This function is designed to fill hull.
+#' This function is designed to fill contours.
 #' @param mat an List, containing contour tracing labeling, object of class `IFCip_ctl`
 #' @param label an uint32_t corresponding to the label of desired set of contour to be filled.
 #' Default is 0 to fill all set of contours found.
 #' @param inner a bool, to whether or not fill hole(s) inside contours if some where identified
 #' @param outer a bool, to whether or not fill contours outside hole(s) if some where identified
+#' @return an IntegerMatrix.
+#' @keywords internal
+NULL
+
+#' @title Contours Filling Outer Only
+#' @name cpp_fill_out
+#' @description
+#' This function is designed to fill the most external contours.
+#' @param mat an List, containing contour tracing labeling, object of class `IFCip_ctl`
 #' @return an IntegerMatrix.
 #' @keywords internal
 NULL
@@ -837,6 +846,10 @@ cpp_ctl <- function(mat, global = FALSE) {
 
 cpp_fill <- function(ctl, label = 0L, inner = TRUE, outer = TRUE) {
     .Call(`_IFCip_cpp_fill`, ctl, label, inner, outer)
+}
+
+cpp_fill_out <- function(ctl) {
+    .Call(`_IFCip_cpp_fill_out`, ctl)
 }
 
 cpp_threshold <- function(img, msk, k = 0.0, removal = 0L) {

@@ -542,6 +542,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_fill_out
+Rcpp::IntegerMatrix cpp_fill_out(const List ctl);
+RcppExport SEXP _IFCip_cpp_fill_out(SEXP ctlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_fill_out(ctl));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_threshold
 Rcpp::LogicalMatrix cpp_threshold(const Rcpp::NumericMatrix img, const Rcpp::NumericMatrix msk, const double k, uint8_t removal);
 RcppExport SEXP _IFCip_cpp_threshold(SEXP imgSEXP, SEXP mskSEXP, SEXP kSEXP, SEXP removalSEXP) {
@@ -701,6 +712,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_cont", (DL_FUNC) &_IFCip_cpp_cont, 3},
     {"_IFCip_cpp_ctl", (DL_FUNC) &_IFCip_cpp_ctl, 2},
     {"_IFCip_cpp_fill", (DL_FUNC) &_IFCip_cpp_fill, 4},
+    {"_IFCip_cpp_fill_out", (DL_FUNC) &_IFCip_cpp_fill_out, 1},
     {"_IFCip_cpp_threshold", (DL_FUNC) &_IFCip_cpp_threshold, 4},
     {"_IFCip_cpp_thinning_zs", (DL_FUNC) &_IFCip_cpp_thinning_zs, 1},
     {"_IFCip_cpp_thinning_bst", (DL_FUNC) &_IFCip_cpp_thinning_bst, 1},

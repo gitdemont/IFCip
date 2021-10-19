@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{cpp_fill}
 \alias{cpp_fill}
-\title{Hull Filling}
+\title{Contours Filling}
 \arguments{
 \item{mat}{an List, containing contour tracing labeling, object of class `IFCip_ctl`}
 
@@ -17,6 +17,6 @@ Default is 0 to fill all set of contours found.}
 an IntegerMatrix.
 }
 \description{
-This function is designed to fill hull.
+This function is designed to fill contours.
 }
 \keyword{internal}
