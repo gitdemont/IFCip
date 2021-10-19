@@ -42,9 +42,6 @@
 #' @return an integer matrix of object(s) found.
 #' @keywords internal
 mask_identify1 <- function(img, threshold = 0.95, size = 5) {
-  threshold = na.omit(threshold[threshold >= 0 & threshold <= 1]);assert(threshold, len=1)
-  size = as.integer(size); size = na.omit(size[size > 3]); assert(size, len=1)
-
   # blur image
   sigma = sqrt(size) / 2
   kg = make_kernel(size, type = "gaussian", sigma = sigma)
@@ -90,12 +87,9 @@ mask_identify1 <- function(img, threshold = 0.95, size = 5) {
 #' @return an integer matrix of object(s) found.
 #' @keywords internal
 mask_identify2 <- function(img, threshold = 0, size = 5) {
-  threshold = na.omit(threshold[threshold > 0]);assert(threshold, len=1)
-  size = as.integer(size); size = na.omit(size[size > 3]); assert(size, len=1)
-  
   k = make_kernel(size, "box")
-  ctl = cpp_ctl(cpp_closing(cpp_sd(img, k) > threshold, k))
-  foo = cpp_fill(ctl, inner = TRUE, outer = TRUE)
+  ctl = cpp_ctl(cpp_sd(img, k) > threshold)
+  foo = cpp_fill_out(ctl)
   
   ATT = list("IFC_msk", "identify", threshold, size, ctl$perimeter, c(nrow(foo), ncol(foo)))
   names(ATT) = c("class", "type", "threshold", "size", "perimeter","dim")
@@ -116,6 +110,11 @@ mask_identify2 <- function(img, threshold = 0, size = 5) {
 #' @keywords internal
 mask_identify <- function(img, threshold = 0, size = 5, version = 2) {
   version = as.integer(version); assert(version, len = 1, alw = c(1,2))
-  if(version == 1) return(mask_identify1(img = img, threshold = threshold, size = size))
+  size = as.integer(size); size = na.omit(size[size > 3]); assert(size, len=1)
+  if(version == 1) {
+    threshold = na.omit(threshold[threshold >= 0 & threshold <= 1]);assert(threshold, len=1) 
+    return(mask_identify1(img = img, threshold = threshold, size = size))
+  }
+  threshold = na.omit(threshold[threshold > 0]);assert(threshold, len=1)
   return(mask_identify2(img = img, threshold = threshold, size = size))
 }
