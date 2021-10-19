@@ -229,6 +229,7 @@ ExtractFeatures <- function(...,
     param$extract_msk = 0
     message("ExtractFeatures: can't find masks within file. They will be computed.")
   }
+  is_cif = grepl(pattern = "\\.cif$", x = param$fileName_image, ignore.case = TRUE)
   
   # check objects to extract
   nobj = as.integer(attr(x = offsets, which = "obj_count"))
@@ -319,10 +320,10 @@ ExtractFeatures <- function(...,
         bar = lapply(img, FUN=function(i_img) {
           foo = lapply(i_img, FUN=function(i_chan) {
             if(compute_mask) {
-              back = cpp_background(i_chan)
+              back = cpp_background(i_chan, is_cif = is_cif)
               bg_mean = back["BG_MEAN"]
               bg_sd = back["BG_STD"]
-              msk = mask_identify(i_chan, 2 * bg_sd)
+              msk = mask_identify2(img = i_chan, threshold = 3 * bg_sd)
               msk_i = which.max(attr(msk, "perimeter"))
               if(length(msk_i) != 0) {
                 msk = cpp_k_equal_M(msk, msk_i)
@@ -395,7 +396,7 @@ ExtractFeatures <- function(...,
       if(show_pb) setPB(pb, value = 0, title = title_progress, label = "progress bar will not update with parallel work but it is computing features from images")
       ans = list(foreach::foreach(ifcip_iter = 1:L, .combine = "c", .verbose = FALSE, .packages = c("IFC","IFCip"),
                          .export = c("cpp_features_hu3", "compute_haralick","assert","cpp_h_features","cpp_cooc","cpp_ctl",
-                                     "cpp_background","cpp_closing","cpp_sd","cpp_fill","cpp_k_equal_M","mask_identify","mask_identify2","make_kernel",
+                                     "cpp_background","cpp_closing","cpp_sd","cpp_fill","cpp_k_equal_M","mask_identify2","make_kernel",
                                      "cpp_getTAGS")) %op% { 
                            img = do.call(what = "objectExtract", args = c(list(ifd = lapply(sel[[ifcip_iter]],
                                                                                             FUN = function(off) cpp_getTAGS(fname = param$fileName_image,
@@ -410,10 +411,10 @@ ExtractFeatures <- function(...,
         bar = lapply(img, FUN=function(i_img) {
           foo = lapply(i_img, FUN=function(i_chan) {
             if(compute_mask) {
-              back = cpp_background(i_chan)
+              back = cpp_background(i_chan, is_cif = is_cif)
               bg_mean = back["BG_MEAN"]
               bg_sd = back["BG_STD"]
-              msk = mask_identify(i_chan, 2 * bg_sd)
+              msk = mask_identify2(img = i_chan, threshold = 3 * bg_sd)
               msk_i = which.max(attr(msk, "perimeter"))
               if(length(msk_i) != 0) {
                 msk = cpp_k_equal_M(msk, msk_i)
