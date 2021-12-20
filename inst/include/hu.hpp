@@ -532,17 +532,28 @@ Rcpp::NumericVector hpp_basic(const Rcpp::NumericMatrix img,
 ////' @export
 // [[Rcpp::export]]
 Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
-                               const Rcpp::IntegerMatrix msk,
-                               const unsigned int components = 0,
-                               const double mag = 1.0) {
+                                     const Rcpp::IntegerMatrix msk,
+                                     const unsigned int components = 0,
+                                     const double mag = 1.0) {
   R_len_t mat_r = img.nrow(), mat_c = img.ncol();
   if(mat_r != msk.nrow() || mat_c != msk.ncol()) {
     Rcpp::stop("hpp_features_hu3: 'img' and 'msk' should have same dimensions");
   }
+  
   R_len_t nC = components; // == 0 ? 1:components;
+  R_len_t alw = (std::ceil(mat_r / 2) + 1) * (std::ceil(mat_c / 2) + 1);
   
   if(nC == 0) {
-    for(R_len_t i_msk = 0; i_msk < mat_c * mat_r; i_msk++) nC = std::max(nC, msk[i_msk]) ;
+    for(R_len_t i_msk = 0; i_msk < mat_c * mat_r; i_msk++) {
+      if(msk[i_msk] < 0) Rcpp::stop("hpp_features_hu3: invalid negative value for 'msk'");
+      if(msk[i_msk] >= alw) Rcpp::stop("hpp_features_hu3: invalid max number of components for 'msk'");
+      nC = std::max(nC, msk[i_msk]); 
+    }
+  } else {
+    for(R_len_t i_msk = 0; i_msk < mat_c * mat_r; i_msk++) {
+      if(msk[i_msk] < 0) Rcpp::stop("hpp_features_hu3: invalid negative value for 'msk'");
+      if(msk[i_msk] >= alw) Rcpp::stop("hpp_features_hu3: invalid max number of components for 'msk'");
+    }
   }
   
   // 32 values to return [00-31] 
@@ -587,57 +598,57 @@ Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
   
   // define raw moments
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
+    if(Rcpp::is_true(Rcpp::any(Rcpp::is_na(msk(Rcpp::_,i_col))))) Rcpp::stop("hpp_features_hu3: NA - NaN value are not allowed in 'msk'");
     R_len_t i_col_1 = i_col + 1;
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
       R_len_t i_row_1 = i_row + 1;
-      for(R_len_t i_comp = 0; i_comp < nC; i_comp++) {
-        if(msk(i_row, i_col) == i_comp + 1) {
-          // for centroid and ellipse
-          // M00
-          foo(i_comp, 40)++;
-          // M01
-          foo(i_comp, 41) += i_col_1;
-          // M10
-          foo(i_comp, 42) += i_row_1;
-          // M11
-          foo(i_comp, 43) += i_row_1 * i_col_1;
-          // M02
-          foo(i_comp, 44) += i_col_1 * i_col_1;
-          // M20
-          foo(i_comp, 45) += i_row_1 * i_row_1;
-          
-          // for invariants
-          // M03
-          foo(i_comp, 46) += i_col_1 * i_col_1 * i_col_1 * img(i_row, i_col);    
-          // M12
-          foo(i_comp, 47) += i_row_1 * i_col_1 * i_col_1 * img(i_row, i_col);
-          // M21
-          foo(i_comp, 48) += i_row_1 * i_row_1 * i_col_1 * img(i_row, i_col);
-          // M30
-          foo(i_comp, 49) += i_row_1 * i_row_1 * i_row_1 * img(i_row, i_col);
-          // M00
-          foo(i_comp, 50) += img(i_row, i_col);
-          // M01
-          foo(i_comp, 51) += i_col_1 * img(i_row, i_col);
-          // M10
-          foo(i_comp, 52) += i_row_1 * img(i_row, i_col);
-          // M11
-          foo(i_comp, 53) += i_row_1 * i_col_1 * img(i_row, i_col);
-          // M02
-          foo(i_comp, 54) += i_col_1 * i_col_1 * img(i_row, i_col);
-          // M20
-          foo(i_comp, 55) += i_row_1 * i_row_1 * img(i_row, i_col);
-          
-          // for intensity
-          // Mean
-          foo(i_comp, 26) += img(i_row, i_col);
-          // Min
-          if(foo(i_comp, 27) > img(i_row, i_col)) foo(i_comp, 27) = img(i_row, i_col);
-          // Max
-          if(foo(i_comp, 28) < img(i_row, i_col)) foo(i_comp, 28) = img(i_row, i_col);
-          // pix_count
-          foo(i_comp, 18)++;
-        }
+      R_len_t i_comp = msk(i_row, i_col) - 1;
+      if((i_comp >= 0) && (i_comp < nC)) {
+        // for centroid and ellipse
+        // M00
+        foo(i_comp, 40)++;
+        // M01
+        foo(i_comp, 41) += i_col_1;
+        // M10
+        foo(i_comp, 42) += i_row_1;
+        // M11
+        foo(i_comp, 43) += i_row_1 * i_col_1;
+        // M02
+        foo(i_comp, 44) += i_col_1 * i_col_1;
+        // M20
+        foo(i_comp, 45) += i_row_1 * i_row_1;
+        
+        // for invariants
+        // M03
+        foo(i_comp, 46) += i_col_1 * i_col_1 * i_col_1 * img(i_row, i_col);    
+        // M12
+        foo(i_comp, 47) += i_row_1 * i_col_1 * i_col_1 * img(i_row, i_col);
+        // M21
+        foo(i_comp, 48) += i_row_1 * i_row_1 * i_col_1 * img(i_row, i_col);
+        // M30
+        foo(i_comp, 49) += i_row_1 * i_row_1 * i_row_1 * img(i_row, i_col);
+        // M00
+        foo(i_comp, 50) += img(i_row, i_col);
+        // M01
+        foo(i_comp, 51) += i_col_1 * img(i_row, i_col);
+        // M10
+        foo(i_comp, 52) += i_row_1 * img(i_row, i_col);
+        // M11
+        foo(i_comp, 53) += i_row_1 * i_col_1 * img(i_row, i_col);
+        // M02
+        foo(i_comp, 54) += i_col_1 * i_col_1 * img(i_row, i_col);
+        // M20
+        foo(i_comp, 55) += i_row_1 * i_row_1 * img(i_row, i_col);
+        
+        // for intensity
+        // Mean
+        foo(i_comp, 26) += img(i_row, i_col);
+        // Min
+        if(foo(i_comp, 27) > img(i_row, i_col)) foo(i_comp, 27) = img(i_row, i_col);
+        // Max
+        if(foo(i_comp, 28) < img(i_row, i_col)) foo(i_comp, 28) = img(i_row, i_col);
+        // pix_count
+        foo(i_comp, 18)++;
       }
     }
   }
@@ -723,7 +734,7 @@ Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
     // define invariants
     // scale invariants
     double n02, n03, n11, n12, n20, n21, n30;
-    double U00_2 = std::pow(foo(i_comp, 40), 2.0), U00_25 = std::pow(foo(i_comp, 40), 2.5);
+    double U00_2 = foo(i_comp, 40) * foo(i_comp, 40), U00_25 = std::pow(foo(i_comp, 40), 2.5);
     n02 = U02 / U00_2;  // 1 + (0+2)/2 
     n03 = U03 / U00_25; // 1 + (0+3)/2 
     n11 = U11 / U00_2;  // 1 + (1+1)/2 
@@ -733,23 +744,24 @@ Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
     n30 = U30 / U00_25; // 1 + (3+0)/2 
     
     // temp variables
-    double foo1, foo2, foo3, foo4, foo5, foo6;
+    double foo1, foo2, foo3, foo4, foo5, foo6, foo7;
     foo1 = n30 + n12;
-    foo2 = std::pow(foo1, 2.0);
+    foo2 = foo1 * foo1;
     foo3 = n21 + n03;
-    foo4 = std::pow(foo3, 2.0);
+    foo4 = foo3 * foo3;
     foo5 = 3 * n21 - n03;
     foo6 = n30 - 3 * n12;
+    foo7 = n20 - n02;
     
     // rotation invariants
     double I1, I2, I3, I4, I5, I6, I7;
     I1 = n20 + n02;
-    I2 = std::pow(n20 - n02, 2.0) + 4 * n11 * n11;
-    I3 = std::pow(foo6, 2.0) + std::pow(foo5, 2.0);
+    I2 = foo7 * foo7 + 4 * n11 * n11;
+    I3 = foo6 * foo6 + foo5 * foo5;
     I4 = foo2 + foo4;
     I5 = (foo6) * (foo1) * ( foo2 - 3 * foo4 )
       + (foo5) * (foo3) * ( 3 * foo2 - foo4 );
-    I6 = (n20 - n02) * ( foo2 - foo4 )
+    I6 = foo7 * ( foo2 - foo4 )
       + 4 * n11 * (foo1) * (foo3);
     I7 = (foo5) * (foo1) * ( foo2 - 3 * foo4 )
       - (foo6) * (foo3) * ( 3 * foo2 - foo4 );
@@ -785,25 +797,23 @@ Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
     // foo(i_comp, 28) is Max int;
   }
   
-  // TODO 
-  // should kurtosis and skewness be intensity weighted ?
+  // FIXME: should kurtosis and skewness be intensity weighted ?
   for(R_len_t i = 0; i < img.size(); i++) { 
-    for(R_len_t i_comp = 0; i_comp < nC; i_comp++) {
-      if(msk[i]) {
-        double diff = img[i] - foo(i_comp, 26);
-        foo(i_comp, 29) += std::pow(diff, 2.0);
-        foo(i_comp, 30) += std::pow(diff, 3.0);
-        foo(i_comp, 31) += std::pow(diff, 4.0);
-      }
+    R_len_t i_comp = msk[i] - 1;
+    if((i_comp >= 0) && (i_comp < nC)) {
+      double diff = img[i] - foo(i_comp, 26);
+      foo(i_comp, 29) += diff * diff;
+      foo(i_comp, 30) += diff * diff * diff;
+      foo(i_comp, 31) += diff * diff * diff * diff;
     }
   }
   
   for(R_len_t i_comp = 0; i_comp < nC; i_comp++) {
     foo(i_comp, 29) = std::sqrt(foo(i_comp, 29) / foo(i_comp, 18));
-    foo(i_comp, 30) = foo(i_comp, 30) / std::pow(foo(i_comp, 29), 3.0) / foo(i_comp, 18);
-    foo(i_comp, 31) = foo(i_comp, 31) / std::pow(foo(i_comp, 29), 4.0) / foo(i_comp, 18);
+    foo(i_comp, 30) = foo(i_comp, 30) / (foo(i_comp, 29) * foo(i_comp, 29) * foo(i_comp, 29)) / foo(i_comp, 18);
+    foo(i_comp, 31) = foo(i_comp, 31) / (foo(i_comp, 29) * foo(i_comp, 29) * foo(i_comp, 29) * foo(i_comp, 29)) / foo(i_comp, 18);
   } 
-
+  
   // return results
   Rcpp::NumericMatrix out = foo(Rcpp::_, Rcpp::Range(0,31));
   Rcpp::colnames(out) = N;
