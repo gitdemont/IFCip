@@ -36,11 +36,15 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 Rcpp::LogicalMatrix hpp_make_disc(const uint8_t size = 3) {
   Rcpp::LogicalMatrix out(size, size);
+  if(size == 0) return out;
   double half = size % 2 ? size / 2 : size / 2 - 0.5;
   for(R_len_t i_col = 0; i_col < size; i_col++) {
     double foo = i_col - half;
+    foo = foo < 0 ? foo + 0.3 : foo - 0.3;
     for(R_len_t i_row = 0; i_row < size; i_row++) {
-      out(i_row, i_col) = std::sqrt(foo * foo + pow(i_row - half, 2.0)) <= half;
+      double bar = i_row - half;
+      bar = bar < 0 ? bar + 0.3 : bar - 0.3;
+      out(i_row, i_col) = std::sqrt(foo * foo + bar * bar) <= half;
     }
   }
   return out;
