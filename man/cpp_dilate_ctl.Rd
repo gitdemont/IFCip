@@ -4,7 +4,7 @@
 \alias{cpp_dilate_ctl}
 \title{Contours Dilatation}
 \arguments{
-\item{mat, }{a NumericMatrix.}
+\item{ctl}{a List, containing contour tracing labeling, object of class `IFCip_ctl`}
 
 \item{kernel, }{a NumericMatrix.}
 

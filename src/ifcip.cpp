@@ -1034,7 +1034,7 @@ Rcpp::IntegerMatrix cpp_fill(const List ctl,
 //' @name cpp_fill_out
 //' @description
 //' This function is designed to fill the most external contours.
-//' @param mat an List, containing contour tracing labeling, object of class `IFCip_ctl`
+//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
@@ -1047,7 +1047,7 @@ Rcpp::IntegerMatrix cpp_fill_out(const List ctl) {
 //' @name cpp_dilate_ctl
 //' @description
 //' This function applies contours dilatation.
-//' @param mat, a NumericMatrix.
+//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
 //' @param kernel, a NumericMatrix.
 //' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
 //' @return a NumericMatrix.
@@ -1064,7 +1064,7 @@ Rcpp::NumericMatrix cpp_dilate_ctl(const List ctl,
 //' @name cpp_erode_ctl
 //' @description
 //' This function applies contours erosion.
-//' @param mat, a NumericMatrix.
+//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
 //' @param kernel, a NumericMatrix.
 //' @param iter, an uint8_t, number of time erode should be iterated. Default is 0.
 //' @return a NumericMatrix.

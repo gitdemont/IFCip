@@ -4,7 +4,7 @@
 \alias{cpp_fill_out}
 \title{Contours Filling Outer Only}
 \arguments{
-\item{mat}{an List, containing contour tracing labeling, object of class `IFCip_ctl`}
+\item{ctl}{a List, containing contour tracing labeling, object of class `IFCip_ctl`}
 }
 \value{
 an IntegerMatrix.

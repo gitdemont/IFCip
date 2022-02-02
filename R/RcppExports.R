@@ -660,7 +660,7 @@ NULL
 #' @name cpp_fill_out
 #' @description
 #' This function is designed to fill the most external contours.
-#' @param mat an List, containing contour tracing labeling, object of class `IFCip_ctl`
+#' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
 #' @return an IntegerMatrix.
 #' @keywords internal
 NULL
@@ -669,7 +669,7 @@ NULL
 #' @name cpp_dilate_ctl
 #' @description
 #' This function applies contours dilatation.
-#' @param mat, a NumericMatrix.
+#' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
 #' @param kernel, a NumericMatrix.
 #' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
 #' @return a NumericMatrix.
@@ -680,7 +680,7 @@ NULL
 #' @name cpp_erode_ctl
 #' @description
 #' This function applies contours erosion.
-#' @param mat, a NumericMatrix.
+#' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
 #' @param kernel, a NumericMatrix.
 #' @param iter, an uint8_t, number of time erode should be iterated. Default is 0.
 #' @return a NumericMatrix.
