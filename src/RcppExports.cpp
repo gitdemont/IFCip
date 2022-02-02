@@ -186,6 +186,107 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_distance_eucl
+Rcpp::NumericMatrix cpp_distance_eucl(const Rcpp::IntegerMatrix msk);
+RcppExport SEXP _IFCip_cpp_distance_eucl(SEXP mskSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix >::type msk(mskSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_distance_eucl(msk));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_distance_eucl_norm
+Rcpp::NumericMatrix cpp_distance_eucl_norm(const Rcpp::IntegerMatrix msk);
+RcppExport SEXP _IFCip_cpp_distance_eucl_norm(SEXP mskSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix >::type msk(mskSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_distance_eucl_norm(msk));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_distance_manh
+Rcpp::NumericMatrix cpp_distance_manh(const Rcpp::IntegerMatrix msk);
+RcppExport SEXP _IFCip_cpp_distance_manh(SEXP mskSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix >::type msk(mskSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_distance_manh(msk));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_distance_manh_norm
+Rcpp::NumericMatrix cpp_distance_manh_norm(const Rcpp::IntegerMatrix msk);
+RcppExport SEXP _IFCip_cpp_distance_manh_norm(SEXP mskSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix >::type msk(mskSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_distance_manh_norm(msk));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_disttrans_manh
+Rcpp::NumericMatrix cpp_disttrans_manh(const Rcpp::NumericMatrix img);
+RcppExport SEXP _IFCip_cpp_disttrans_manh(SEXP imgSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_disttrans_manh(img));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_disttrans_eucl
+Rcpp::NumericMatrix cpp_disttrans_eucl(const Rcpp::NumericMatrix img);
+RcppExport SEXP _IFCip_cpp_disttrans_eucl(SEXP imgSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_disttrans_eucl(img));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_voronoi_eucl
+Rcpp::IntegerMatrix cpp_voronoi_eucl(const Rcpp::IntegerMatrix img);
+RcppExport SEXP _IFCip_cpp_voronoi_eucl(SEXP imgSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix >::type img(imgSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_voronoi_eucl(img));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_voronoi_manh
+Rcpp::IntegerMatrix cpp_voronoi_manh(const Rcpp::IntegerMatrix img);
+RcppExport SEXP _IFCip_cpp_voronoi_manh(SEXP imgSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix >::type img(imgSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_voronoi_manh(img));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_watershed
+Rcpp::IntegerMatrix cpp_watershed(const Rcpp::NumericMatrix mat, const unsigned short connectivity, const unsigned short levels);
+RcppExport SEXP _IFCip_cpp_watershed(SEXP matSEXP, SEXP connectivitySEXP, SEXP levelsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const unsigned short >::type connectivity(connectivitySEXP);
+    Rcpp::traits::input_parameter< const unsigned short >::type levels(levelsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_watershed(mat, connectivity, levels));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_zernike1
 Rcpp::List cpp_zernike1(const Rcpp::NumericMatrix img, const double cx, const double cy, const uint8_t nmax, const double radius);
 RcppExport SEXP _IFCip_cpp_zernike1(SEXP imgSEXP, SEXP cxSEXP, SEXP cySEXP, SEXP nmaxSEXP, SEXP radiusSEXP) {
@@ -516,6 +617,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_laplacian
+Rcpp::NumericMatrix cpp_laplacian(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel, const uint8_t iter);
+RcppExport SEXP _IFCip_cpp_laplacian(SEXP matSEXP, SEXP kernelSEXP, SEXP iterSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const uint8_t >::type iter(iterSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_laplacian(mat, kernel, iter));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_ctl
 Rcpp::List cpp_ctl(const Rcpp::LogicalMatrix mat, const bool global);
 RcppExport SEXP _IFCip_cpp_ctl(SEXP matSEXP, SEXP globalSEXP) {
@@ -550,6 +664,32 @@ BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_fill_out(ctl));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_dilate_ctl
+Rcpp::NumericMatrix cpp_dilate_ctl(const List ctl, const Rcpp::NumericMatrix kernel, const uint8_t iter);
+RcppExport SEXP _IFCip_cpp_dilate_ctl(SEXP ctlSEXP, SEXP kernelSEXP, SEXP iterSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const uint8_t >::type iter(iterSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_dilate_ctl(ctl, kernel, iter));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_erode_ctl
+Rcpp::NumericMatrix cpp_erode_ctl(const List ctl, const Rcpp::NumericMatrix kernel, const uint8_t iter);
+RcppExport SEXP _IFCip_cpp_erode_ctl(SEXP ctlSEXP, SEXP kernelSEXP, SEXP iterSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const uint8_t >::type iter(iterSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_erode_ctl(ctl, kernel, iter));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -684,6 +824,15 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_features_hu2", (DL_FUNC) &_IFCip_cpp_features_hu2, 2},
     {"_IFCip_cpp_basic", (DL_FUNC) &_IFCip_cpp_basic, 3},
     {"_IFCip_cpp_features_hu3", (DL_FUNC) &_IFCip_cpp_features_hu3, 4},
+    {"_IFCip_cpp_distance_eucl", (DL_FUNC) &_IFCip_cpp_distance_eucl, 1},
+    {"_IFCip_cpp_distance_eucl_norm", (DL_FUNC) &_IFCip_cpp_distance_eucl_norm, 1},
+    {"_IFCip_cpp_distance_manh", (DL_FUNC) &_IFCip_cpp_distance_manh, 1},
+    {"_IFCip_cpp_distance_manh_norm", (DL_FUNC) &_IFCip_cpp_distance_manh_norm, 1},
+    {"_IFCip_cpp_disttrans_manh", (DL_FUNC) &_IFCip_cpp_disttrans_manh, 1},
+    {"_IFCip_cpp_disttrans_eucl", (DL_FUNC) &_IFCip_cpp_disttrans_eucl, 1},
+    {"_IFCip_cpp_voronoi_eucl", (DL_FUNC) &_IFCip_cpp_voronoi_eucl, 1},
+    {"_IFCip_cpp_voronoi_manh", (DL_FUNC) &_IFCip_cpp_voronoi_manh, 1},
+    {"_IFCip_cpp_watershed", (DL_FUNC) &_IFCip_cpp_watershed, 3},
     {"_IFCip_cpp_zernike1", (DL_FUNC) &_IFCip_cpp_zernike1, 5},
     {"_IFCip_cpp_zernike2", (DL_FUNC) &_IFCip_cpp_zernike2, 5},
     {"_IFCip_cpp_AND_M", (DL_FUNC) &_IFCip_cpp_AND_M, 1},
@@ -710,9 +859,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_tophat_black", (DL_FUNC) &_IFCip_cpp_tophat_black, 3},
     {"_IFCip_cpp_tophat_self", (DL_FUNC) &_IFCip_cpp_tophat_self, 3},
     {"_IFCip_cpp_cont", (DL_FUNC) &_IFCip_cpp_cont, 3},
+    {"_IFCip_cpp_laplacian", (DL_FUNC) &_IFCip_cpp_laplacian, 3},
     {"_IFCip_cpp_ctl", (DL_FUNC) &_IFCip_cpp_ctl, 2},
     {"_IFCip_cpp_fill", (DL_FUNC) &_IFCip_cpp_fill, 4},
     {"_IFCip_cpp_fill_out", (DL_FUNC) &_IFCip_cpp_fill_out, 1},
+    {"_IFCip_cpp_dilate_ctl", (DL_FUNC) &_IFCip_cpp_dilate_ctl, 3},
+    {"_IFCip_cpp_erode_ctl", (DL_FUNC) &_IFCip_cpp_erode_ctl, 3},
     {"_IFCip_cpp_threshold", (DL_FUNC) &_IFCip_cpp_threshold, 4},
     {"_IFCip_cpp_thinning_zs", (DL_FUNC) &_IFCip_cpp_thinning_zs, 1},
     {"_IFCip_cpp_thinning_bst", (DL_FUNC) &_IFCip_cpp_thinning_bst, 1},

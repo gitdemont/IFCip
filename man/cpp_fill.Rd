@@ -4,7 +4,7 @@
 \alias{cpp_fill}
 \title{Contours Filling}
 \arguments{
-\item{mat}{an List, containing contour tracing labeling, object of class `IFCip_ctl`}
+\item{ctl}{a List, containing contour tracing labeling, object of class `IFCip_ctl`}
 
 \item{label}{an uint32_t corresponding to the label of desired set of contour to be filled.
 Default is 0 to fill all set of contours found.}

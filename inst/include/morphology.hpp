@@ -416,4 +416,27 @@ Rcpp::NumericMatrix hpp_cont(const Rcpp::NumericMatrix mat,
   return out;
 }
 
+//' @title Image Laplacian
+//' @name cpp_laplacian
+//' @description
+//' This function applies Laplacian morphology on image.
+//' @param mat, a NumericMatrix.
+//' @param kernel, a NumericMatrix.
+//' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix hpp_laplacian(const Rcpp::NumericMatrix mat,
+                                  const Rcpp::NumericMatrix kernel,
+                                  const uint8_t iter = 0) {
+  Rcpp::NumericMatrix dil = hpp_dilate(mat, kernel, iter);
+  Rcpp::NumericMatrix ero = hpp_erode(mat, kernel, iter);
+  R_len_t mat_r = mat.nrow();
+  R_len_t mat_c = mat.ncol();
+  Rcpp::NumericMatrix out(mat_r, mat_c);
+  for(R_len_t i_out = 0; i_out < mat_r * mat_c; i_out++) out[i_out] = dil[i_out] + ero[i_out] - 2 * mat[i_out];
+  return out;
+}
+
 # endif

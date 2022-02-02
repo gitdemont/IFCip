@@ -291,7 +291,7 @@ bool ray_pnt_in_poly(const Rcpp::NumericVector pnt,
 //' @name cpp_fill
 //' @description
 //' This function is designed to fill contours.
-//' @param mat an List, containing contour tracing labeling, object of class `IFCip_ctl`
+//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
 //' @param label an uint32_t corresponding to the label of desired set of contour to be filled.
 //' Default is 0 to fill all set of contours found.
 //' @param inner a bool, to whether or not fill hole(s) inside contours if some where identified
@@ -490,6 +490,100 @@ Rcpp::IntegerMatrix hpp_fill_out(const List ctl) {
     }
   }
   return out(Rcpp::Range(1, dim[0]), Rcpp::Range(1, dim[1]));
+}
+
+//' @title Contours Dilatation
+//' @name cpp_dilate_ctl
+//' @description
+//' This function applies contours dilatation.
+//' @param mat, a NumericMatrix.
+//' @param kernel, a NumericMatrix.
+//' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix hpp_dilate_ctl(const List ctl,
+                                   const Rcpp::NumericMatrix kernel,
+                                   const uint8_t iter = 0) {
+  if(!Rf_inherits(ctl, "IFCip_ctl")) {
+    Rcpp::stop("hpp_fill: 'ctl' should be of class `IFCip_ctl`");
+  }
+  Rcpp::IntegerVector dim = Rcpp::clone(as<Rcpp::IntegerVector>(ctl["dim"]));
+  R_len_t mat_r = dim[0];
+  R_len_t mat_c = dim[1];
+  Rcpp::List pad = hpp_padding(as<Rcpp::NumericMatrix>(ctl["matrix"]), kernel, 5, 0);
+  Rcpp::NumericMatrix out = pad["out"];
+  R_len_t pad_r = pad["ori_r"];
+  R_len_t pad_c = pad["ori_c"];
+  
+  uint8_t i_iter = 0;
+  while(i_iter <= iter) {
+    i_iter++;
+    Rcpp::NumericMatrix foo = clone(out);
+    for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
+      for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
+        double K = foo(i_row, i_col);
+        for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col <= i_col + pad_c; f_col++) {
+          for(R_len_t f_row = i_row - pad_r; f_row <= i_row + pad_r; f_row++) {
+            if(kernel[i_ker++]) {
+              if(foo(f_row, f_col) == 0) {
+                out(f_row, f_col) = K;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+}
+
+//' @title Contours Erosion
+//' @name cpp_erode_ctl
+//' @description
+//' This function applies contours erosion.
+//' @param mat, a NumericMatrix.
+//' @param kernel, a NumericMatrix.
+//' @param iter, an uint8_t, number of time erode should be iterated. Default is 0.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix hpp_erode_ctl(const List ctl,
+                                  const Rcpp::NumericMatrix kernel,
+                                  const uint8_t iter = 0) {
+  if(!Rf_inherits(ctl, "IFCip_ctl")) {
+    Rcpp::stop("hpp_fill: 'ctl' should be of class `IFCip_ctl`");
+  }
+  Rcpp::IntegerVector dim = Rcpp::clone(as<Rcpp::IntegerVector>(ctl["dim"]));
+  R_len_t mat_r = dim[0];
+  R_len_t mat_c = dim[1];
+  Rcpp::List pad = hpp_padding(as<Rcpp::NumericMatrix>(ctl["matrix"]), kernel, 5, 0);
+  Rcpp::NumericMatrix out = pad["out"];
+  R_len_t pad_r = pad["ori_r"];
+  R_len_t pad_c = pad["ori_c"];
+  
+  uint8_t i_iter = 0;
+  while(i_iter <= iter) {
+    i_iter++;
+    Rcpp::NumericMatrix foo = clone(out);
+    for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
+      for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
+        double K = foo(i_row, i_col);
+        for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col <= i_col + pad_c; f_col++) {
+          for(R_len_t f_row = i_row - pad_r; f_row <= i_row + pad_r; f_row++) {
+            if(kernel[i_ker++]) {
+              if(foo(f_row, f_col)) {
+                out(f_row, f_col) = K;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
 }
 
 #endif

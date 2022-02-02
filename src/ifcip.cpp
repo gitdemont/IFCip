@@ -31,6 +31,8 @@
 #include <Rcpp.h>
 #include "../inst/include/utils.hpp"
 #include "../inst/include/hu.hpp"
+#include "../inst/include/distance.hpp"
+#include "../inst/include/watershed.hpp"
 #include "../inst/include/haralick.hpp"
 #include "../inst/include/zernike.hpp"
 #include "../inst/include/matrix_logic.hpp"
@@ -370,6 +372,144 @@ Rcpp::NumericMatrix cpp_features_hu3(const Rcpp::NumericMatrix img,
   return hpp_features_hu3(img, msk, components, mag);
 }
 // END hu
+
+// FROM distance
+//' @title Mask Euclidean Distance
+//' @name cpp_distance_eucl
+//' @description
+//' This function is designed to compute Euclidean distance from background to centroïds' foreground
+//' @param msk an IntegerMatrix, containing connected components.
+//' @return an NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix cpp_distance_eucl(const Rcpp::IntegerMatrix msk) {
+  return hpp_distance_eucl(msk);
+}
+
+//' @title Mask Normalized Euclidean Distance
+//' @name cpp_distance_eucl_norm
+//' @description
+//' This function is designed to compute normalized Euclidean distance from background to centroïds' foreground
+//' @param msk an IntegerMatrix, containing connected components.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix cpp_distance_eucl_norm(const Rcpp::IntegerMatrix msk) {
+  return hpp_distance_eucl_norm(msk);
+}
+
+//' @title Mask Manhattan Distance
+//' @name cpp_distance_manh
+//' @description
+//' This function is designed to compute Manhattan distance from background to centroïds' foreground
+//' @param msk an IntegerMatrix, containing connected components.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix cpp_distance_manh(const Rcpp::IntegerMatrix msk) {
+  return hpp_distance_manh(msk);
+}
+
+//' @title Mask Normalized Manhattan Distance
+//' @name cpp_distance_manh_norm
+//' @description
+//' This function is designed to compute normalized Manhattan distance from background to centroïds' foreground
+//' @param msk an IntegerMatrix, containing connected components.
+//' @return an NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix cpp_distance_manh_norm(const Rcpp::IntegerMatrix msk) {
+  return hpp_distance_manh_norm(msk);
+}
+
+//' @title Manhattan Distance Transform
+//' @name cpp_disttrans_manh
+//' @description
+//' This function computes the Manhattan distance transform of an image by implementing A. Meijster algorithm.
+//' @param img, a NumericMatrix.
+//' @details adaptation of 'A General Algorithm For Computing Distance Transforms In Linear Time' from W.H. Hesselink, A. Meijster, J.B.T.M. Roerdink.
+//' Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\url{https://doi.org/10.1007/0-306-47025-X_36}\cr
+//' Values > 0 will be considered as foreground whereas all other values will be concidered as background (i.e. 0).
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix cpp_disttrans_manh (const Rcpp::NumericMatrix img) {
+  return hpp_disttrans_manh(img);
+}
+
+//' @title Euclidean Distance Transform
+//' @name cpp_disttrans_eucl
+//' @description
+//' This function computes the Euclidean distance transform of an image by implementing A. Meijster algorithm.
+//' @param img, a NumericMatrix.
+//' @details adaptation of 'A General Algorithm For Computing Distance Transforms In Linear Time' from W.H. Hesselink, A. Meijster, J.B.T.M. Roerdink.
+//' Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\url{https://doi.org/10.1007/0-306-47025-X_36}\cr
+//' Values > 0 will be considered as foreground whereas all other values will be concidered as background (i.e. 0).
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix cpp_disttrans_eucl (const Rcpp::NumericMatrix img) {
+  return hpp_disttrans_eucl(img);
+}
+
+//' @title Euclidean Voronoï
+//' @name cpp_voronoi_eucl
+//' @description
+//' This function computes Voronoï diagram using Euclidean distance of a seed image.
+//' @param img, a positive IntegerMatrix where values > 0 represent foreground seeds.
+//' @details img will be passed to connected component labelling and centroïd of each identified components will be used to build Voronoï diagram.
+//' @return an IntegerMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::IntegerMatrix cpp_voronoi_eucl (const Rcpp::IntegerMatrix img) {
+  return hpp_voronoi_eucl(img);
+}
+
+//' @title Manhattan Voronoï
+//' @name cpp_voronoi_manh
+//' @description
+//' This function computes Voronoï diagram using Manhattan distance of a seed image.
+//' @param img, a positive IntegerMatrix where values > 0 represent foreground seeds.
+//' @details img will be passed to connected component labelling and centroïd of each identified components will be used to build Voronoï diagram.
+//' @return an IntegerMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::IntegerMatrix cpp_voronoi_manh (const Rcpp::IntegerMatrix img) {
+  return hpp_voronoi_manh(img);
+}
+// END distance
+
+// FROM watershed
+//' @title Watershed Transformation
+//' @name cpp_watershed
+//' @description
+//' This function computes the watershed transformation of an image.
+//' @param mat, a NumericMatrix; a distance transform matrix is expected.
+//' @param connectivity, an unsigned short either 4 or 8 describing pixel neighborhood. Default is 8.
+//' @param levels, an unsigned short determining the number elevation levels. Default is 256, should be at least 2.
+//' @detais adaptation of 'Watersheds in digital spaces: an efficient algorithm based on immersion simulations' from  L. Vincent and P. Soille.
+//' In IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(6):583-598, June 1991.\cr
+//' The algorithm is reviewed in 'The Watershed Transform: Definitions, Algorithms and Parallelization Strategies'
+//' from Roerdink, J. B. T. M., & Meijster, A. (2000) in Fundamenta Informaticae, 41, 187-228 \url{https://doi.org/10.3233/FI-2000-411207}
+//' @return an IntegerMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::IntegerMatrix cpp_watershed(const Rcpp::NumericMatrix mat,
+                                  const unsigned short connectivity = 8,
+                                  const unsigned short levels = 256) {
+  return hpp_watershed(mat, connectivity, levels);
+}
+// END watershed
+
 
 // FROM zernike
 //' @title Zernike's Features
@@ -828,6 +968,23 @@ Rcpp::NumericMatrix cpp_cont(const Rcpp::NumericMatrix mat,
                              const uint8_t iter = 0) {
   return hpp_cont(mat, kernel, iter);
 }
+
+//' @title Image Laplacian
+//' @name cpp_laplacian
+//' @description
+//' This function applies Laplacian morphology on image.
+//' @param mat, a NumericMatrix.
+//' @param kernel, a NumericMatrix.
+//' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix cpp_laplacian(const Rcpp::NumericMatrix mat,
+                                  const Rcpp::NumericMatrix kernel,
+                                  const uint8_t iter = 0) {
+  return hpp_laplacian(mat, kernel, iter);
+}
 // END morphology
 
 // FROM ctl
@@ -857,7 +1014,7 @@ Rcpp::List cpp_ctl(const Rcpp::LogicalMatrix mat,
 //' @name cpp_fill
 //' @description
 //' This function is designed to fill contours.
-//' @param mat an List, containing contour tracing labeling, object of class `IFCip_ctl`
+//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
 //' @param label an uint32_t corresponding to the label of desired set of contour to be filled.
 //' Default is 0 to fill all set of contours found.
 //' @param inner a bool, to whether or not fill hole(s) inside contours if some where identified
@@ -884,6 +1041,40 @@ Rcpp::IntegerMatrix cpp_fill(const List ctl,
 // [[Rcpp::export]]
 Rcpp::IntegerMatrix cpp_fill_out(const List ctl) {
   return hpp_fill_out(ctl);
+}
+
+//' @title Contours Dilatation
+//' @name cpp_dilate_ctl
+//' @description
+//' This function applies contours dilatation.
+//' @param mat, a NumericMatrix.
+//' @param kernel, a NumericMatrix.
+//' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix cpp_dilate_ctl(const List ctl,
+                                   const Rcpp::NumericMatrix kernel,
+                                   const uint8_t iter = 0) {
+  return hpp_dilate_ctl(ctl, kernel, iter);
+}
+
+//' @title Contours Erosion
+//' @name cpp_erode_ctl
+//' @description
+//' This function applies contours erosion.
+//' @param mat, a NumericMatrix.
+//' @param kernel, a NumericMatrix.
+//' @param iter, an uint8_t, number of time erode should be iterated. Default is 0.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix cpp_erode_ctl(const List ctl,
+                                  const Rcpp::NumericMatrix kernel,
+                                  const uint8_t iter = 0) {
+  return hpp_erode_ctl(ctl, kernel, iter);
 }
 // END ctl
 

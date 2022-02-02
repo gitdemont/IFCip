@@ -63,6 +63,24 @@ Pages 206-220.
 Available at https://doi.org/10.1016/j.cviu.2003.09.002
 
 --------------------------------------------------------------------------------
+hpp_disttrans_1st, hpp_disttrans_manh, hpp_disttrans_eucl are adapted from
+'A General Algorithm For Computing Distance Transforms In Linear Time' by
+W.H. Hesselink, A. Meijster, J.B.T.M. Roerdink described in  Mathematical
+Morphology and its Applications to Image and Signal Processing. February 2002,
+Pages 331-340. 
+Available at https://doi.org/10.1007/0-306-47025-X_36
+
+--------------------------------------------------------------------------------
+hpp_watershed is adapted from 'Watersheds in digital spaces: an efficient 
+algorithm based on immersion simulations' authored by L. Vincent and P. Soille.
+described in IEEE Transactions on Pattern Analysis and Machine Intelligence,
+June 1991. 13(6):583-598. The algorithm is reviewed in 'The Watershed Transform:
+Definitions, Algorithms and Parallelization Strategies' by
+Roerdink, J. B. T. M., & Meijster, A. in Fundamenta Informaticae, 2000, 41,
+Pages 187-228
+Available at https://doi.org/10.3233/FI-2000-411207
+
+--------------------------------------------------------------------------------
 hpp_thinning_zs is adapted from 'A fast parallel algorithm for thinning digital 
 patterns' authored by T. Y. Zhang, C. Y. Suen. Desribed in Communications of the
 ACM, March 1984.

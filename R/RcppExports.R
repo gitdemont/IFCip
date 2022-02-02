@@ -226,6 +226,101 @@ NULL
 #' @keywords internal
 NULL
 
+#' @title Mask Euclidean Distance
+#' @name cpp_distance_eucl
+#' @description
+#' This function is designed to compute Euclidean distance from background to centroïds' foreground
+#' @param msk an IntegerMatrix, containing connected components.
+#' @return an NumericMatrix.
+#' @keywords internal
+NULL
+
+#' @title Mask Normalized Euclidean Distance
+#' @name cpp_distance_eucl_norm
+#' @description
+#' This function is designed to compute normalized Euclidean distance from background to centroïds' foreground
+#' @param msk an IntegerMatrix, containing connected components.
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
+#' @title Mask Manhattan Distance
+#' @name cpp_distance_manh
+#' @description
+#' This function is designed to compute Manhattan distance from background to centroïds' foreground
+#' @param msk an IntegerMatrix, containing connected components.
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
+#' @title Mask Normalized Manhattan Distance
+#' @name cpp_distance_manh_norm
+#' @description
+#' This function is designed to compute normalized Manhattan distance from background to centroïds' foreground
+#' @param msk an IntegerMatrix, containing connected components.
+#' @return an NumericMatrix.
+#' @keywords internal
+NULL
+
+#' @title Manhattan Distance Transform
+#' @name cpp_disttrans_manh
+#' @description
+#' This function computes the Manhattan distance transform of an image by implementing A. Meijster algorithm.
+#' @param img, a NumericMatrix.
+#' @details adaptation of 'A General Algorithm For Computing Distance Transforms In Linear Time' from W.H. Hesselink, A. Meijster, J.B.T.M. Roerdink.
+#' Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\url{https://doi.org/10.1007/0-306-47025-X_36}\cr
+#' Values > 0 will be considered as foreground whereas all other values will be concidered as background (i.e. 0).
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
+#' @title Euclidean Distance Transform
+#' @name cpp_disttrans_eucl
+#' @description
+#' This function computes the Euclidean distance transform of an image by implementing A. Meijster algorithm.
+#' @param img, a NumericMatrix.
+#' @details adaptation of 'A General Algorithm For Computing Distance Transforms In Linear Time' from W.H. Hesselink, A. Meijster, J.B.T.M. Roerdink.
+#' Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\url{https://doi.org/10.1007/0-306-47025-X_36}\cr
+#' Values > 0 will be considered as foreground whereas all other values will be concidered as background (i.e. 0).
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
+#' @title Euclidean Voronoï
+#' @name cpp_voronoi_eucl
+#' @description
+#' This function computes Voronoï diagram using Euclidean distance of a seed image.
+#' @param img, a positive IntegerMatrix where values > 0 represent foreground seeds.
+#' @details img will be passed to connected component labelling and centroïd of each identified components will be used to build Voronoï diagram.
+#' @return an IntegerMatrix.
+#' @keywords internal
+NULL
+
+#' @title Manhattan Voronoï
+#' @name cpp_voronoi_manh
+#' @description
+#' This function computes Voronoï diagram using Manhattan distance of a seed image.
+#' @param img, a positive IntegerMatrix where values > 0 represent foreground seeds.
+#' @details img will be passed to connected component labelling and centroïd of each identified components will be used to build Voronoï diagram.
+#' @return an IntegerMatrix.
+#' @keywords internal
+NULL
+
+#' @title Watershed Transformation
+#' @name cpp_watershed
+#' @description
+#' This function computes the watershed transformation of an image.
+#' @param mat, a NumericMatrix; a distance transform matrix is expected.
+#' @param connectivity, an unsigned short either 4 or 8 describing pixel neighborhood. Default is 8.
+#' @param levels, an unsigned short determining the number elevation levels. Default is 256, should be at least 2.
+#' @detais adaptation of 'Watersheds in digital spaces: an efficient algorithm based on immersion simulations' from  L. Vincent and P. Soille.
+#' In IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(6):583-598, June 1991.\cr
+#' The algorithm is reviewed in 'The Watershed Transform: Definitions, Algorithms and Parallelization Strategies'
+#' from Roerdink, J. B. T. M., & Meijster, A. (2000) in Fundamenta Informaticae, 41, 187-228 \url{https://doi.org/10.3233/FI-2000-411207}
+#' @return an IntegerMatrix.
+#' @keywords internal
+NULL
+
 #' @title Zernike's Features
 #' @name cpp_zernike1
 #' @description
@@ -520,6 +615,17 @@ NULL
 #' @keywords internal
 NULL
 
+#' @title Image Laplacian
+#' @name cpp_laplacian
+#' @description
+#' This function applies Laplacian morphology on image.
+#' @param mat, a NumericMatrix.
+#' @param kernel, a NumericMatrix.
+#' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
 #' @title Contour Tracing Connected Component Labeling
 #' @name cpp_ctl
 #' @description
@@ -541,7 +647,7 @@ NULL
 #' @name cpp_fill
 #' @description
 #' This function is designed to fill contours.
-#' @param mat an List, containing contour tracing labeling, object of class `IFCip_ctl`
+#' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
 #' @param label an uint32_t corresponding to the label of desired set of contour to be filled.
 #' Default is 0 to fill all set of contours found.
 #' @param inner a bool, to whether or not fill hole(s) inside contours if some where identified
@@ -556,6 +662,28 @@ NULL
 #' This function is designed to fill the most external contours.
 #' @param mat an List, containing contour tracing labeling, object of class `IFCip_ctl`
 #' @return an IntegerMatrix.
+#' @keywords internal
+NULL
+
+#' @title Contours Dilatation
+#' @name cpp_dilate_ctl
+#' @description
+#' This function applies contours dilatation.
+#' @param mat, a NumericMatrix.
+#' @param kernel, a NumericMatrix.
+#' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
+#' @title Contours Erosion
+#' @name cpp_erode_ctl
+#' @description
+#' This function applies contours erosion.
+#' @param mat, a NumericMatrix.
+#' @param kernel, a NumericMatrix.
+#' @param iter, an uint8_t, number of time erode should be iterated. Default is 0.
+#' @return a NumericMatrix.
 #' @keywords internal
 NULL
 
@@ -736,6 +864,42 @@ cpp_features_hu3 <- function(img, msk, components = 0L, mag = 1.0) {
     .Call(`_IFCip_cpp_features_hu3`, img, msk, components, mag)
 }
 
+cpp_distance_eucl <- function(msk) {
+    .Call(`_IFCip_cpp_distance_eucl`, msk)
+}
+
+cpp_distance_eucl_norm <- function(msk) {
+    .Call(`_IFCip_cpp_distance_eucl_norm`, msk)
+}
+
+cpp_distance_manh <- function(msk) {
+    .Call(`_IFCip_cpp_distance_manh`, msk)
+}
+
+cpp_distance_manh_norm <- function(msk) {
+    .Call(`_IFCip_cpp_distance_manh_norm`, msk)
+}
+
+cpp_disttrans_manh <- function(img) {
+    .Call(`_IFCip_cpp_disttrans_manh`, img)
+}
+
+cpp_disttrans_eucl <- function(img) {
+    .Call(`_IFCip_cpp_disttrans_eucl`, img)
+}
+
+cpp_voronoi_eucl <- function(img) {
+    .Call(`_IFCip_cpp_voronoi_eucl`, img)
+}
+
+cpp_voronoi_manh <- function(img) {
+    .Call(`_IFCip_cpp_voronoi_manh`, img)
+}
+
+cpp_watershed <- function(mat, connectivity = 8L, levels = 256L) {
+    .Call(`_IFCip_cpp_watershed`, mat, connectivity, levels)
+}
+
 cpp_zernike1 <- function(img, cx, cy, nmax = 15L, radius = 15.0) {
     .Call(`_IFCip_cpp_zernike1`, img, cx, cy, nmax, radius)
 }
@@ -840,6 +1004,10 @@ cpp_cont <- function(mat, kernel, iter = 0L) {
     .Call(`_IFCip_cpp_cont`, mat, kernel, iter)
 }
 
+cpp_laplacian <- function(mat, kernel, iter = 0L) {
+    .Call(`_IFCip_cpp_laplacian`, mat, kernel, iter)
+}
+
 cpp_ctl <- function(mat, global = FALSE) {
     .Call(`_IFCip_cpp_ctl`, mat, global)
 }
@@ -850,6 +1018,14 @@ cpp_fill <- function(ctl, label = 0L, inner = TRUE, outer = TRUE) {
 
 cpp_fill_out <- function(ctl) {
     .Call(`_IFCip_cpp_fill_out`, ctl)
+}
+
+cpp_dilate_ctl <- function(ctl, kernel, iter = 0L) {
+    .Call(`_IFCip_cpp_dilate_ctl`, ctl, kernel, iter)
+}
+
+cpp_erode_ctl <- function(ctl, kernel, iter = 0L) {
+    .Call(`_IFCip_cpp_erode_ctl`, ctl, kernel, iter)
 }
 
 cpp_threshold <- function(img, msk, k = 0.0, removal = 0L) {

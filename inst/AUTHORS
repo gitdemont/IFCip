@@ -22,7 +22,7 @@ Processing Letters, 9, 1979, pp216-219 reported in M. A. Jayaram, Hasan Fleyeh,
 Intelligent Systems, Vol. 6 No. 2, 2016, pp. 48-58.
 
 --------------------------------------------------------------------------------
-hpp_antipodalpairs is adaptated from Computational geometry with the rotating 
+hpp_antipodalpairs is adapted from Computational geometry with the rotating 
 calipers authored by Pirzadeh, Hormoz under supervision of Toussaint, Godfried
 T. at McGill University. 
 Available at https://escholarship.mcgill.ca/concern/theses/fx719p46g
@@ -33,7 +33,25 @@ W. Randolph Franklin.
 Available at http://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
 
 --------------------------------------------------------------------------------
-hpp_ctl is adaptated from 'A linear-time component-labeling algorithm using 
+hpp_disttrans_1st, hpp_disttrans_manh, hpp_disttrans_eucl are adapted from
+'A General Algorithm For Computing Distance Transforms In Linear Time' by
+W.H. Hesselink, A. Meijster, J.B.T.M. Roerdink described in  Mathematical
+Morphology and its Applications to Image and Signal Processing. February 2002,
+Pages 331-340. 
+Available at https://doi.org/10.1007/0-306-47025-X_36
+
+--------------------------------------------------------------------------------
+hpp_watershed is adapted from 'Watersheds in digital spaces: an efficient 
+algorithm based on immersion simulations' authored by L. Vincent and P. Soille.
+described in IEEE Transactions on Pattern Analysis and Machine Intelligence,
+June 1991. 13(6):583-598. The algorithm is reviewed in 'The Watershed Transform:
+Definitions, Algorithms and Parallelization Strategies' by
+Roerdink, J. B. T. M., & Meijster, A. in Fundamenta Informaticae, 2000, 41,
+Pages 187-228
+Available at https://doi.org/10.3233/FI-2000-411207
+
+--------------------------------------------------------------------------------
+hpp_ctl is adapted from 'A linear-time component-labeling algorithm using 
 contour tracing technique' from F. Change, CJ. Chen and CJ Lu. Described in
 Computer Vision and Image Understanding Volume 93, Issue 2, February 2004,
 Pages 206-220.
@@ -41,8 +59,8 @@ Available at https://doi.org/10.1016/j.cviu.2003.09.002
 
 --------------------------------------------------------------------------------
 hpp_thinning_zs is adapted from 'A fast parallel algorithm for thinning digital 
-patterns' authored by T. Y. Zhang, C. Y. Suen. Desribed in Communications of the
-ACM, March 1984.
+patterns' authored by T. Y. Zhang, C. Y. Suen. Described in Communications of
+the ACM, March 1984.
 Available at https://doi.org/10.1145/357994.358023
 
 --------------------------------------------------------------------------------
