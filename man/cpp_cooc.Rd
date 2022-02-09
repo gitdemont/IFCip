@@ -8,7 +8,7 @@
 
 \item{msk}{a LogicalMatrix, containing mask.}
 
-\item{delta}{uint8_t offset from which co-oocurence has to be computed to. Default is 1.}
+\item{delta}{uint8_t offset from which co-occurence has to be computed to. Default is 1.}
 }
 \value{
 a list whose members are normalized Gray-Level Co-occurrence Matrices at angles 0, 45, 90 and 315.

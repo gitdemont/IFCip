@@ -43,7 +43,7 @@ a NumericMatrix whose rows are component numbers and columns are:\cr
 -Raw Max Pixel, pixels intensity maximum of the component\cr
 -Std Dev, pixels intensity standard variation of the component\cr
 -skewness, component's skewness\cr
--kurtosis, component's kurosis.
+-kurtosis, component's kurtosis.
 }
 \description{
 This function is designed to compute image features.
