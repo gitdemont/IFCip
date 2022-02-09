@@ -41,13 +41,22 @@ Pages 331-340.
 Available at https://doi.org/10.1007/0-306-47025-X_36
 
 --------------------------------------------------------------------------------
-hpp_watershed is adapted from 'Watersheds in digital spaces: an efficient 
-algorithm based on immersion simulations' authored by L. Vincent and P. Soille.
-described in IEEE Transactions on Pattern Analysis and Machine Intelligence,
-June 1991. 13(6):583-598. The algorithm is reviewed in 'The Watershed Transform:
-Definitions, Algorithms and Parallelization Strategies' by
-Roerdink, J. B. T. M., & Meijster, A. in Fundamenta Informaticae, 2000, 41,
-Pages 187-228
+hpp_watershed_sv1 uses algorihtm from 'Determining watersheds in digital
+pictures via flooding simulations' from P. Soille. and L. Vincent. In Proc.
+SPIE 1360, Visual Communications and Image Processing '90: Fifth in a Series,
+(1 September 1990) available at https://doi:10.1117/12.24211. The implementation
+is adapted from WatershedTransform2D.java authored by Ignacio Arganda-Carreras
+in MorphoLib plugin for ImageJ.
+Available at https://github.com/ijpb/MorphoLibJ/blob/master/src/main/java/inra/ijpb/watershed/WatershedTransform2D.java
+
+--------------------------------------------------------------------------------
+hpp_watershed_sv2 uses algorithm from 'Watersheds in digital spaces: an
+efficient algorithm based on immersion simulations' authored by L. Vincent and 
+P. Soille described in IEEE Transactions on Pattern Analysis and Machine
+Intelligence, June 1991. 13(6):583-598. The implementation is adapted from
+review in 'The Watershed Transform: Definitions, Algorithms and Parallelization
+Strategies' by Roerdink, J. B. T. M. and Meijster, A. in Fundamenta Informaticae,
+2000, 41, Pages 187-228
 Available at https://doi.org/10.3233/FI-2000-411207
 
 --------------------------------------------------------------------------------
@@ -56,6 +65,12 @@ contour tracing technique' from F. Change, CJ. Chen and CJ Lu. Described in
 Computer Vision and Image Understanding Volume 93, Issue 2, February 2004,
 Pages 206-220.
 Available at https://doi.org/10.1016/j.cviu.2003.09.002
+
+--------------------------------------------------------------------------------
+hpp_multi_otsu is adapted from 'A Fast Algorithm for Multilevel Thresholding'
+from L. Ping-Sung, C. Tse-Sheng, and C. Pau-Choo. Described in Jounal of 
+Information Science and Engineering. 2001(17), Pages 713-727.
+Available at https://doi.org/10.6688/JISE.2001.17.5.1
 
 --------------------------------------------------------------------------------
 hpp_thinning_zs is adapted from 'A fast parallel algorithm for thinning digital 

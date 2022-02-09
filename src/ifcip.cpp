@@ -31,8 +31,8 @@
 #include <Rcpp.h>
 #include "../inst/include/utils.hpp"
 #include "../inst/include/hu.hpp"
+#include "../inst/include/otsu.hpp"
 #include "../inst/include/distance.hpp"
-#include "../inst/include/watershed.hpp"
 #include "../inst/include/haralick.hpp"
 #include "../inst/include/zernike.hpp"
 #include "../inst/include/matrix_logic.hpp"
@@ -40,6 +40,7 @@
 #include "../inst/include/flip.hpp"
 #include "../inst/include/filter.hpp"
 #include "../inst/include/morphology.hpp"
+#include "../inst/include/watershed.hpp"
 #include "../inst/include/ctl.hpp"
 #include "../inst/include/mask.hpp"
 #include "../inst/include/thinning.hpp"
@@ -142,7 +143,7 @@ Rcpp::IntegerMatrix cpp_rescale_M(const Rcpp::NumericMatrix mat,
 //' This function is designed to compute Haralick co-occurrence matrix
 //' @param img a Rcpp::IntegerMatrix of class `IFCip_rescale`, containing image intensity values.
 //' @param msk a LogicalMatrix, containing mask.
-//' @param delta uint8_t offset from which co-oocurence has to be computed to. Default is 1.
+//' @param delta uint8_t offset from which co-occurence has to be computed to. Default is 1.
 //' @details See 'Textural Features for Image Classification', Haralick et. al (1979),
 //' available at: \url{https://haralick.org/journals/TexturalFeatures.pdf}
 //' @return a list whose members are normalized Gray-Level Co-occurrence Matrices at angles 0, 45, 90 and 315.
@@ -361,7 +362,7 @@ Rcpp::NumericVector cpp_basic(const Rcpp::NumericMatrix img,
 //' -Raw Max Pixel, pixels intensity maximum of the component\cr
 //' -Std Dev, pixels intensity standard variation of the component\cr
 //' -skewness, component's skewness\cr
-//' -kurtosis, component's kurosis.  
+//' -kurtosis, component's kurtosis.  
 //' @keywords internal
 ////' @export
 // [[Rcpp::export]]
@@ -372,6 +373,31 @@ Rcpp::NumericMatrix cpp_features_hu3(const Rcpp::NumericMatrix img,
   return hpp_features_hu3(img, msk, components, mag);
 }
 // END hu
+
+// FROM otsu
+//' @title Otsu Multi Thresholding
+//' @name cpp_multi_otsu
+//' @description
+//' This function determines best threshold(s) according to Otsu's method.
+//' @param img, a NumericMatrix;
+//' @param n_comp, number of components to separate. Default is 2, should be at least 2.\cr
+//' Returned thresholds will be of length n_comp - 1.
+//' @param n_lev, an unsigned short determining the number of grey levels used for the computation. Default is 256, should be at least 2.
+//' Despite being fast thanks to LUT pre-computation, performance will be highly impacted with large 'n_comp' or 'n_lev' values (typically n_comp = 5 and n_lev = 256).
+//' Alternatively, you can try to decrease 'n_lev' when 'n_comp' needs to be large (e.g. n_comp = 8 and n_lev = 32).
+//' @details adaptation of 'A Fast Algorithm for Multilevel Thresholding' from L. Ping-Sung, C. Tse-Sheng, and C. Pau-Choo
+//' in Jounal of Information Science and Engineering. 2001(17), 713-727.
+//' \url{https://doi.org/10.6688/JISE.2001.17.5.1}
+//' @return an NumericVector of threshold(s).
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericVector cpp_multi_otsu (const Rcpp::NumericMatrix img,
+                                    const uint8_t n_comp = 2,
+                                    const unsigned short n_lev = 256) {
+  return hpp_multi_otsu(img, n_comp, n_lev);
+}
+// END otsu
 
 // FROM distance
 //' @title Mask Euclidean Distance
@@ -486,30 +512,6 @@ Rcpp::IntegerMatrix cpp_voronoi_manh (const Rcpp::IntegerMatrix img) {
   return hpp_voronoi_manh(img);
 }
 // END distance
-
-// FROM watershed
-//' @title Watershed Transformation
-//' @name cpp_watershed
-//' @description
-//' This function computes the watershed transformation of an image.
-//' @param mat, a NumericMatrix; a distance transform matrix is expected.
-//' @param connectivity, an unsigned short either 4 or 8 describing pixel neighborhood. Default is 8.
-//' @param levels, an unsigned short determining the number elevation levels. Default is 256, should be at least 2.
-//' @detais adaptation of 'Watersheds in digital spaces: an efficient algorithm based on immersion simulations' from  L. Vincent and P. Soille.
-//' In IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(6):583-598, June 1991.\cr
-//' The algorithm is reviewed in 'The Watershed Transform: Definitions, Algorithms and Parallelization Strategies'
-//' from Roerdink, J. B. T. M., & Meijster, A. (2000) in Fundamenta Informaticae, 41, 187-228 \url{https://doi.org/10.3233/FI-2000-411207}
-//' @return an IntegerMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export]]
-Rcpp::IntegerMatrix cpp_watershed(const Rcpp::NumericMatrix mat,
-                                  const unsigned short connectivity = 8,
-                                  const unsigned short levels = 256) {
-  return hpp_watershed(mat, connectivity, levels);
-}
-// END watershed
-
 
 // FROM zernike
 //' @title Zernike's Features
@@ -986,6 +988,59 @@ Rcpp::NumericMatrix cpp_laplacian(const Rcpp::NumericMatrix mat,
   return hpp_laplacian(mat, kernel, iter);
 }
 // END morphology
+
+// FROM watershed
+//' @title Watershed Transformation SV1
+//' @name cpp_watershed_sv1
+//' @description
+//' This function computes the watershed transformation of an image.
+//' @param mat, a NumericMatrix; a distance transform matrix is expected.
+//' @param connectivity, an uint8_t either 4 or 8 describing pixel neighborhood. Default is 8.
+//' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
+//' @param ws_draw, a bool; whether to draw watershed lines or not. Default is true.
+//' @param ws_dilate , an uint8_t controlling watershed line expansion in pixel. Default is 0, for no expansion.
+//' Then, increasing values will expand watershed lines by 2 pixels. This parameter only applies when 'ws_draw' is true.
+//' @details adaptation of 'Determining watersheds in digital pictures via flooding simulations' from P. Soille. and L. Vincent.
+//' In Proc. SPIE 1360, Visual Communications and Image Processing '90: Fifth in a Series, (1 September 1990) \url{https://doi:10.1117/12.24211}.
+//' @source MorphoLib plugin for ImageJ presents a Java implementation of the algorithm in  \url{https://github.com/ijpb/MorphoLibJ/blob/master/src/main/java/inra/ijpb/watershed/WatershedTransform2D.java} authored by Ignacio Arganda-Carreras 
+//' @return an IntegerMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat,
+                                      const uint8_t connectivity = 8,
+                                      const unsigned short n_lev = 256,
+                                      const bool ws_draw = true,
+                                      const uint8_t ws_dilate = 0) {
+  return hpp_watershed_sv1(mat, connectivity, n_lev, ws_draw, ws_dilate);
+}
+
+//' @title Watershed Transformation SV2
+//' @name cpp_watershed_sv2
+//' @description
+//' This function computes the watershed transformation of an image.
+//' @param mat, a NumericMatrix; a distance transform matrix is expected.
+//' @param connectivity, an uint8_t either 4 or 8 describing pixel neighborhood. Default is 8.
+//' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
+//' @param ws_draw, a bool; whether to draw watershed lines or not. Default is true.
+//' @param ws_dilate , an uint8_t controlling watershed line expansion in pixel. Default is 0, for no expansion.
+//' Then, increasing values will expand watershed lines by 2 pixels. This parameter only applies when 'ws_draw' is true.
+//' @details adaptation of 'Watersheds in digital spaces: an efficient algorithm based on immersion simulations' from  L. Vincent and P. Soille.
+//' In IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(6):583-598, June 1991.\cr
+//' @source The algorithm is reviewed in 'The Watershed Transform: Definitions, Algorithms and Parallelization Strategies'
+//' from Roerdink, J. B. T. M. and Meijster, A. (2000) in Fundamenta Informaticae, 41, 187-228 \url{https://doi.org/10.3233/FI-2000-411207}
+//' @return an IntegerMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::IntegerVector cpp_watershed_sv2(const Rcpp::NumericMatrix mat,
+                                      const uint8_t connectivity = 8,
+                                      const unsigned short n_lev = 256,
+                                      const bool ws_draw = true,
+                                      const uint8_t ws_dilate = 0) {
+  return hpp_watershed_sv2(mat, connectivity, n_lev, ws_draw, ws_dilate);
+}
+// END watershed
 
 // FROM ctl
 //' @title Contour Tracing Connected Component Labeling

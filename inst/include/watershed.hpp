@@ -31,6 +31,7 @@
 #define IFCIP_WATERSHED_HPP
 
 #include <Rcpp.h>
+#include "morphology.hpp"
 using namespace Rcpp;
 
 static int ifcip_ws_dx [8]={ 1, 0,-1, 0,-1,-1, 1, 1};
@@ -99,32 +100,36 @@ void get_neighbor(const R_len_t cur_idx,
   nbr[0] = n;
 }
 
-//' @title Watershed Transformation
-//' @name cpp_watershed
+//' @title Watershed Transformation SV1
+//' @name cpp_watershed_sv1
 //' @description
 //' This function computes the watershed transformation of an image.
 //' @param mat, a NumericMatrix; a distance transform matrix is expected.
 //' @param connectivity, an uint8_t either 4 or 8 describing pixel neighborhood. Default is 8.
-//' @param levels, an unsigned short determining the number elevation levels. Default is 256, should be at least 2.
-//' @details adaptation of 'Watersheds in digital spaces: an efficient algorithm based on immersion simulations' from  L. Vincent and P. Soille.
-//' In IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(6):583-598, June 1991.\cr
-//' The algorithm is reviewed in 'The Watershed Transform: Definitions, Algorithms and Parallelization Strategies'
-//' from Roerdink, J. B. T. M., & Meijster, A. (2000) in Fundamenta Informaticae, 41, 187-228 \url{https://doi.org/10.3233/FI-2000-411207}
+//' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
+//' @param ws_draw, a bool; whether to draw watershed lines or not. Default is true.
+//' @param ws_dilate , an uint8_t controlling watershed line expansion in pixel. Default is 0, for no expansion.
+//' Then, increasing values will expand watershed lines by 2 pixels. This parameter only applies when 'ws_draw' is true.
+//' @details adaptation of 'Determining watersheds in digital pictures via flooding simulations' from P. Soille. and L. Vincent.
+//' In Proc. SPIE 1360, Visual Communications and Image Processing '90: Fifth in a Series, (1 September 1990) \url{https://doi:10.1117/12.24211}.
+//' @source MorphoLib plugin for ImageJ presents a Java implementation of the algorithm in  \url{https://github.com/ijpb/MorphoLibJ/blob/master/src/main/java/inra/ijpb/watershed/WatershedTransform2D.java} authored by Ignacio Arganda-Carreras 
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export]]
-Rcpp::IntegerMatrix hpp_watershed(const Rcpp::NumericMatrix mat,
-                                  const uint8_t connectivity = 8,
-                                  const unsigned short levels = 256) {
+Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
+                                      const uint8_t connectivity = 8,
+                                      const unsigned short n_lev = 256,
+                                      const bool ws_draw = true,
+                                      const uint8_t ws_dilate = 0) {
   R_len_t mat_r = mat.nrow();
   R_len_t mat_c = mat.ncol();
   R_len_t MAX_SIZ = mat_r * mat_c;
   if(MAX_SIZ <= 0) Rcpp::stop("'mat' should be at least 1px row and 1px col");
   if(MAX_SIZ >= (std::pow(2.0,31.0) - 2)) Rcpp::stop("'mat' is too large");
   if(!((connectivity==4)||(connectivity==8))) Rcpp::stop("'connectivity' should be either 4 or 8");
-  if(levels < 2) Rcpp::stop("'levels' should be at least >= 2");
-  int MAX_LEV = levels;
+  if(n_lev < 2) Rcpp::stop("'n_lev' should be at least >= 2");
+  int MAX_LEV = n_lev;
   
   // determines image range
   double mat_min = R_PosInf, mat_max = R_NegInf;
@@ -139,7 +144,7 @@ Rcpp::IntegerMatrix hpp_watershed(const Rcpp::NumericMatrix mat,
   
   // creates scaled mat ranging from [1 - MAX_LEV, 0]
   Rcpp::IntegerMatrix sca = Rcpp::no_init(mat_r, mat_c);
-  double MAX_LEV_SCA = (1 - MAX_LEV) / mat_max;
+  double MAX_LEV_SCA = (1 - MAX_LEV) / (mat_max - mat_min);
   for(R_len_t i = 0; i < MAX_SIZ; i++) sca[i] = MAX_LEV_SCA * (mat[i] - mat_min);
   
   // sort values
@@ -147,7 +152,189 @@ Rcpp::IntegerMatrix hpp_watershed(const Rcpp::NumericMatrix mat,
   std::sort(idx.begin(), idx.end(), [&](int i, int j){return sca[i] < sca[j];});
   
   // initialization
-  R_len_t mask = -2, // px is initially found at threshold level
+  int wshed = 0,
+    init = -1,
+    mask = -2,
+    inqueue = -3;
+  Rcpp::IntegerMatrix out = Rcpp::no_init(mat_r, mat_c);       // returned segmented image
+  out.fill(init);
+  R_len_t cur_lab = 0;
+  
+  // working var
+  Rcpp::IntegerVector nbr(connectivity + 1);                   // vector of neighbors idx
+  Rcpp::IntegerVector Q(MAX_SIZ + 2, NA_INTEGER);              // hierarchical priority queue
+  Q[0] = 0;
+  Q[MAX_SIZ + 1] = 1;
+  bool flag = true;
+  int k_start = 0, k = 0, k_stop = mat.size();
+  
+  // start flooding
+  for(int h = 2-MAX_LEV; h <= 0; h++) {
+    k_stop = mat.size();
+    for(k = k_start; k < k_stop; k++) {
+      if(sca[idx[k]] >= h) {
+        k_stop = k;
+        break;
+      }
+    }
+    for(k = k_start; k < k_stop; k++) {
+      int p = idx[k];
+      out[p] = mask;
+      get_neighbor(p, mat_r, mat_c, nbr);
+      for(uint8_t i = 1; i <= nbr[0]; i++) {
+        if((out[nbr[i]] > 0) || (out[p] == wshed)) {
+          out[p] = inqueue;
+          fifo_add(Q, p);
+          break;
+        }
+      }
+    }
+    while(Q[0] != 0) {
+      int p = fifo_pop(Q);
+      get_neighbor(p, mat_r, mat_c, nbr);
+      for(uint8_t i = 1; i <= nbr[0]; i++) {
+        if(out[nbr[i]] > 0) {
+          if((out[p] == inqueue) || (flag && (out[p] == wshed))) {
+            out[p] = out[nbr[i]];
+          } else {
+            if((out[p] > 0) && (out[p] != out[nbr[i]])) {
+              out[p] = wshed;
+              flag = false;
+            }
+          }
+        } else {
+          if(out[nbr[i]] == wshed) {
+            if(out[p] == inqueue) {
+              out[p] = wshed;
+              flag = true;
+            }
+          } else {
+            if(out[nbr[i]] == mask) {
+              out[nbr[i]] = inqueue;
+              fifo_add(Q, nbr[i]);
+            }
+          }
+        }
+      }
+    }
+    // search for new minima
+    k = k_start;
+    for(k = k_start; k < k_stop; k++) {
+      int p = idx[k];
+      if(out[p] == mask) {
+        cur_lab++;
+        out[p] = cur_lab;
+        fifo_add(Q, p);
+        while(Q[0] != 0) {
+          get_neighbor(fifo_pop(Q), mat_r, mat_c, nbr);
+          for(uint8_t i = 1; i <= nbr[0]; i++) {
+            if(out[nbr[i]] == mask) {
+              fifo_add(Q, nbr[i]);
+              out[nbr[i]] = cur_lab;
+            }
+          }
+        }
+      }
+    }
+    k_start = k_stop;
+  }
+  // TODO-FIXME:
+  // should we replace 0 (wshed values) by something else to keep track of watershed lines
+  // before replacing remaining non visited -1 values ?
+  if(ws_draw) {
+    if(ws_dilate != 0) {
+      Rcpp::NumericMatrix wsl = no_init(mat_r, mat_c);
+      Rcpp::NumericMatrix knl = no_init(3,3);
+      knl.fill(1);
+      for(k = 0; k < MAX_SIZ; k++) wsl[k] = out[k] == wshed;
+      wsl = hpp_dilate(wsl, knl, ws_dilate - 1);
+      for(k = 0; k < MAX_SIZ; k++) {
+        if(wsl[k]) out[k] = wshed;
+      }
+    } 
+  } else {
+    Rcpp::IntegerMatrix out2 = Rcpp::no_init(mat_r, mat_c);
+    for(k = 0; k < MAX_SIZ; k++) {
+      if(out[k] == wshed) {
+        double d, dmax = R_NegInf;
+        get_neighbor(k, mat_r, mat_c, nbr);
+        for(uint8_t i = 1; i <= nbr[0]; i++) {
+          if(out[nbr[i]] == wshed) continue;
+          d = std::abs(sca[nbr[i]] - sca[k]);
+          if(d > dmax) {
+            out2[k] = out[nbr[i]];
+            dmax = d;
+          }
+        }
+      } else {
+        out2[k] = out[k];
+      }
+    }
+    for(k = k_start; k < MAX_SIZ; k++) {
+      out2[idx[k]] = 0;
+    }
+    return out2;
+  }
+  for(k = k_start; k < MAX_SIZ; k++) {
+    out[idx[k]] = 0;
+  }
+  return out;
+}
+
+//' @title Watershed Transformation SV2
+//' @name cpp_watershed_sv2
+//' @description
+//' This function computes the watershed transformation of an image.
+//' @param mat, a NumericMatrix; a distance transform matrix is expected.
+//' @param connectivity, an uint8_t either 4 or 8 describing pixel neighborhood. Default is 8.
+//' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
+//' @param ws_draw, a bool; whether to draw watershed lines or not. Default is true.
+//' @param ws_dilate , an uint8_t controlling watershed line expansion in pixel. Default is 0, for no expansion.
+//' Then, increasing values will expand watershed lines by 2 pixels. This parameter only applies when 'ws_draw' is true.
+//' @details adaptation of 'Watersheds in digital spaces: an efficient algorithm based on immersion simulations' from  L. Vincent and P. Soille.
+//' In IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(6):583-598, June 1991.\cr
+//' @source The algorithm is reviewed in 'The Watershed Transform: Definitions, Algorithms and Parallelization Strategies'
+//' from Roerdink, J. B. T. M. and Meijster, A. (2000) in Fundamenta Informaticae, 41, 187-228 \url{https://doi.org/10.3233/FI-2000-411207}
+//' @return an IntegerMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
+                                      const uint8_t connectivity = 8,
+                                      const unsigned short n_lev = 256,
+                                      const bool ws_draw = true,
+                                      const uint8_t ws_dilate = 0) {
+  R_len_t mat_r = mat.nrow();
+  R_len_t mat_c = mat.ncol();
+  R_len_t MAX_SIZ = mat_r * mat_c;
+  if(MAX_SIZ <= 0) Rcpp::stop("'mat' should be at least 1px row and 1px col");
+  if(MAX_SIZ >= (std::pow(2.0,31.0) - 2)) Rcpp::stop("'mat' is too large");
+  if(!((connectivity==4)||(connectivity==8))) Rcpp::stop("'connectivity' should be either 4 or 8");
+  if(n_lev < 2) Rcpp::stop("'n_lev' should be at least >= 2");
+  int MAX_LEV = n_lev;
+  
+  // determines image range
+  double mat_min = R_PosInf, mat_max = R_NegInf;
+  for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
+    Rcpp::NumericVector col_ran = range(mat(Rcpp::_, i_col));
+    if(col_ran[0] < mat_min) {
+      mat_min = col_ran[0];
+    } else {
+      if(col_ran[1] > mat_max) mat_max = col_ran[1];
+    }
+  }
+  
+  // creates scaled mat ranging from [1 - MAX_LEV, 0]
+  Rcpp::IntegerMatrix sca = Rcpp::no_init(mat_r, mat_c);
+  double MAX_LEV_SCA = (1 - MAX_LEV) / (mat_max - mat_min);
+  for(R_len_t i = 0; i < MAX_SIZ; i++) sca[i] = MAX_LEV_SCA * (mat[i] - mat_min);
+  
+  // sort values
+  Rcpp::IntegerVector idx = seq_along(mat) - 1;
+  std::sort(idx.begin(), idx.end(), [&](int i, int j){return sca[i] < sca[j];});
+  
+  // initialization
+  int mask = -2,     // px is initially found at threshold level
     wshed = 0,       // px belongs to a watershed line
     init = -1;       // initial value of out
   
@@ -176,10 +363,11 @@ Rcpp::IntegerMatrix hpp_watershed(const Rcpp::NumericMatrix mat,
       int p = idx[k];
       out[p] = mask;
       get_neighbor(p, mat_r, mat_c, nbr);
-      for(R_len_t i = 1; i <= nbr[0]; i++) {
+      for(uint8_t i = 1; i <= nbr[0]; i++) {
         if((out[nbr[i]] > 0) || (out[nbr[i]] == wshed)) {
           dst[p]  = 1;
           fifo_add(Q, p);
+          break;
         }
       }
     }
@@ -197,10 +385,10 @@ Rcpp::IntegerMatrix hpp_watershed(const Rcpp::NumericMatrix mat,
         }
       }
       get_neighbor(p, mat_r, mat_c, nbr);
-      for(R_len_t i = 1; i <= nbr[0]; i++) {
+      for(uint8_t i = 1; i <= nbr[0]; i++) {
         int pp = nbr[i];
         if((dst[pp] < cur_dist) && ((out[pp] > 0) || (out[pp] == wshed))) {
-          if(out[pp] > 0) {
+          if((out[pp] > 0)) {
             if((out[p] == mask) || (out[p] == wshed)) {
               out[p] = out[pp];
             } else {
@@ -227,7 +415,7 @@ Rcpp::IntegerMatrix hpp_watershed(const Rcpp::NumericMatrix mat,
         fifo_add(Q, p); out[p] = cur_lab;
         while(Q[0] != 0) {
           get_neighbor(fifo_pop(Q), mat_r, mat_c, nbr);
-          for(R_len_t i = 1; i <= nbr[0]; i++) {
+          for(uint8_t i = 1; i <= nbr[0]; i++) {
             if(out[nbr[i]] == mask) {
               fifo_add(Q, nbr[i]);
               out[nbr[i]] = cur_lab;
@@ -241,7 +429,41 @@ Rcpp::IntegerMatrix hpp_watershed(const Rcpp::NumericMatrix mat,
   // TODO-FIXME:
   // should we replace 0 (wshed values) by something else to keep track of watershed lines
   // before replacing remaining non visited -1 values ?
-  for(k = k_start; k < mat.size(); k++) {
+  if(ws_draw) {
+    if(ws_dilate != 0) {
+      Rcpp::NumericMatrix wsl = no_init(mat_r, mat_c);
+      Rcpp::NumericMatrix knl = no_init(3,3);
+      knl.fill(1);
+      for(k = 0; k < MAX_SIZ; k++) wsl[k] = out[k] == wshed;
+      wsl = hpp_dilate(wsl, knl, ws_dilate - 1);
+      for(k = 0; k < MAX_SIZ; k++) {
+        if(wsl[k]) out[k] = wshed;
+      }
+    } 
+  } else {
+    Rcpp::IntegerMatrix out2 = Rcpp::no_init(mat_r, mat_c);
+    for(k = 0; k < MAX_SIZ; k++) {
+      if(out[k] == wshed) {
+        double d, dmax = R_NegInf;
+        get_neighbor(k, mat_r, mat_c, nbr);
+        for(uint8_t i = 1; i <= nbr[0]; i++) {
+          if(out[nbr[i]] == wshed) continue;
+          d = std::abs(sca[nbr[i]] - sca[k]);
+          if(d > dmax) {
+            out2[k] = out[nbr[i]];
+            dmax = d;
+          }
+        }
+      } else {
+        out2[k] = out[k];
+      }
+    }
+    for(k = k_start; k < MAX_SIZ; k++) {
+      out2[idx[k]] = 0;
+    }
+    return out2;
+  }
+  for(k = k_start; k < MAX_SIZ; k++) {
     out[idx[k]] = 0;
   }
   return out;
