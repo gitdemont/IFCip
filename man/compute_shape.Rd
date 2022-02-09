@@ -18,7 +18,7 @@ shape features from 'msk'.
 Computes shape of a mask
 }
 \details{
-Based on contour tracing labeling by Change, CJ. et al. \url{https://doi.org/10.1016/j.cviu.2003.09.002},
+Based on contour tracing labeling by Chang F. et al. \url{https://doi.org/10.1016/j.cviu.2003.09.002},
 convex hull computation from Andrew's Monotone Chain Algorithm \url{https://www.sciencedirect.com/science/article/abs/pii/0020019079900723}
 and bounding box determination thanks to rotating calipers as described by Pirzadeh, Hormoz under supervision of Godfried T. Toussaint \url{https://escholarship.mcgill.ca/concern/theses/fx719p46g}
 }

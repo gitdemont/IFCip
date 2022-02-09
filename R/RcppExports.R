@@ -670,7 +670,7 @@ NULL
 #' @param mat a LogicalMatrix, containing mask.
 #' @param global whether to compute the perimeter globally or to evaluate the perimeter of each non 8-connected objects. Default is false.
 #' When true pixels of overlapping extra borders of objects are counted only once.
-#' @details adaptation of 'A linear-time component-labeling algorithm using contour tracing technique' from F. Change, CJ. Chen and CJ Lu.
+#' @details adaptation of 'A linear-time component-labeling algorithm using contour tracing technique' from F. Chang, C.J. Chen and C.J. Lu.
 #' Computer Vision and Image Understanding Volume 93, Issue 2, February 2004, Pages 206-220.\url{https://doi.org/10.1016/j.cviu.2003.09.002}
 #' @return a list whose members are:\cr
 #' -matrix: an IntegerMatrix with connected component labels.\cr

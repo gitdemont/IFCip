@@ -57,7 +57,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 --------------------------------------------------------------------------------
 hpp_ctl is adapted from 'A linear-time component-labeling algorithm using 
-contour tracing technique' from F. Change, CJ. Chen and CJ Lu. Described in
+contour tracing technique' from F. Chang, C.J. Chen and C.J. Lu. Described in
 Computer Vision and Image Understanding Volume 93, Issue 2, February 2004,
 Pages 206-220.
 Available at https://doi.org/10.1016/j.cviu.2003.09.002

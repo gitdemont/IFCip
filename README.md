@@ -98,7 +98,7 @@ On top of all the tools in IFCip, **ExtractFeatures()** is certainly the most us
 
 
 
-- **compute_shape()** to retrieve several `shape features` based notably on `contour tracing labeling` [Change, CJ.  _et_ al.](https://doi.org/10.1016/j.cviu.2003.09.002), `convex hull` computation from Andrew's Monotone Chain Algorithm reported by [M. A. Jayaram, Hasan Fleyeh](http://article.sapub.org/10.5923.j.ajis.20160602.03.html) and bounding box determination thanks to `rotating calipers` as described by [Pirzadeh, Hormoz under supervision of Godfried T. Toussaint](https://escholarship.mcgill.ca/concern/theses/fx719p46g):
+- **compute_shape()** to retrieve several `shape features` based notably on `contour tracing labeling` [Chang, F.  _et_ al.](https://doi.org/10.1016/j.cviu.2003.09.002), `convex hull` computation from Andrew's Monotone Chain Algorithm reported by [M. A. Jayaram, Hasan Fleyeh](http://article.sapub.org/10.5923.j.ajis.20160602.03.html) and bounding box determination thanks to `rotating calipers` as described by [Pirzadeh, Hormoz under supervision of Godfried T. Toussaint](https://escholarship.mcgill.ca/concern/theses/fx719p46g):
   - Perimeter
   - Diameter
   - Circularity

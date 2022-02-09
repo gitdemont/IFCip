@@ -20,7 +20,7 @@ a list whose members are:\cr
 This function is designed to identify connected component.
 }
 \details{
-adaptation of 'A linear-time component-labeling algorithm using contour tracing technique' from F. Change, CJ. Chen and CJ Lu.
+adaptation of 'A linear-time component-labeling algorithm using contour tracing technique' from F. Chang, C.J. Chen and C.J. Lu.
 Computer Vision and Image Understanding Volume 93, Issue 2, February 2004, Pages 206-220.\url{https://doi.org/10.1016/j.cviu.2003.09.002}
 }
 \keyword{internal}
