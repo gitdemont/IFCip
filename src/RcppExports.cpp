@@ -187,15 +187,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_multi_otsu
-Rcpp::NumericVector cpp_multi_otsu(const Rcpp::NumericMatrix img, const uint8_t n_comp, const unsigned short n_lev);
-RcppExport SEXP _IFCip_cpp_multi_otsu(SEXP imgSEXP, SEXP n_compSEXP, SEXP n_levSEXP) {
+Rcpp::NumericVector cpp_multi_otsu(const Rcpp::NumericMatrix img, const Rcpp::Nullable<Rcpp::NumericMatrix> msk_, const uint8_t n_comp, const unsigned short n_lev);
+RcppExport SEXP _IFCip_cpp_multi_otsu(SEXP imgSEXP, SEXP msk_SEXP, SEXP n_compSEXP, SEXP n_levSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type msk_(msk_SEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type n_comp(n_compSEXP);
     Rcpp::traits::input_parameter< const unsigned short >::type n_lev(n_levSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_multi_otsu(img, n_comp, n_lev));
+    rcpp_result_gen = Rcpp::wrap(cpp_multi_otsu(img, msk_, n_comp, n_lev));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -631,32 +632,34 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_watershed_sv1
-Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat, const uint8_t connectivity, const unsigned short n_lev, const bool ws_draw, const uint8_t ws_dilate);
-RcppExport SEXP _IFCip_cpp_watershed_sv1(SEXP matSEXP, SEXP connectivitySEXP, SEXP n_levSEXP, SEXP ws_drawSEXP, SEXP ws_dilateSEXP) {
+Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat, const Rcpp::Nullable<Rcpp::NumericMatrix> msk_, const uint8_t connectivity, const unsigned short n_lev, const bool ws_draw, const uint8_t ws_dilate);
+RcppExport SEXP _IFCip_cpp_watershed_sv1(SEXP matSEXP, SEXP msk_SEXP, SEXP connectivitySEXP, SEXP n_levSEXP, SEXP ws_drawSEXP, SEXP ws_dilateSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type msk_(msk_SEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type connectivity(connectivitySEXP);
     Rcpp::traits::input_parameter< const unsigned short >::type n_lev(n_levSEXP);
     Rcpp::traits::input_parameter< const bool >::type ws_draw(ws_drawSEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type ws_dilate(ws_dilateSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_watershed_sv1(mat, connectivity, n_lev, ws_draw, ws_dilate));
+    rcpp_result_gen = Rcpp::wrap(cpp_watershed_sv1(mat, msk_, connectivity, n_lev, ws_draw, ws_dilate));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_watershed_sv2
-Rcpp::IntegerVector cpp_watershed_sv2(const Rcpp::NumericMatrix mat, const uint8_t connectivity, const unsigned short n_lev, const bool ws_draw, const uint8_t ws_dilate);
-RcppExport SEXP _IFCip_cpp_watershed_sv2(SEXP matSEXP, SEXP connectivitySEXP, SEXP n_levSEXP, SEXP ws_drawSEXP, SEXP ws_dilateSEXP) {
+Rcpp::IntegerVector cpp_watershed_sv2(const Rcpp::NumericMatrix mat, const Rcpp::Nullable<Rcpp::NumericMatrix> msk_, const uint8_t connectivity, const unsigned short n_lev, const bool ws_draw, const uint8_t ws_dilate);
+RcppExport SEXP _IFCip_cpp_watershed_sv2(SEXP matSEXP, SEXP msk_SEXP, SEXP connectivitySEXP, SEXP n_levSEXP, SEXP ws_drawSEXP, SEXP ws_dilateSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type msk_(msk_SEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type connectivity(connectivitySEXP);
     Rcpp::traits::input_parameter< const unsigned short >::type n_lev(n_levSEXP);
     Rcpp::traits::input_parameter< const bool >::type ws_draw(ws_drawSEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type ws_dilate(ws_dilateSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_watershed_sv2(mat, connectivity, n_lev, ws_draw, ws_dilate));
+    rcpp_result_gen = Rcpp::wrap(cpp_watershed_sv2(mat, msk_, connectivity, n_lev, ws_draw, ws_dilate));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -854,7 +857,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_features_hu2", (DL_FUNC) &_IFCip_cpp_features_hu2, 2},
     {"_IFCip_cpp_basic", (DL_FUNC) &_IFCip_cpp_basic, 3},
     {"_IFCip_cpp_features_hu3", (DL_FUNC) &_IFCip_cpp_features_hu3, 4},
-    {"_IFCip_cpp_multi_otsu", (DL_FUNC) &_IFCip_cpp_multi_otsu, 3},
+    {"_IFCip_cpp_multi_otsu", (DL_FUNC) &_IFCip_cpp_multi_otsu, 4},
     {"_IFCip_cpp_distance_eucl", (DL_FUNC) &_IFCip_cpp_distance_eucl, 1},
     {"_IFCip_cpp_distance_eucl_norm", (DL_FUNC) &_IFCip_cpp_distance_eucl_norm, 1},
     {"_IFCip_cpp_distance_manh", (DL_FUNC) &_IFCip_cpp_distance_manh, 1},
@@ -890,8 +893,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_tophat_self", (DL_FUNC) &_IFCip_cpp_tophat_self, 3},
     {"_IFCip_cpp_cont", (DL_FUNC) &_IFCip_cpp_cont, 3},
     {"_IFCip_cpp_laplacian", (DL_FUNC) &_IFCip_cpp_laplacian, 3},
-    {"_IFCip_cpp_watershed_sv1", (DL_FUNC) &_IFCip_cpp_watershed_sv1, 5},
-    {"_IFCip_cpp_watershed_sv2", (DL_FUNC) &_IFCip_cpp_watershed_sv2, 5},
+    {"_IFCip_cpp_watershed_sv1", (DL_FUNC) &_IFCip_cpp_watershed_sv1, 6},
+    {"_IFCip_cpp_watershed_sv2", (DL_FUNC) &_IFCip_cpp_watershed_sv2, 6},
     {"_IFCip_cpp_ctl", (DL_FUNC) &_IFCip_cpp_ctl, 2},
     {"_IFCip_cpp_fill", (DL_FUNC) &_IFCip_cpp_fill, 4},
     {"_IFCip_cpp_fill_out", (DL_FUNC) &_IFCip_cpp_fill_out, 1},

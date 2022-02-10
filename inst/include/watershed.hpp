@@ -31,6 +31,7 @@
 #define IFCIP_WATERSHED_HPP
 
 #include <Rcpp.h>
+#include "utils.hpp"
 #include "morphology.hpp"
 using namespace Rcpp;
 
@@ -105,6 +106,8 @@ void get_neighbor(const R_len_t cur_idx,
 //' @description
 //' This function computes the watershed transformation of an image.
 //' @param mat, a NumericMatrix; a distance transform matrix is expected.
+//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @param connectivity, an uint8_t either 4 or 8 describing pixel neighborhood. Default is 8.
 //' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
 //' @param ws_draw, a bool; whether to draw watershed lines or not. Default is true.
@@ -118,6 +121,7 @@ void get_neighbor(const R_len_t cur_idx,
 ////' @export
 // [[Rcpp::export]]
 Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
+                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                       const uint8_t connectivity = 8,
                                       const unsigned short n_lev = 256,
                                       const bool ws_draw = true,
@@ -131,21 +135,25 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
   if(n_lev < 2) Rcpp::stop("'n_lev' should be at least >= 2");
   int MAX_LEV = n_lev;
   
-  // determines image range
-  double mat_min = R_PosInf, mat_max = R_NegInf;
-  for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-    Rcpp::NumericVector col_ran = range(mat(Rcpp::_, i_col));
-    if(col_ran[0] < mat_min) {
-      mat_min = col_ran[0];
-    } else {
-      if(col_ran[1] > mat_max) mat_max = col_ran[1];
-    }
-  }
+  // // determines image range
+  // double mat_min = R_PosInf, mat_max = R_NegInf;
+  // for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
+  //   Rcpp::NumericVector col_ran = range(mat(Rcpp::_, i_col));
+  //   if(col_ran[0] < mat_min) {
+  //     mat_min = col_ran[0];
+  //   } else {
+  //     if(col_ran[1] > mat_max) mat_max = col_ran[1];
+  //   }
+  // }
+  // 
+  // // creates scaled mat ranging from [1 - MAX_LEV, 0]
+  // Rcpp::IntegerMatrix sca = Rcpp::no_init(mat_r, mat_c);
+  // double MAX_LEV_SCA = (1 - MAX_LEV) / (mat_max - mat_min);
+  // for(R_len_t i = 0; i < MAX_SIZ; i++) sca[i] = MAX_LEV_SCA * (mat[i] - mat_min);
   
-  // creates scaled mat ranging from [1 - MAX_LEV, 0]
-  Rcpp::IntegerMatrix sca = Rcpp::no_init(mat_r, mat_c);
-  double MAX_LEV_SCA = (1 - MAX_LEV) / (mat_max - mat_min);
-  for(R_len_t i = 0; i < MAX_SIZ; i++) sca[i] = MAX_LEV_SCA * (mat[i] - mat_min);
+  Rcpp::NumericMatrix img = Rcpp::clone(mat);
+  hpp_scale(img, msk_, 0.0, n_lev, false);
+  Rcpp::IntegerMatrix sca = as<Rcpp::IntegerMatrix>(img);
   
   // sort values
   Rcpp::IntegerVector idx = seq_along(mat) - 1;
@@ -286,6 +294,8 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 //' @description
 //' This function computes the watershed transformation of an image.
 //' @param mat, a NumericMatrix; a distance transform matrix is expected.
+//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @param connectivity, an uint8_t either 4 or 8 describing pixel neighborhood. Default is 8.
 //' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
 //' @param ws_draw, a bool; whether to draw watershed lines or not. Default is true.
@@ -300,6 +310,7 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 ////' @export
 // [[Rcpp::export]]
 Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
+                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                       const uint8_t connectivity = 8,
                                       const unsigned short n_lev = 256,
                                       const bool ws_draw = true,
@@ -313,21 +324,25 @@ Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
   if(n_lev < 2) Rcpp::stop("'n_lev' should be at least >= 2");
   int MAX_LEV = n_lev;
   
-  // determines image range
-  double mat_min = R_PosInf, mat_max = R_NegInf;
-  for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-    Rcpp::NumericVector col_ran = range(mat(Rcpp::_, i_col));
-    if(col_ran[0] < mat_min) {
-      mat_min = col_ran[0];
-    } else {
-      if(col_ran[1] > mat_max) mat_max = col_ran[1];
-    }
-  }
+  // // determines image range
+  // double mat_min = R_PosInf, mat_max = R_NegInf;
+  // for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
+  //   Rcpp::NumericVector col_ran = range(mat(Rcpp::_, i_col));
+  //   if(col_ran[0] < mat_min) {
+  //     mat_min = col_ran[0];
+  //   } else {
+  //     if(col_ran[1] > mat_max) mat_max = col_ran[1];
+  //   }
+  // }
+  // 
+  // // creates scaled mat ranging from [1 - MAX_LEV, 0]
+  // Rcpp::IntegerMatrix sca = Rcpp::no_init(mat_r, mat_c);
+  // double MAX_LEV_SCA = (1 - MAX_LEV) / (mat_max - mat_min);
+  // for(R_len_t i = 0; i < MAX_SIZ; i++) sca[i] = MAX_LEV_SCA * (mat[i] - mat_min);
   
-  // creates scaled mat ranging from [1 - MAX_LEV, 0]
-  Rcpp::IntegerMatrix sca = Rcpp::no_init(mat_r, mat_c);
-  double MAX_LEV_SCA = (1 - MAX_LEV) / (mat_max - mat_min);
-  for(R_len_t i = 0; i < MAX_SIZ; i++) sca[i] = MAX_LEV_SCA * (mat[i] - mat_min);
+  Rcpp::NumericMatrix img = Rcpp::clone(mat);
+  hpp_scale(img, msk_, 0.0, n_lev, false);
+  Rcpp::IntegerMatrix sca = as<Rcpp::IntegerMatrix>(img);
   
   // sort values
   Rcpp::IntegerVector idx = seq_along(mat) - 1;

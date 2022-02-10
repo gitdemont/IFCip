@@ -379,7 +379,9 @@ Rcpp::NumericMatrix cpp_features_hu3(const Rcpp::NumericMatrix img,
 //' @name cpp_multi_otsu
 //' @description
 //' This function determines best threshold(s) according to Otsu's method.
-//' @param img, a NumericMatrix;
+//' @param img, a NumericMatrix.
+//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' Default is R_NilValue, for using all 'img' elements without masking anything.
 //' @param n_comp, number of components to separate. Default is 2, should be at least 2.\cr
 //' Returned thresholds will be of length n_comp - 1.
 //' @param n_lev, an unsigned short determining the number of grey levels used for the computation. Default is 256, should be at least 2.
@@ -393,9 +395,10 @@ Rcpp::NumericMatrix cpp_features_hu3(const Rcpp::NumericMatrix img,
 ////' @export
 // [[Rcpp::export]]
 Rcpp::NumericVector cpp_multi_otsu (const Rcpp::NumericMatrix img,
+                                    const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                     const uint8_t n_comp = 2,
                                     const unsigned short n_lev = 256) {
-  return hpp_multi_otsu(img, n_comp, n_lev);
+  return hpp_multi_otsu(img, msk_, n_comp, n_lev);
 }
 // END otsu
 
@@ -995,6 +998,8 @@ Rcpp::NumericMatrix cpp_laplacian(const Rcpp::NumericMatrix mat,
 //' @description
 //' This function computes the watershed transformation of an image.
 //' @param mat, a NumericMatrix; a distance transform matrix is expected.
+//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @param connectivity, an uint8_t either 4 or 8 describing pixel neighborhood. Default is 8.
 //' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
 //' @param ws_draw, a bool; whether to draw watershed lines or not. Default is true.
@@ -1008,11 +1013,12 @@ Rcpp::NumericMatrix cpp_laplacian(const Rcpp::NumericMatrix mat,
 ////' @export
 // [[Rcpp::export]]
 Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat,
+                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                       const uint8_t connectivity = 8,
                                       const unsigned short n_lev = 256,
                                       const bool ws_draw = true,
                                       const uint8_t ws_dilate = 0) {
-  return hpp_watershed_sv1(mat, connectivity, n_lev, ws_draw, ws_dilate);
+  return hpp_watershed_sv1(mat, msk_, connectivity, n_lev, ws_draw, ws_dilate);
 }
 
 //' @title Watershed Transformation SV2
@@ -1020,6 +1026,8 @@ Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 //' @description
 //' This function computes the watershed transformation of an image.
 //' @param mat, a NumericMatrix; a distance transform matrix is expected.
+//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @param connectivity, an uint8_t either 4 or 8 describing pixel neighborhood. Default is 8.
 //' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
 //' @param ws_draw, a bool; whether to draw watershed lines or not. Default is true.
@@ -1034,11 +1042,12 @@ Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 ////' @export
 // [[Rcpp::export]]
 Rcpp::IntegerVector cpp_watershed_sv2(const Rcpp::NumericMatrix mat,
+                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                       const uint8_t connectivity = 8,
                                       const unsigned short n_lev = 256,
                                       const bool ws_draw = true,
                                       const uint8_t ws_dilate = 0) {
-  return hpp_watershed_sv2(mat, connectivity, n_lev, ws_draw, ws_dilate);
+  return hpp_watershed_sv2(mat, msk_, connectivity, n_lev, ws_draw, ws_dilate);
 }
 // END watershed
 

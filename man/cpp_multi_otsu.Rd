@@ -4,7 +4,10 @@
 \alias{cpp_multi_otsu}
 \title{Otsu Multi Thresholding}
 \arguments{
-\item{img, }{a NumericMatrix;}
+\item{img, }{a NumericMatrix.}
+
+\item{msk_, }{a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+Default is R_NilValue, for using all 'img' elements without masking anything.}
 
 \item{n_comp, }{number of components to separate. Default is 2, should be at least 2.\cr
 Returned thresholds will be of length n_comp - 1.}

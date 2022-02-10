@@ -230,7 +230,9 @@ NULL
 #' @name cpp_multi_otsu
 #' @description
 #' This function determines best threshold(s) according to Otsu's method.
-#' @param img, a NumericMatrix;
+#' @param img, a NumericMatrix.
+#' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+#' Default is R_NilValue, for using all 'img' elements without masking anything.
 #' @param n_comp, number of components to separate. Default is 2, should be at least 2.\cr
 #' Returned thresholds will be of length n_comp - 1.
 #' @param n_lev, an unsigned short determining the number of grey levels used for the computation. Default is 256, should be at least 2.
@@ -633,6 +635,8 @@ NULL
 #' @description
 #' This function computes the watershed transformation of an image.
 #' @param mat, a NumericMatrix; a distance transform matrix is expected.
+#' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+#' Default is R_NilValue, for using all 'mat' elements without masking anything.
 #' @param connectivity, an uint8_t either 4 or 8 describing pixel neighborhood. Default is 8.
 #' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
 #' @param ws_draw, a bool; whether to draw watershed lines or not. Default is true.
@@ -650,6 +654,8 @@ NULL
 #' @description
 #' This function computes the watershed transformation of an image.
 #' @param mat, a NumericMatrix; a distance transform matrix is expected.
+#' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+#' Default is R_NilValue, for using all 'mat' elements without masking anything.
 #' @param connectivity, an uint8_t either 4 or 8 describing pixel neighborhood. Default is 8.
 #' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
 #' @param ws_draw, a bool; whether to draw watershed lines or not. Default is true.
@@ -901,8 +907,8 @@ cpp_features_hu3 <- function(img, msk, components = 0L, mag = 1.0) {
     .Call(`_IFCip_cpp_features_hu3`, img, msk, components, mag)
 }
 
-cpp_multi_otsu <- function(img, n_comp = 2L, n_lev = 256L) {
-    .Call(`_IFCip_cpp_multi_otsu`, img, n_comp, n_lev)
+cpp_multi_otsu <- function(img, msk_ = NULL, n_comp = 2L, n_lev = 256L) {
+    .Call(`_IFCip_cpp_multi_otsu`, img, msk_, n_comp, n_lev)
 }
 
 cpp_distance_eucl <- function(msk) {
@@ -1045,12 +1051,12 @@ cpp_laplacian <- function(mat, kernel, iter = 0L) {
     .Call(`_IFCip_cpp_laplacian`, mat, kernel, iter)
 }
 
-cpp_watershed_sv1 <- function(mat, connectivity = 8L, n_lev = 256L, ws_draw = TRUE, ws_dilate = 0L) {
-    .Call(`_IFCip_cpp_watershed_sv1`, mat, connectivity, n_lev, ws_draw, ws_dilate)
+cpp_watershed_sv1 <- function(mat, msk_ = NULL, connectivity = 8L, n_lev = 256L, ws_draw = TRUE, ws_dilate = 0L) {
+    .Call(`_IFCip_cpp_watershed_sv1`, mat, msk_, connectivity, n_lev, ws_draw, ws_dilate)
 }
 
-cpp_watershed_sv2 <- function(mat, connectivity = 8L, n_lev = 256L, ws_draw = TRUE, ws_dilate = 0L) {
-    .Call(`_IFCip_cpp_watershed_sv2`, mat, connectivity, n_lev, ws_draw, ws_dilate)
+cpp_watershed_sv2 <- function(mat, msk_ = NULL, connectivity = 8L, n_lev = 256L, ws_draw = TRUE, ws_dilate = 0L) {
+    .Call(`_IFCip_cpp_watershed_sv2`, mat, msk_, connectivity, n_lev, ws_draw, ws_dilate)
 }
 
 cpp_ctl <- function(mat, global = FALSE) {

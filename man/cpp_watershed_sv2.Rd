@@ -10,6 +10,9 @@ from Roerdink, J. B. T. M. and Meijster, A. (2000) in Fundamenta Informaticae, 4
 \arguments{
 \item{mat, }{a NumericMatrix; a distance transform matrix is expected.}
 
+\item{msk_, }{a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+Default is R_NilValue, for using all 'mat' elements without masking anything.}
+
 \item{connectivity, }{an uint8_t either 4 or 8 describing pixel neighborhood. Default is 8.}
 
 \item{n_lev, }{an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.}
