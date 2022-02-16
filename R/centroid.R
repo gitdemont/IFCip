@@ -30,7 +30,7 @@
 # This function is designed to compute Hu's image centroids.
 #' @param img an object of class `IFC_img` or `IFC_msk`.
 #' @details See Visual pattern recognition by moment invariants authored
-#' by Ming-Kuei Hu \url{https://doi.org/10.1109/TIT.1962.1057692}
+#' by Ming-Kuei Hu \doi{10.1109/TIT.1962.1057692}
 #' @return a named vector. where pix cx is x image's centroid and pix cy y image's centroid.
 centroid <- function(img) {
   if(!any(inherits(img, what = c("IFC_img", "IFC_msk")))) stop("'img' be should of class `IFC_img` or `IFC_msk`")

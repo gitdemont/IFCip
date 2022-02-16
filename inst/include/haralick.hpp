@@ -245,7 +245,7 @@ Rcpp::List hpp_cooc(const Rcpp::IntegerMatrix img,
 //' @param invariant a bool, whether to compute invariant Haralick's texture features. Default is false.
 //' Not yet supported.
 //' @details Haralick's invariant texture features are described in Löfstedt T, Brynolfsson P, Asklund T, Nyholm T, Garpebring A (2019) Gray-level invariant Haralick texture features.
-//' PLoS ONE 14(2): e0212110. \url{https://doi.org/10.1371/journal.pone.0212110}
+//' PLoS ONE 14(2): e0212110. \doi{10.1371/journal.pone.0212110}
 //' @return a Rcpp::NumericVector of Haralick's texture features
 //' @keywords internal
 ////' @export

@@ -17,6 +17,6 @@ This function is designed to compute Haralick's features
 }
 \details{
 Haralick's invariant texture features are described in Löfstedt T, Brynolfsson P, Asklund T, Nyholm T, Garpebring A (2019) Gray-level invariant Haralick texture features.
-PLoS ONE 14(2): e0212110. \url{https://doi.org/10.1371/journal.pone.0212110}
+PLoS ONE 14(2): e0212110. \doi{10.1371/journal.pone.0212110}
 }
 \keyword{internal}

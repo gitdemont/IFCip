@@ -47,7 +47,7 @@ static int ifcip_ctl_bk [8]={ 7, 7, 1, 1, 3, 3, 5, 5};
 //' @param global whether to compute the perimeter globally or to evaluate the perimeter of each non 8-connected objects. Default is false.
 //' When true pixels of overlapping extra borders of objects are counted only once.
 //' @details adaptation of 'A linear-time component-labeling algorithm using contour tracing technique' from F. Chang, CJ. Chen and CJ Lu.
-//' Computer Vision and Image Understanding Volume 93, Issue 2, February 2004, Pages 206-220.\url{https://doi.org/10.1016/j.cviu.2003.09.002}
+//' Computer Vision and Image Understanding Volume 93, Issue 2, February 2004, Pages 206-220.\doi{10.1016/j.cviu.2003.09.002}
 //' @return a list whose members are:\cr
 //' -matrix: an IntegerMatrix with connected component labels.\cr
 //' -contours: an IntegerMatrix of identified contours, whose columns are x, y, label, direction and type.\cr

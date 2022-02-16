@@ -5,7 +5,7 @@
 \title{Watershed Transformation SV2}
 \source{
 The algorithm is reviewed in 'The Watershed Transform: Definitions, Algorithms and Parallelization Strategies'
-from Roerdink, J. B. T. M. and Meijster, A. (2000) in Fundamenta Informaticae, 41, 187-228 \url{https://doi.org/10.3233/FI-2000-411207}
+from Roerdink, J. B. T. M. and Meijster, A. (2000) in Fundamenta Informaticae, 41, 187-228 \doi{10.3233/FI-2000-411207}
 }
 \arguments{
 \item{mat, }{a NumericMatrix; a distance transform matrix is expected.}

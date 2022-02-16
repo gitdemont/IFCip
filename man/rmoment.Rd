@@ -23,5 +23,5 @@ Hu's Raw Moments
 }
 \details{
 See Visual pattern recognition by moment invariants authored
-by Ming-Kuei Hu \url{https://doi.org/10.1109/TIT.1962.1057692}
+by Ming-Kuei Hu \doi{10.1109/TIT.1962.1057692}
 }

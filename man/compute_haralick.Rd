@@ -28,5 +28,5 @@ array of Haralick's texture Features with dimensions corresponding to:\cr
 This function is designed to compute Haralick's Features.
 }
 \details{
-See Haralick's original paper \url{https://haralick.org/journals/TexturalFeatures.pdf} and Löfstedt T. et al. url{https://doi.org/10.1371/journal.pone.0212110} used for the computation:
+See Haralick's original paper \url{https://haralick.org/journals/TexturalFeatures.pdf} and Löfstedt T. et al. \doi{10.1371/journal.pone.0212110} used for the computation:
 }

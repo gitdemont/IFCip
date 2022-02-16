@@ -265,8 +265,8 @@ Rcpp::NumericMatrix hpp_distance_manh_norm(const Rcpp::IntegerMatrix msk) {
 //' This function performs the 1st pass of the distance transform of an image by implementing A. Meijster algorithm.
 //' @param img, a NumericMatrix. /!\ Elements with values <=0 are considered as background.
 //' @details adaptation of 'A General Algorithm For Computing Distance Transforms In Linear Time' from W.H. Hesselink, A. Meijster, J.B.T.M. Roerdink.
-//' Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\url{https://doi.org/10.1007/0-306-47025-X_36}\cr
-//' Values > 0 will be considered as foreground whereas all other values will be concidered as background (i.e. 0).
+//' Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\doi{10.1007/0-306-47025-X_36}\cr
+//' Values > 0 will be considered as foreground whereas all other values will be considered as background (i.e. 0).
 //' @return a NumericMatrix.
 //' @keywords internal
 Rcpp::NumericMatrix hpp_disttrans_1st (const Rcpp::NumericMatrix img) {
@@ -313,8 +313,8 @@ double manh_sep (R_len_t i, R_len_t u, R_len_t Gi, R_len_t Gu) {
 //' This function computes the Manhattan distance transform of an image by implementing A. Meijster algorithm.
 //' @param img, a NumericMatrix.
 //' @details adaptation of 'A General Algorithm For Computing Distance Transforms In Linear Time' from W.H. Hesselink, A. Meijster, J.B.T.M. Roerdink.
-//' Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\url{https://doi.org/10.1007/0-306-47025-X_36}\cr
-//' Values > 0 will be considered as foreground whereas all other values will be concidered as background (i.e. 0).
+//' Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\doi{10.1007/0-306-47025-X_36}\cr
+//' Values > 0 will be considered as foreground whereas all other values will be considered as background (i.e. 0).
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
@@ -360,8 +360,8 @@ Rcpp::NumericMatrix hpp_disttrans_manh (const Rcpp::NumericMatrix img) {
 //' This function computes the Euclidean distance transform of an image by implementing A. Meijster algorithm.
 //' @param img, a NumericMatrix.
 //' @details adaptation of 'A General Algorithm For Computing Distance Transforms In Linear Time' from W.H. Hesselink, A. Meijster, J.B.T.M. Roerdink.
-//' Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\url{https://doi.org/10.1007/0-306-47025-X_36}\cr
-//' Values > 0 will be considered as foreground whereas all other values will be concidered as background (i.e. 0).
+//' Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\doi{10.1007/0-306-47025-X_36}\cr
+//' Values > 0 will be considered as foreground whereas all other values will be considered as background (i.e. 0).
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export

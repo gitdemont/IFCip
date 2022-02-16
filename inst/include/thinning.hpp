@@ -42,7 +42,7 @@ static int ifcip_thinning_dy[8]={-1,-1, 0, 1, 1, 1, 0,-1};
 //' This function is designed to identify mask skeleton.
 //' @param mat a LogicalMatrix, containing mask.
 //' @details adaptation of 'A fast parallel algorithm for thinning digital patterns' from T. Y. Zhang, C. Y. Suen.
-//' Communications of the ACM, March 1984 \url{https://doi.org/10.1145/357994.358023}.
+//' Communications of the ACM, March 1984 \doi{10.1145/357994.358023}.
 //' @return a LogicalMatrix with the mask thinned.
 //' @keywords internal
 ////' @export
@@ -157,7 +157,7 @@ Rcpp::LogicalMatrix hpp_thinning_zs(const Rcpp::LogicalMatrix mat) {
 //' This function is designed to identify mask skeleton.
 //' @param mat a LogicalMatrix, containing mask.
 //' @details adaptation of 'A new thinning algorithm for binary images' from L. Ben Boudaoud, A. Sider, A. Tari.
-//' 3rd international conference on control, engineering & information technology, May 2015. \url{https://doi.org/10.1109/CEIT.2015.7233099}.
+//' 3rd international conference on control, engineering & information technology, May 2015. \doi{10.1109/CEIT.2015.7233099}.
 //' @return a LogicalMatrix with the mask thinned.
 //' @keywords internal
 ////' @export

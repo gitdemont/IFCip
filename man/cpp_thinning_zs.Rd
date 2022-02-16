@@ -14,6 +14,6 @@ This function is designed to identify mask skeleton.
 }
 \details{
 adaptation of 'A fast parallel algorithm for thinning digital patterns' from T. Y. Zhang, C. Y. Suen.
-Communications of the ACM, March 1984 \url{https://doi.org/10.1145/357994.358023}.
+Communications of the ACM, March 1984 \doi{10.1145/357994.358023}.
 }
 \keyword{internal}

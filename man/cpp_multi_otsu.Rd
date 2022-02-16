@@ -25,6 +25,6 @@ This function determines best threshold(s) according to Otsu's method.
 \details{
 adaptation of 'A Fast Algorithm for Multilevel Thresholding' from L. Ping-Sung, C. Tse-Sheng, and C. Pau-Choo
 in Jounal of Information Science and Engineering. 2001(17), 713-727.
-\url{https://doi.org/10.6688/JISE.2001.17.5.1}
+\doi{10.6688/JISE.2001.17.5.1}
 }
 \keyword{internal}

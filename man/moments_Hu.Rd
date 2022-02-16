@@ -36,7 +36,7 @@ This function is designed to compute Hu's central + invariant moments.
 }
 \details{
 returned moments are based on Visual pattern recognition by moment invariants authored
-by Ming-Kuei Hu \url{https://doi.org/10.1109/TIT.1962.1057692}
+by Ming-Kuei Hu \doi{10.1109/TIT.1962.1057692}
 circularity is computed according to A Hu moment invariant as a shape circularity
-measure authored by Joviša Žunić, Kaoru Hirota, Paul L. Rosin \url{https://doi.org/10.1016/j.patcog.2009.06.017}
+measure authored by Joviša Žunić, Kaoru Hirota, Paul L. Rosin \doi{10.1016/j.patcog.2009.06.017}
 }

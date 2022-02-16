@@ -48,7 +48,7 @@ using namespace Rcpp;
 //' Alternatively, you can try to decrease 'n_lev' when 'n_comp' needs to be large (e.g. n_comp = 8 and n_lev = 32).
 //' @details adaptation of 'A Fast Algorithm for Multilevel Thresholding' from L. Ping-Sung, C. Tse-Sheng, and C. Pau-Choo
 //' in Jounal of Information Science and Engineering. 2001(17), 713-727.
-//' \url{https://doi.org/10.6688/JISE.2001.17.5.1}
+//' \doi{10.6688/JISE.2001.17.5.1}
 //' @return an NumericVector of threshold(s).
 //' @keywords internal
 ////' @export

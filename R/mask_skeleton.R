@@ -32,7 +32,7 @@
 #' @param msk an object of class `IFC_msk`, the mask matrix.
 #' @param option whether "Thin" or "Thick". Default is "Thin". Not yet implemented "Thick".
 #' @details See 'A new thinning algorithm for binary images' from L. Ben Boudaoud, A. Sider, A. Tari.'
-#' 3rd international conference on control, engineering & information technology, May 2015. \url{https://doi.org/10.1109/CEIT.2015.7233099}.
+#' 3rd international conference on control, engineering & information technology, May 2015. \doi{10.1109/CEIT.2015.7233099}.
 #' @return a logical matrix corresponding to the skeleton area.
 mask_skeleton <- function(msk, option = "Thin") {
   assert(msk, cla = "IFC_msk")

@@ -14,7 +14,7 @@ This function computes the Manhattan distance transform of an image by implement
 }
 \details{
 adaptation of 'A General Algorithm For Computing Distance Transforms In Linear Time' from W.H. Hesselink, A. Meijster, J.B.T.M. Roerdink.
-Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\url{https://doi.org/10.1007/0-306-47025-X_36}\cr
+Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\doi{10.1007/0-306-47025-X_36}\cr
 Values > 0 will be considered as foreground whereas all other values will be concidered as background (i.e. 0).
 }
 \keyword{internal}

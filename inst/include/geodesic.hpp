@@ -73,7 +73,7 @@ double nbr_max (const Rcpp::NumericMatrix M,
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details adaptation of 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}
 //' @return nothing, but r will be modified in-place
 //' @keywords internal
 void rec_dilate (Rcpp::NumericMatrix r,
@@ -130,7 +130,7 @@ void rec_dilate (Rcpp::NumericMatrix r,
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details adaptation of 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}
 //' @return nothing, but r will be modified in-place
 //' @keywords internal
 void rec_erode (Rcpp::NumericMatrix r,
@@ -191,7 +191,7 @@ void rec_erode (Rcpp::NumericMatrix r,
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' HMIN is the erosion reconstruction of (img + h) by kernel where img + h is clipped to img_max.
 //' @return a NumericMatrix of H-Minima transformation of 'img'.
 //' @keywords internal
@@ -224,7 +224,7 @@ Rcpp::NumericMatrix hpp_HMIN (const Rcpp::NumericMatrix img,
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' HMAX is the dilatation reconstruction of (img - h) by kernel where img - h is clipped to img_min.
 //' @return a NumericMatrix of H-Maxima transformation of 'img'.
 //' @keywords internal
@@ -256,7 +256,7 @@ Rcpp::NumericMatrix hpp_HMAX (const Rcpp::NumericMatrix img,
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' RMIN is defined as HMIN(img, 1)
 //' @return a NumericMatrix of regional minima of 'img'.
 //' @keywords internal
@@ -283,7 +283,7 @@ Rcpp::NumericMatrix hpp_RMIN (const Rcpp::NumericMatrix img,
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' RMAX is defined as HMAX(img, 1)
 //' @return a NumericMatrix of regional maxima of 'img'.
 //' @keywords internal
@@ -310,7 +310,7 @@ Rcpp::NumericMatrix hpp_RMAX (const Rcpp::NumericMatrix img,
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' EMIN is defined as RMIN(HMIN(img, h))
 //' @return a NumericMatrix of extended minima of 'img'.
 //' @keywords internal
@@ -337,7 +337,7 @@ Rcpp::NumericMatrix hpp_EMIN (const Rcpp::NumericMatrix img,
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' EMAX is defined as RMAX(HMAX(img, h))
 //' @return a NumericMatrix of extended maxima of 'img'.
 //' @keywords internal
@@ -359,7 +359,7 @@ Rcpp::NumericMatrix hpp_EMAX (const Rcpp::NumericMatrix img,
 //' @param img, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' Dilation in closing process is replaced by dilation reconstruction.
 //' So, we have out = img - rec_dilate(erode(img)).
 //' @return a NumericMatrix.
@@ -382,7 +382,7 @@ Rcpp::NumericMatrix hpp_geo_tophat_white (const Rcpp::NumericMatrix img,
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' Erosion in opening process is replaced by erosion reconstruction.
 //' So, we have out = rec_erode(dilate(img)) - img.
 //' @return a NumericMatrix.

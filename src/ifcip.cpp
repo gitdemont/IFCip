@@ -165,7 +165,7 @@ Rcpp::List cpp_cooc(const Rcpp::IntegerMatrix img,
 //' @param invariant a bool, whether to compute invariant Haralick's texture features. Default is false.
 //' Not yet supported.
 //' @details Haralick's invariant texture features are described in Löfstedt T, Brynolfsson P, Asklund T, Nyholm T, Garpebring A (2019) Gray-level invariant Haralick texture features.
-//' PLoS ONE 14(2): e0212110. \url{https://doi.org/10.1371/journal.pone.0212110}
+//' PLoS ONE 14(2): e0212110. \doi{10.1371/journal.pone.0212110}
 //' @return a Rcpp::NumericVector of Haralick's texture features
 //' @keywords internal
 ////' @export
@@ -390,7 +390,7 @@ Rcpp::NumericMatrix cpp_features_hu3(const Rcpp::NumericMatrix img,
 //' Alternatively, you can try to decrease 'n_lev' when 'n_comp' needs to be large (e.g. n_comp = 8 and n_lev = 32).
 //' @details adaptation of 'A Fast Algorithm for Multilevel Thresholding' from L. Ping-Sung, C. Tse-Sheng, and C. Pau-Choo
 //' in Jounal of Information Science and Engineering. 2001(17), 713-727.
-//' \url{https://doi.org/10.6688/JISE.2001.17.5.1}
+//' \doi{10.6688/JISE.2001.17.5.1}
 //' @return an NumericVector of threshold(s).
 //' @keywords internal
 ////' @export
@@ -462,7 +462,7 @@ Rcpp::NumericMatrix cpp_distance_manh_norm(const Rcpp::IntegerMatrix msk) {
 //' This function computes the Manhattan distance transform of an image by implementing A. Meijster algorithm.
 //' @param img, a NumericMatrix.
 //' @details adaptation of 'A General Algorithm For Computing Distance Transforms In Linear Time' from W.H. Hesselink, A. Meijster, J.B.T.M. Roerdink.
-//' Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\url{https://doi.org/10.1007/0-306-47025-X_36}\cr
+//' Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\doi{10.1007/0-306-47025-X_36}\cr
 //' Values > 0 will be considered as foreground whereas all other values will be concidered as background (i.e. 0).
 //' @return a NumericMatrix.
 //' @keywords internal
@@ -478,7 +478,7 @@ Rcpp::NumericMatrix cpp_disttrans_manh (const Rcpp::NumericMatrix img) {
 //' This function computes the Euclidean distance transform of an image by implementing A. Meijster algorithm.
 //' @param img, a NumericMatrix.
 //' @details adaptation of 'A General Algorithm For Computing Distance Transforms In Linear Time' from W.H. Hesselink, A. Meijster, J.B.T.M. Roerdink.
-//' Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\url{https://doi.org/10.1007/0-306-47025-X_36}\cr
+//' Mathematical Morphology and its Applications to Image and Signal Processing. February 2002, Pages 331-340.\doi{10.1007/0-306-47025-X_36}\cr
 //' Values > 0 will be considered as foreground whereas all other values will be concidered as background (i.e. 0).
 //' @return a NumericMatrix.
 //' @keywords internal
@@ -1007,7 +1007,7 @@ Rcpp::NumericMatrix cpp_laplacian(const Rcpp::NumericMatrix mat,
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' HMIN is the erosion reconstruction of (img + h) by kernel where img + h is clipped to img_max.
 //' @return a NumericMatrix of H-Minima transformation of 'img'.
 //' @keywords internal
@@ -1034,7 +1034,7 @@ Rcpp::NumericMatrix cpp_HMIN (const Rcpp::NumericMatrix img,
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' HMAX is the dilatation reconstruction of (img - h) by kernel where img - h is clipped to img_min.
 //' @return a NumericMatrix of H-Maxima transformation of 'img'.
 //' @keywords internal
@@ -1060,7 +1060,7 @@ Rcpp::NumericMatrix cpp_HMAX (const Rcpp::NumericMatrix img,
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' RMIN is defined as HMIN(img, 1)
 //' @return a NumericMatrix of regional minima of 'img'.
 //' @keywords internal
@@ -1085,7 +1085,7 @@ Rcpp::NumericMatrix cpp_RMIN (const Rcpp::NumericMatrix img,
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' RMAX is defined as HMAX(img, 1)
 //' @return a NumericMatrix of regional maxima of 'img'.
 //' @keywords internal
@@ -1110,7 +1110,7 @@ Rcpp::NumericMatrix cpp_RMAX (const Rcpp::NumericMatrix img,
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' EMIN is defined as RMIN(HMIN(img, h))
 //' @return a NumericMatrix of extended minima of 'img'.
 //' @keywords internal
@@ -1136,7 +1136,7 @@ Rcpp::NumericMatrix cpp_EMIN (const Rcpp::NumericMatrix img,
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' EMAX is defined as RMAX(HMAX(img, h))
 //' @return a NumericMatrix of extended maxima of 'img'.
 //' @keywords internal
@@ -1157,7 +1157,7 @@ Rcpp::NumericMatrix cpp_EMAX (const Rcpp::NumericMatrix img,
 //' @param img, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' Dilation in closing process is replaced by dilation reconstruction.
 //' So, we have out = img - rec_dilate(erode(img)).
 //' @return a NumericMatrix.
@@ -1176,7 +1176,7 @@ Rcpp::NumericMatrix cpp_geo_tophat_white (const Rcpp::NumericMatrix img,
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+//' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 //' Erosion in opening process is replaced by erosion reconstruction.
 //' So, we have out = rec_erode(dilate(img)) - img.
 //' @return a NumericMatrix.
@@ -1237,7 +1237,7 @@ Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 //' @details adaptation of 'Watersheds in digital spaces: an efficient algorithm based on immersion simulations' from  L. Vincent and P. Soille.
 //' In IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(6):583-598, June 1991.\cr
 //' @source The algorithm is reviewed in 'The Watershed Transform: Definitions, Algorithms and Parallelization Strategies'
-//' from Roerdink, J. B. T. M. and Meijster, A. (2000) in Fundamenta Informaticae, 41, 187-228 \url{https://doi.org/10.3233/FI-2000-411207}
+//' from Roerdink, J. B. T. M. and Meijster, A. (2000) in Fundamenta Informaticae, 41, 187-228 \doi{10.3233/FI-2000-411207}
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
@@ -1261,7 +1261,7 @@ Rcpp::IntegerVector cpp_watershed_sv2(const Rcpp::NumericMatrix mat,
 //' @param global whether to compute the perimeter globally or to evaluate the perimeter of each non 8-connected objects. Default is false.
 //' When true pixels of overlapping extra borders of objects are counted only once.
 //' @details adaptation of 'A linear-time component-labeling algorithm using contour tracing technique' from F. Chang, C.J. Chen and C.J. Lu.
-//' Computer Vision and Image Understanding Volume 93, Issue 2, February 2004, Pages 206-220.\url{https://doi.org/10.1016/j.cviu.2003.09.002}
+//' Computer Vision and Image Understanding Volume 93, Issue 2, February 2004, Pages 206-220.\doi{10.1016/j.cviu.2003.09.002}
 //' @return a list whose members are:\cr
 //' -matrix: an IntegerMatrix with connected component labels.\cr
 //' -contours: an IntegerMatrix of identified contours, whose columns are x, y, label, direction and type.\cr
@@ -1377,7 +1377,7 @@ Rcpp::LogicalMatrix cpp_threshold(const Rcpp::NumericMatrix img,
 //' This function is designed to identify mask skeleton.
 //' @param mat a LogicalMatrix, containing mask.
 //' @details adaptation of 'A fast parallel algorithm for thinning digital patterns' from T. Y. Zhang, C. Y. Suen.
-//' Communications of the ACM, March 1984 \url{https://doi.org/10.1145/357994.358023}.
+//' Communications of the ACM, March 1984 \doi{10.1145/357994.358023}.
 //' @return a LogicalMatrix with the mask thinned.
 //' @keywords internal
 ////' @export
@@ -1391,7 +1391,7 @@ Rcpp::LogicalMatrix cpp_thinning_zs(const Rcpp::LogicalMatrix mat) {
 //' This function is designed to identify mask skeleton.
 //' @param mat a LogicalMatrix, containing mask.
 //' @details adaptation of 'A new thinning algorithm for binary images' from L. Ben Boudaoud, A. Sider, A. Tari.
-//' 3rd international conference on control, engineering & information technology, May 2015. \url{https://doi.org/10.1109/CEIT.2015.7233099}.
+//' 3rd international conference on control, engineering & information technology, May 2015. \doi{10.1109/CEIT.2015.7233099}.
 //' @return a LogicalMatrix with the mask thinned.
 //' @keywords internal
 ////' @export

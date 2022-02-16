@@ -35,7 +35,7 @@
 #' For very fine textures, this value is small (1-3 pixels), while for very coarse textures, it is large (>10).
 #' @param bits gray levels depth. Default is 4 (i.e. 2^4 = 16 gray levels). Allowed are [2-10].
 #' Before applying compensation `IFC_img` have 2^12 = 4096 gray levels.
-#' @details See Haralick's original paper \url{https://haralick.org/journals/TexturalFeatures.pdf} and Löfstedt T. et al. url{https://doi.org/10.1371/journal.pone.0212110} used for the computation:
+#' @details See Haralick's original paper \url{https://haralick.org/journals/TexturalFeatures.pdf} and Löfstedt T. et al. \doi{10.1371/journal.pone.0212110} used for the computation:
 #' @return array of Haralick's texture Features with dimensions corresponding to:\cr
 #' -1st: the type of value returned,\cr
 #' -2nd: the Haralick feature,\cr

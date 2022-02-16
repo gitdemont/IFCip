@@ -51,7 +51,7 @@ using namespace Rcpp;
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @details adaptation of 'Determining watersheds in digital pictures via flooding simulations' from P. Soille. and L. Vincent.
-//' In Proc. SPIE 1360, Visual Communications and Image Processing '90: Fifth in a Series, (1 September 1990) \url{https://doi:10.1117/12.24211}.
+//' In Proc. SPIE 1360, Visual Communications and Image Processing '90: Fifth in a Series, (1 September 1990) \doi{10.1117/12.24211}.
 //' @source MorphoLib plugin for ImageJ presents a Java implementation of the algorithm in  \url{https://github.com/ijpb/MorphoLibJ/blob/master/src/main/java/inra/ijpb/watershed/WatershedTransform2D.java} authored by Ignacio Arganda-Carreras 
 //' @return an IntegerMatrix.
 //' @keywords internal
@@ -237,7 +237,7 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 //' @details adaptation of 'Watersheds in digital spaces: an efficient algorithm based on immersion simulations' from  L. Vincent and P. Soille.
 //' In IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(6):583-598, June 1991.\cr
 //' @source The algorithm is reviewed in 'The Watershed Transform: Definitions, Algorithms and Parallelization Strategies'
-//' from Roerdink, J. B. T. M. and Meijster, A. (2000) in Fundamenta Informaticae, 41, 187-228 \url{https://doi.org/10.3233/FI-2000-411207}
+//' from Roerdink, J. B. T. M. and Meijster, A. (2000) in Fundamenta Informaticae, 41, 187-228 \doi{10.3233/FI-2000-411207}
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export

@@ -55,7 +55,7 @@ double hpp_similarity(const Rcpp::NumericMatrix img1,
     Rcpp::stop("hpp_similarity: 'img1', 'img2' and 'msk' should have same dimensions");
   }
   // formula in 'Highlighting curcumin-induced crosstalk between autophagy and apoptosis: A biochemical approach coupling impedancemetry, imaging, and flow cytometry.'
-  // from F. J. Sala de Oyanguren,  N. E. Rainey, A. Moustapha, A. Saric, F. Sureau, J-E O’Connor, P. X. Petit. https://doi.org/10.1101/827279 Fig.5.
+  // from F. J. Sala de Oyanguren,  N. E. Rainey, A. Moustapha, A. Saric, F. Sureau, J-E O'Connor, P. X. Petit. https://doi.org/10.1101/827279 Fig.5.
   
   // compute means
   R_len_t i = 0, count = 0;

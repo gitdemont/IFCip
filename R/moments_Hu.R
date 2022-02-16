@@ -33,9 +33,9 @@
 #' @param full a logical. Controls the quantity of information that will be returned. Default is TRUE.
 #' if full == TRUE, the eight first invariant moments will also be returned.
 #' @details returned moments are based on Visual pattern recognition by moment invariants authored
-#' by Ming-Kuei Hu \url{https://doi.org/10.1109/TIT.1962.1057692}
+#' by Ming-Kuei Hu \doi{10.1109/TIT.1962.1057692}
 #' circularity is computed according to A Hu moment invariant as a shape circularity
-#' measure authored by Joviša Žunić, Kaoru Hirota, Paul L. Rosin \url{https://doi.org/10.1016/j.patcog.2009.06.017}
+#' measure authored by Joviša Žunić, Kaoru Hirota, Paul L. Rosin \doi{10.1016/j.patcog.2009.06.017}
 #' @return a named vector of Hu's moments values.\cr
 #' -Area: img's area\cr
 #' -circularity: img's circularity\cr

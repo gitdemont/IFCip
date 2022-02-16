@@ -25,7 +25,7 @@ Keep highest peaks in image.
 }
 \details{
 see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
-IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
 HMAX is the dilatation reconstruction of (img - h) by kernel where img - h is clipped to img_min.
 }
 \keyword{internal}
