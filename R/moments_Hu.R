@@ -31,7 +31,7 @@
 #' @param img an object of class `IFC_img` or `IFC_msk`.
 #' @param mag magnification. Default is 40. Allowed are 20, 40 and 60.
 #' @param full a logical. Controls the quantity of information that will be returned. Default is TRUE.
-#' if full == TRUE, the eight first invariant moments will also be returned.
+#' if full == TRUE, the seven first invariant moments will also be returned.
 #' @details returned moments are based on Visual pattern recognition by moment invariants authored
 #' by Ming-Kuei Hu \doi{10.1109/TIT.1962.1057692}
 #' circularity is computed according to A Hu moment invariant as a shape circularity

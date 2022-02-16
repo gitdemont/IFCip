@@ -12,7 +12,7 @@ moments_Hu(img, mag = 40, full = TRUE)
 \item{mag}{magnification. Default is 40. Allowed are 20, 40 and 60.}
 
 \item{full}{a logical. Controls the quantity of information that will be returned. Default is TRUE.
-if full == TRUE, the eight first invariant moments will also be returned.}
+if full == TRUE, the seven first invariant moments will also be returned.}
 }
 \value{
 a named vector of Hu's moments values.\cr
