@@ -631,35 +631,147 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_HMIN
+Rcpp::NumericMatrix cpp_HMIN(const Rcpp::NumericMatrix img, const double h, const double img_min, const double img_max, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
+RcppExport SEXP _IFCip_cpp_HMIN(SEXP imgSEXP, SEXP hSEXP, SEXP img_minSEXP, SEXP img_maxSEXP, SEXP kernelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
+    Rcpp::traits::input_parameter< const double >::type h(hSEXP);
+    Rcpp::traits::input_parameter< const double >::type img_min(img_minSEXP);
+    Rcpp::traits::input_parameter< const double >::type img_max(img_maxSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_HMIN(img, h, img_min, img_max, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_HMAX
+Rcpp::NumericMatrix cpp_HMAX(const Rcpp::NumericMatrix img, const double h, const double img_min, const double img_max, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
+RcppExport SEXP _IFCip_cpp_HMAX(SEXP imgSEXP, SEXP hSEXP, SEXP img_minSEXP, SEXP img_maxSEXP, SEXP kernelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
+    Rcpp::traits::input_parameter< const double >::type h(hSEXP);
+    Rcpp::traits::input_parameter< const double >::type img_min(img_minSEXP);
+    Rcpp::traits::input_parameter< const double >::type img_max(img_maxSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_HMAX(img, h, img_min, img_max, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_RMIN
+Rcpp::NumericMatrix cpp_RMIN(const Rcpp::NumericMatrix img, const double img_min, const double img_max, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
+RcppExport SEXP _IFCip_cpp_RMIN(SEXP imgSEXP, SEXP img_minSEXP, SEXP img_maxSEXP, SEXP kernelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
+    Rcpp::traits::input_parameter< const double >::type img_min(img_minSEXP);
+    Rcpp::traits::input_parameter< const double >::type img_max(img_maxSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_RMIN(img, img_min, img_max, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_RMAX
+Rcpp::NumericMatrix cpp_RMAX(const Rcpp::NumericMatrix img, const double img_min, const double img_max, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
+RcppExport SEXP _IFCip_cpp_RMAX(SEXP imgSEXP, SEXP img_minSEXP, SEXP img_maxSEXP, SEXP kernelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
+    Rcpp::traits::input_parameter< const double >::type img_min(img_minSEXP);
+    Rcpp::traits::input_parameter< const double >::type img_max(img_maxSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_RMAX(img, img_min, img_max, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_EMIN
+Rcpp::NumericMatrix cpp_EMIN(const Rcpp::NumericMatrix img, const double h, const double img_min, const double img_max, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
+RcppExport SEXP _IFCip_cpp_EMIN(SEXP imgSEXP, SEXP hSEXP, SEXP img_minSEXP, SEXP img_maxSEXP, SEXP kernelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
+    Rcpp::traits::input_parameter< const double >::type h(hSEXP);
+    Rcpp::traits::input_parameter< const double >::type img_min(img_minSEXP);
+    Rcpp::traits::input_parameter< const double >::type img_max(img_maxSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_EMIN(img, h, img_min, img_max, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_EMAX
+Rcpp::NumericMatrix cpp_EMAX(const Rcpp::NumericMatrix img, const double h, const double img_min, const double img_max, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
+RcppExport SEXP _IFCip_cpp_EMAX(SEXP imgSEXP, SEXP hSEXP, SEXP img_minSEXP, SEXP img_maxSEXP, SEXP kernelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
+    Rcpp::traits::input_parameter< const double >::type h(hSEXP);
+    Rcpp::traits::input_parameter< const double >::type img_min(img_minSEXP);
+    Rcpp::traits::input_parameter< const double >::type img_max(img_maxSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_EMAX(img, h, img_min, img_max, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_geo_tophat_white
+Rcpp::NumericMatrix cpp_geo_tophat_white(const Rcpp::NumericMatrix img, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
+RcppExport SEXP _IFCip_cpp_geo_tophat_white(SEXP imgSEXP, SEXP kernelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_geo_tophat_white(img, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_geo_tophat_black
+Rcpp::NumericMatrix cpp_geo_tophat_black(const Rcpp::NumericMatrix img, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
+RcppExport SEXP _IFCip_cpp_geo_tophat_black(SEXP imgSEXP, SEXP kernelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_geo_tophat_black(img, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_watershed_sv1
-Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat, const Rcpp::Nullable<Rcpp::NumericMatrix> msk_, const uint8_t connectivity, const unsigned short n_lev, const bool ws_draw, const uint8_t ws_dilate);
-RcppExport SEXP _IFCip_cpp_watershed_sv1(SEXP matSEXP, SEXP msk_SEXP, SEXP connectivitySEXP, SEXP n_levSEXP, SEXP ws_drawSEXP, SEXP ws_dilateSEXP) {
+Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat, const Rcpp::Nullable<Rcpp::NumericMatrix> msk_, const unsigned short n_lev, const bool draw_lines, const bool invert, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
+RcppExport SEXP _IFCip_cpp_watershed_sv1(SEXP matSEXP, SEXP msk_SEXP, SEXP n_levSEXP, SEXP draw_linesSEXP, SEXP invertSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type msk_(msk_SEXP);
-    Rcpp::traits::input_parameter< const uint8_t >::type connectivity(connectivitySEXP);
     Rcpp::traits::input_parameter< const unsigned short >::type n_lev(n_levSEXP);
-    Rcpp::traits::input_parameter< const bool >::type ws_draw(ws_drawSEXP);
-    Rcpp::traits::input_parameter< const uint8_t >::type ws_dilate(ws_dilateSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_watershed_sv1(mat, msk_, connectivity, n_lev, ws_draw, ws_dilate));
+    Rcpp::traits::input_parameter< const bool >::type draw_lines(draw_linesSEXP);
+    Rcpp::traits::input_parameter< const bool >::type invert(invertSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_watershed_sv1(mat, msk_, n_lev, draw_lines, invert, kernel));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_watershed_sv2
-Rcpp::IntegerVector cpp_watershed_sv2(const Rcpp::NumericMatrix mat, const Rcpp::Nullable<Rcpp::NumericMatrix> msk_, const uint8_t connectivity, const unsigned short n_lev, const bool ws_draw, const uint8_t ws_dilate);
-RcppExport SEXP _IFCip_cpp_watershed_sv2(SEXP matSEXP, SEXP msk_SEXP, SEXP connectivitySEXP, SEXP n_levSEXP, SEXP ws_drawSEXP, SEXP ws_dilateSEXP) {
+Rcpp::IntegerVector cpp_watershed_sv2(const Rcpp::NumericMatrix mat, const Rcpp::Nullable<Rcpp::NumericMatrix> msk_, const unsigned short n_lev, const bool draw_lines, const bool invert, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
+RcppExport SEXP _IFCip_cpp_watershed_sv2(SEXP matSEXP, SEXP msk_SEXP, SEXP n_levSEXP, SEXP draw_linesSEXP, SEXP invertSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type msk_(msk_SEXP);
-    Rcpp::traits::input_parameter< const uint8_t >::type connectivity(connectivitySEXP);
     Rcpp::traits::input_parameter< const unsigned short >::type n_lev(n_levSEXP);
-    Rcpp::traits::input_parameter< const bool >::type ws_draw(ws_drawSEXP);
-    Rcpp::traits::input_parameter< const uint8_t >::type ws_dilate(ws_dilateSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_watershed_sv2(mat, msk_, connectivity, n_lev, ws_draw, ws_dilate));
+    Rcpp::traits::input_parameter< const bool >::type draw_lines(draw_linesSEXP);
+    Rcpp::traits::input_parameter< const bool >::type invert(invertSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_watershed_sv2(mat, msk_, n_lev, draw_lines, invert, kernel));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -893,6 +1005,14 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_tophat_self", (DL_FUNC) &_IFCip_cpp_tophat_self, 3},
     {"_IFCip_cpp_cont", (DL_FUNC) &_IFCip_cpp_cont, 3},
     {"_IFCip_cpp_laplacian", (DL_FUNC) &_IFCip_cpp_laplacian, 3},
+    {"_IFCip_cpp_HMIN", (DL_FUNC) &_IFCip_cpp_HMIN, 5},
+    {"_IFCip_cpp_HMAX", (DL_FUNC) &_IFCip_cpp_HMAX, 5},
+    {"_IFCip_cpp_RMIN", (DL_FUNC) &_IFCip_cpp_RMIN, 4},
+    {"_IFCip_cpp_RMAX", (DL_FUNC) &_IFCip_cpp_RMAX, 4},
+    {"_IFCip_cpp_EMIN", (DL_FUNC) &_IFCip_cpp_EMIN, 5},
+    {"_IFCip_cpp_EMAX", (DL_FUNC) &_IFCip_cpp_EMAX, 5},
+    {"_IFCip_cpp_geo_tophat_white", (DL_FUNC) &_IFCip_cpp_geo_tophat_white, 2},
+    {"_IFCip_cpp_geo_tophat_black", (DL_FUNC) &_IFCip_cpp_geo_tophat_black, 2},
     {"_IFCip_cpp_watershed_sv1", (DL_FUNC) &_IFCip_cpp_watershed_sv1, 6},
     {"_IFCip_cpp_watershed_sv2", (DL_FUNC) &_IFCip_cpp_watershed_sv2, 6},
     {"_IFCip_cpp_ctl", (DL_FUNC) &_IFCip_cpp_ctl, 2},

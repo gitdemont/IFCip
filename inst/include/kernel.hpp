@@ -1,6 +1,6 @@
 /*
   This file is released under the GNU General Public License, Version 3, GPL-3  
-  Copyright (C) 2021 Yohann Demont                                              
+  Copyright (C) 2022 Yohann Demont                                              
                                                                                 
   It is part of IFCip package, please cite:                                     
   -IFCip: An R Package for Imaging Flow Cytometry Image Processing              
@@ -32,6 +32,100 @@
 
 #include <Rcpp.h>
 using namespace Rcpp;
+
+// retrieve kernel matrix or set it to default [[1,1,1],[1,1,1],[1,1,1]] if NULL
+Rcpp::NumericMatrix get_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue) {
+  Rcpp::NumericMatrix kk;
+  if(kernel.isNotNull()) {
+    Rcpp::NumericMatrix k(kernel.get());
+    kk = k;
+  }
+  if(kk.size() == 0) {
+    kk = Rcpp::NumericMatrix(3,3);
+    kk.fill(1);
+  }
+  return kk;
+}
+
+// compute matrix of x, y, offsets relative to kernel center in raster order
+// according to non-zero kernel elements
+// NULL kernel will result in 8 connected neighbors offsets
+// return an IntegerMatrix whose rows are x, y, respectively and columns are elements
+Rcpp::IntegerMatrix offset_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue) {
+  Rcpp::NumericMatrix kk = get_kernel(kernel);
+  if(!((kk.nrow() % 2) && (kk.ncol() % 2))) Rcpp::stop("offset_kernel: 'kernel' rows and columns are expected to be odd");
+  R_len_t n = 0;
+  for(R_len_t i = 0; i < kk.size(); i++) if(kk[i]) n++;
+  Rcpp::IntegerMatrix out(2, std::max(0, n - 1));
+  R_len_t rr = kk.nrow() >> 1;
+  R_len_t rc = kk.ncol() >> 1; 
+  for(R_len_t c = -rc, i = 0, j = 0; c <= rc; c++) {
+    for(R_len_t r = -rr; r <= rr; r++) {
+      if(kk[j++] && !((r == 0) && (c == 0))) {
+        out[i++] = c;
+        out[i++] = r;
+      }
+    }
+  }
+  return out;
+}
+
+// determine x, y, offsets that are scanned before offset (kernel) center in raster order
+// return an IntegerMatrix whose rows are x, y, respectively and columns are elements
+Rcpp::IntegerMatrix offset_backward(const Rcpp::IntegerMatrix offset) {
+  if(offset.nrow() < 2) Rcpp::stop("offset_backward: 'offset' should be at least 2 rows");
+  R_len_t pos = -2;
+  for(R_len_t i = 0; i < offset.ncol(); i++) {
+    if(is_true(all(offset(Rcpp::_, i) >= 0))) {
+      pos = i;
+      break;
+    }
+  }
+  Rcpp::IntegerMatrix out(offset.nrow(), std::max(0, pos));
+  for(R_len_t i = 0; i < pos * offset.nrow(); i++) out[i] = offset[i];
+  return out;
+}
+
+// determine x, y, offsets that are scanned after offset (kernel) center in raster order
+// return an IntegerMatrix whose rows are x, y, respectively and columns are elements
+Rcpp::IntegerMatrix offset_forward(const Rcpp::IntegerMatrix offset) {
+  if(offset.nrow() < 2) Rcpp::stop("offset_forward: 'offset' should be at least 2 rows");
+  R_len_t pos = -2;
+  for(R_len_t i = 0; i < offset.ncol(); i++) {
+    if(is_true(all(offset(Rcpp::_, i) >= 0))) {
+      pos = i;
+      break;
+    }
+  }
+  Rcpp::IntegerMatrix out(offset.nrow(), std::max(0, offset.ncol() - pos));
+  if(pos >= 0) for(R_len_t i = pos * offset.nrow(), j = 0; i < offset.size(); i++, j++) out[j] = offset[i];
+  return out;
+}
+
+// neighbor position computation according to offset
+// Each time a neighbor is found, it is added to nbr vector starting at nbr[1]
+// while nbr[0] stores the total count of neighbors found.
+// Only possible positions are stored i.e. inside nrow / ncol ranges.
+void offset_nbr(const R_len_t idx,
+                const R_len_t nrow, 
+                const R_len_t ncol,
+                const Rcpp::IntegerMatrix offset,
+                Rcpp::IntegerVector nbr) {
+  R_len_t n = 0;
+  if((idx >= 0) && (idx < nrow * ncol)) {
+    for(R_len_t i = 0, i_col = idx / nrow; i < offset.ncol(); i++) {
+      R_len_t x = offset(0, i) + i_col;
+      R_len_t y = offset(1, i) + idx - i_col * nrow;
+      if((x >= 0) && (x < ncol) &&
+         (y >= 0) && (y < nrow)) {
+        nbr[++n] = y + x * nrow;
+      }
+    }
+  } else { // should never happen
+    Rcpp::stop("offset_nbr: 'idx' is out of matrix dimensions");
+  }
+  nbr[0] = n;
+}
 
 // [[Rcpp::export]]
 Rcpp::LogicalMatrix hpp_make_disc(const uint8_t size = 3) {

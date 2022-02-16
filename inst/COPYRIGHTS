@@ -69,6 +69,13 @@ Information Science and Engineering. 2001(17), Pages 713-727.
 Available at https://doi.org/10.6688/JISE.2001.17.5.1
 
 --------------------------------------------------------------------------------
+functions in geodesic.hpp are adapted from 'Morphological grayscale 
+reconstruction in image analysis: applications and efficient algorithms' by 
+L. Vincent described in IEEE Transactions on Image Processing, 2(2) April 1993.
+Pages 176-201.
+available at https://doi.org/10.1109/83.217222
+
+--------------------------------------------------------------------------------
 hpp_disttrans_1st, hpp_disttrans_manh, hpp_disttrans_eucl are adapted from
 'A General Algorithm For Computing Distance Transforms In Linear Time' by
 W.H. Hesselink, A. Meijster, J.B.T.M. Roerdink described in  Mathematical

@@ -13,14 +13,16 @@ from Roerdink, J. B. T. M. and Meijster, A. (2000) in Fundamenta Informaticae, 4
 \item{msk_, }{a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 Default is R_NilValue, for using all 'mat' elements without masking anything.}
 
-\item{connectivity, }{an uint8_t either 4 or 8 describing pixel neighborhood. Default is 8.}
-
 \item{n_lev, }{an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.}
 
-\item{ws_draw, }{a bool; whether to draw watershed lines or not. Default is true.}
+\item{draw_lines, }{a bool; whether to draw watershed lines or not. Default is true.}
 
-\item{ws_dilate}{, an uint8_t controlling watershed line expansion in pixel. Default is 0, for no expansion.
-Then, increasing values will expand watershed lines by 2 pixels. This parameter only applies when 'ws_draw' is true.}
+\item{kernel, }{a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
+Default is R_NilValue, resulting in 8-connected pixels neighbors computation.}
+
+\item{invert, }{a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
+When 'mat' is the result of the distance transformation of an image, peaks (highest values) represent largest distances from background.
+Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.}
 }
 \value{
 an IntegerMatrix.

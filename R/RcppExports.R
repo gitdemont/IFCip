@@ -630,6 +630,144 @@ NULL
 #' @keywords internal
 NULL
 
+#' @title H-Minima transformation
+#' @name cpp_HMIN
+#' @description
+#' Keep deepest valleys from image.
+#' @param img, a NumericMatrix.
+#' @param h, a double, specifying the minimal depth. Default is 0.0. it should be positive.
+#' @param img_min, a double. Minimal value of image range. Default is 0.0.
+#' It is the value provided by the user, according to what the 'img' range should cover and not the actual minimal value of 'img'.
+#' @param img_max, a double. Maximal value of image range. Default is 1.0.
+#' It is the value provided by the user, according to what the 'img' range should cover and not the actual maximal value of 'img'.
+#' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
+#' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
+#' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
+#' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+#' HMIN is the erosion reconstruction of (img + h) by kernel where img + h is clipped to img_max.
+#' @return a NumericMatrix of H-Minima transformation of 'img'.
+#' @keywords internal
+NULL
+
+#' @title H-Maxima transformation
+#' @name cpp_HMAX
+#' @description
+#' Keep highest peaks in image.
+#' @param img, a NumericMatrix.
+#' @param h, a double, specifying the minimal height. Default is 0.0, it should be positive.
+#' @param img_min, a double. Minimal value of image range. Default is 0.0.
+#' It is the value provided by the user, according to what the 'img' range should cover and not the actual minimal value of 'img'.
+#' @param img_max, a double. Maximal value of image range. Default is 1.0.
+#' It is the value provided by the user, according to what the 'img' range should cover and not the actual maximal value of 'img'.
+#' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
+#' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
+#' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
+#' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+#' HMAX is the dilatation reconstruction of (img - h) by kernel where img - h is clipped to img_min.
+#' @return a NumericMatrix of H-Maxima transformation of 'img'.
+#' @keywords internal
+NULL
+
+#' @title Regional Minima
+#' @name cpp_RMIN
+#' @description
+#' Mask connected component of pixels whose values are lower to their external boundaries neighborhood.
+#' @param img, a NumericMatrix.
+#' @param img_min, a double. Minimal value of image range. Default is 0.0.
+#' It is the value provided by the user, according to what the 'img' range should cover and not the actual minimal value of 'img'.
+#' @param img_max, a double. Maximal value of image range. Default is 1.0.
+#' It is the value provided by the user, according to what the 'img' range should cover and not the actual maximal value of 'img'.
+#' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
+#' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
+#' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
+#' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+#' RMIN is defined as HMIN(img, 1)
+#' @return a NumericMatrix of regional minima of 'img'.
+#' @keywords internal
+NULL
+
+#' @title Regional Maxima
+#' @name cpp_RMAX
+#' @description
+#' Mask connected component of pixels whose values are higher to their external boundaries neighborhood.
+#' @param img, a NumericMatrix.
+#' @param img_min, a double. Minimal value of image range. Default is 0.0.
+#' It is the value provided by the user, according to what the 'img' range should cover and not the actual minimal value of 'img'.
+#' @param img_max, a double. Maximal value of image range. Default is 1.0.
+#' It is the value provided by the user, according to what the 'img' range should cover and not the actual maximal value of 'img'.
+#' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
+#' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
+#' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
+#' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+#' RMAX is defined as HMAX(img, 1)
+#' @return a NumericMatrix of regional maxima of 'img'.
+#' @keywords internal
+NULL
+
+#' @title Extended Minima
+#' @name cpp_EMIN
+#' @description
+#' Mask the regional minima of the corresponding h-minima transformation.
+#' @param img, a NumericMatrix.
+#' @param img_min, a double. Minimal value of image range. Default is 0.0.
+#' It is the value provided by the user, according to what the 'img' range should cover and not the actual minimal value of 'img'.
+#' @param img_max, a double. Maximal value of image range. Default is 1.0.
+#' It is the value provided by the user, according to what the 'img' range should cover and not the actual maximal value of 'img'.
+#' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
+#' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
+#' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
+#' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+#' EMIN is defined as RMIN(HMIN(img, h))
+#' @return a NumericMatrix of extended minima of 'img'.
+#' @keywords internal
+NULL
+
+#' @title Extended Maxima
+#' @name cpp_EMAX
+#' @description
+#' Mask the regional maxima of the corresponding h-maxima transformation.
+#' @param img, a NumericMatrix.
+#' @param img_min, a double. Minimal value of image range. Default is 0.0.
+#' It is the value provided by the user, according to what the 'img' range should cover and not the actual minimal value of 'img'.
+#' @param img_max, a double. Maximal value of image range. Default is 1.0.
+#' It is the value provided by the user, according to what the 'img' range should cover and not the actual maximal value of 'img'.
+#' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
+#' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
+#' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
+#' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+#' EMAX is defined as RMAX(HMAX(img, h))
+#' @return a NumericMatrix of extended maxima of 'img'.
+#' @keywords internal
+NULL
+
+#' @title Geodesic White Top Hat
+#' @name cpp_geo_tophat_white
+#' @description
+#' This function applies geodesic white top hat on image.
+#' @param img, a NumericMatrix.
+#' @param kernel, a NumericMatrix.
+#' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
+#' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+#' Dilation in closing process is replaced by dilation reconstruction.
+#' So, we have out = img - rec_dilate(erode(img)).
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
+#' @title Geodesic Black Top Hat
+#' @name cpp_geo_tophat_black
+#' @description
+#' This function applies geodesic black top hat on image.
+#' @param mat, a NumericMatrix.
+#' @param kernel, a NumericMatrix.
+#' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
+#' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\url{https://doi.org/10.1109/83.217222}\cr
+#' Erosion in opening process is replaced by erosion reconstruction.
+#' So, we have out = rec_erode(dilate(img)) - img.
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
 #' @title Watershed Transformation SV1
 #' @name cpp_watershed_sv1
 #' @description
@@ -637,11 +775,13 @@ NULL
 #' @param mat, a NumericMatrix; a distance transform matrix is expected.
 #' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 #' Default is R_NilValue, for using all 'mat' elements without masking anything.
-#' @param connectivity, an uint8_t either 4 or 8 describing pixel neighborhood. Default is 8.
 #' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
-#' @param ws_draw, a bool; whether to draw watershed lines or not. Default is true.
-#' @param ws_dilate , an uint8_t controlling watershed line expansion in pixel. Default is 0, for no expansion.
-#' Then, increasing values will expand watershed lines by 2 pixels. This parameter only applies when 'ws_draw' is true.
+#' @param draw_lines, a bool; whether to draw watershed lines or not. Default is true.
+#' @param invert, a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
+#' When 'mat' is the result of the distance transformation of an image, peaks (highest values) represent largest distances from background.
+#' Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.
+#' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
+#' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 #' @details adaptation of 'Determining watersheds in digital pictures via flooding simulations' from P. Soille. and L. Vincent.
 #' In Proc. SPIE 1360, Visual Communications and Image Processing '90: Fifth in a Series, (1 September 1990) \url{https://doi:10.1117/12.24211}.
 #' @source MorphoLib plugin for ImageJ presents a Java implementation of the algorithm in  \url{https://github.com/ijpb/MorphoLibJ/blob/master/src/main/java/inra/ijpb/watershed/WatershedTransform2D.java} authored by Ignacio Arganda-Carreras 
@@ -656,11 +796,13 @@ NULL
 #' @param mat, a NumericMatrix; a distance transform matrix is expected.
 #' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 #' Default is R_NilValue, for using all 'mat' elements without masking anything.
-#' @param connectivity, an uint8_t either 4 or 8 describing pixel neighborhood. Default is 8.
 #' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
-#' @param ws_draw, a bool; whether to draw watershed lines or not. Default is true.
-#' @param ws_dilate , an uint8_t controlling watershed line expansion in pixel. Default is 0, for no expansion.
-#' Then, increasing values will expand watershed lines by 2 pixels. This parameter only applies when 'ws_draw' is true.
+#' @param draw_lines, a bool; whether to draw watershed lines or not. Default is true.
+#' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
+#' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
+#' @param invert, a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
+#' When 'mat' is the result of the distance transformation of an image, peaks (highest values) represent largest distances from background.
+#' Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.
 #' @details adaptation of 'Watersheds in digital spaces: an efficient algorithm based on immersion simulations' from  L. Vincent and P. Soille.
 #' In IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(6):583-598, June 1991.\cr
 #' @source The algorithm is reviewed in 'The Watershed Transform: Definitions, Algorithms and Parallelization Strategies'
@@ -1051,12 +1193,44 @@ cpp_laplacian <- function(mat, kernel, iter = 0L) {
     .Call(`_IFCip_cpp_laplacian`, mat, kernel, iter)
 }
 
-cpp_watershed_sv1 <- function(mat, msk_ = NULL, connectivity = 8L, n_lev = 256L, ws_draw = TRUE, ws_dilate = 0L) {
-    .Call(`_IFCip_cpp_watershed_sv1`, mat, msk_, connectivity, n_lev, ws_draw, ws_dilate)
+cpp_HMIN <- function(img, h = 0.0, img_min = 0.0, img_max = 1.0, kernel = NULL) {
+    .Call(`_IFCip_cpp_HMIN`, img, h, img_min, img_max, kernel)
 }
 
-cpp_watershed_sv2 <- function(mat, msk_ = NULL, connectivity = 8L, n_lev = 256L, ws_draw = TRUE, ws_dilate = 0L) {
-    .Call(`_IFCip_cpp_watershed_sv2`, mat, msk_, connectivity, n_lev, ws_draw, ws_dilate)
+cpp_HMAX <- function(img, h = 0.0, img_min = 0.0, img_max = 1.0, kernel = NULL) {
+    .Call(`_IFCip_cpp_HMAX`, img, h, img_min, img_max, kernel)
+}
+
+cpp_RMIN <- function(img, img_min = 0.0, img_max = 1.0, kernel = NULL) {
+    .Call(`_IFCip_cpp_RMIN`, img, img_min, img_max, kernel)
+}
+
+cpp_RMAX <- function(img, img_min = 0.0, img_max = 1.0, kernel = NULL) {
+    .Call(`_IFCip_cpp_RMAX`, img, img_min, img_max, kernel)
+}
+
+cpp_EMIN <- function(img, h = 0.0, img_min = 0.0, img_max = 1.0, kernel = NULL) {
+    .Call(`_IFCip_cpp_EMIN`, img, h, img_min, img_max, kernel)
+}
+
+cpp_EMAX <- function(img, h = 0.0, img_min = 0.0, img_max = 1.0, kernel = NULL) {
+    .Call(`_IFCip_cpp_EMAX`, img, h, img_min, img_max, kernel)
+}
+
+cpp_geo_tophat_white <- function(img, kernel = NULL) {
+    .Call(`_IFCip_cpp_geo_tophat_white`, img, kernel)
+}
+
+cpp_geo_tophat_black <- function(img, kernel = NULL) {
+    .Call(`_IFCip_cpp_geo_tophat_black`, img, kernel)
+}
+
+cpp_watershed_sv1 <- function(mat, msk_ = NULL, n_lev = 256L, draw_lines = TRUE, invert = FALSE, kernel = NULL) {
+    .Call(`_IFCip_cpp_watershed_sv1`, mat, msk_, n_lev, draw_lines, invert, kernel)
+}
+
+cpp_watershed_sv2 <- function(mat, msk_ = NULL, n_lev = 256L, draw_lines = TRUE, invert = FALSE, kernel = NULL) {
+    .Call(`_IFCip_cpp_watershed_sv2`, mat, msk_, n_lev, draw_lines, invert, kernel)
 }
 
 cpp_ctl <- function(mat, global = FALSE) {

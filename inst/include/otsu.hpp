@@ -31,6 +31,7 @@
 #define IFCIP_OTSU_HPP
 
 #include <Rcpp.h>
+#include "scale.hpp"
 using namespace Rcpp;
 
 //' @title Otsu Multi Thresholding
