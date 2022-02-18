@@ -47,20 +47,28 @@ Rcpp::NumericVector hpp_n_scale(Rcpp::NumericMatrix img,
       Rcpp::stop("hpp_scale: when 'msk' is provided 'img' and 'msk' should have same dimensions");
     }
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-      Rcpp::NumericVector Vm = msk(Rcpp::_,i_col);
-      Rcpp::NumericVector Vi = img(Rcpp::_,i_col);
-      
-      if(Rcpp::is_true(Rcpp::any(Rcpp::is_na(Vm))) ||
-         Rcpp::is_true(Rcpp::any(Rcpp::is_infinite(Vm))) ||
-         Rcpp::is_true(Rcpp::any(Rcpp::is_na(Vi))) ||
-         Rcpp::is_true(Rcpp::any(Rcpp::is_infinite(Vi)))) {
-        Rcpp::stop("hpp_scale: non-finite values found");
-      };
-      Rcpp::NumericVector col_ran = range(as<Rcpp::NumericVector>(Vi[as<Rcpp::LogicalVector>(Vm)])); // why as<Rcpp::NumericVector> is needed here ?
-      if(col_ran[0] < mat_min) {
-        mat_min = col_ran[0];
-      } else {
-        if(col_ran[1] > mat_max) mat_max = col_ran[1];
+      for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
+        if((msk(i_row, i_col) != NA_REAL) &&
+           (msk(i_row, i_col) != R_NaN) &&
+           (msk(i_row, i_col) != R_PosInf) &&
+           (msk(i_row, i_col) != R_NegInf)) {
+          if(msk(i_row, i_col)) {
+            if((img(i_row, i_col) != NA_REAL) &&
+               (img(i_row, i_col) != R_NaN) &&
+               (img(i_row, i_col) != R_PosInf) &&
+               (img(i_row, i_col) != R_NegInf)) {
+              if(img(i_row, i_col) < mat_min) {
+                mat_min = img(i_row, i_col);
+              } else {
+                if(img(i_row, i_col) > mat_max) mat_max = img(i_row, i_col);
+              }
+            } else {
+              Rcpp::stop("hpp_scale: non-finite values found in 'img'");
+            }
+          }
+        } else {
+          Rcpp::stop("hpp_scale: non-finite values found in 'msk'");
+        }
       }
     }
     MAX_LEV_SCA /= (mat_max - mat_min);
@@ -72,16 +80,19 @@ Rcpp::NumericVector hpp_n_scale(Rcpp::NumericMatrix img,
     return Rcpp::NumericVector::create(mat_min, mat_max, MAX_LEV_SCA, positive, value);
   } else {
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-      Rcpp::NumericVector Vi = img(Rcpp::_,i_col);
-      if(Rcpp::is_true(Rcpp::any(Rcpp::is_na(Vi))) ||
-         Rcpp::is_true(Rcpp::any(Rcpp::is_infinite(Vi)))) {
-        Rcpp::stop("hpp_scale: non-finite values found");
-      }
-      Rcpp::NumericVector col_ran = range(Vi);
-      if(col_ran[0] < mat_min) {
-        mat_min = col_ran[0];
-      } else {
-        if(col_ran[1] > mat_max) mat_max = col_ran[1];
+      for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
+        if((img(i_row, i_col) != NA_REAL) &&
+           (img(i_row, i_col) != R_NaN) &&
+           (img(i_row, i_col) != R_PosInf) &&
+           (img(i_row, i_col) != R_NegInf)) {
+          if(img(i_row, i_col) < mat_min) {
+            mat_min = img(i_row, i_col);
+          } else {
+            if(img(i_row, i_col) > mat_max) mat_max = img(i_row, i_col);
+          }
+        } else {
+          Rcpp::stop("hpp_scale: non-finite values found in 'img'");
+        }
       }
     }
     MAX_LEV_SCA /= (mat_max - mat_min);
@@ -108,20 +119,22 @@ Rcpp::NumericVector hpp_i_scale(Rcpp::IntegerMatrix img,
       Rcpp::stop("hpp_scale: when 'msk' is provided 'img' and 'msk' should have same dimensions");
     }
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-      Rcpp::NumericVector Vm = msk(Rcpp::_,i_col);
-      Rcpp::IntegerVector Vi = img(Rcpp::_,i_col);
-      
-      if(Rcpp::is_true(Rcpp::any(Rcpp::is_na(Vm))) ||
-         Rcpp::is_true(Rcpp::any(Rcpp::is_infinite(Vm))) ||
-         Rcpp::is_true(Rcpp::any(Rcpp::is_na(Vi))) ||
-         Rcpp::is_true(Rcpp::any(Rcpp::is_infinite(Vi)))) {
-        Rcpp::stop("hpp_scale: non-finite values found");
-      };
-      Rcpp::IntegerVector col_ran = range(as<Rcpp::IntegerVector>(Vi[as<Rcpp::LogicalVector>(Vm)])); // why as<Rcpp::NumericVector> is needed here ?
-      if(col_ran[0] < mat_min) {
-        mat_min = col_ran[0];
-      } else {
-        if(col_ran[1] > mat_max) mat_max = col_ran[1];
+      for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
+        if(msk(i_row, i_col) != NA_INTEGER) {
+          if(msk(i_row, i_col)) {
+            if(img(i_row, i_col) != NA_INTEGER) {
+              if(img(i_row, i_col) < mat_min) {
+                mat_min = img(i_row, i_col);
+              } else {
+                if(img(i_row, i_col) > mat_max) mat_max = img(i_row, i_col);
+              }
+            } else {
+              Rcpp::stop("hpp_scale: non-finite values found in 'img'");
+            }
+          }
+        } else {
+          Rcpp::stop("hpp_scale: non-finite values found in 'msk'");
+        }
       }
     }
     MAX_LEV_SCA /= (mat_max - mat_min);
@@ -133,16 +146,16 @@ Rcpp::NumericVector hpp_i_scale(Rcpp::IntegerMatrix img,
     return Rcpp::NumericVector::create(mat_min, mat_max, MAX_LEV_SCA, positive, value);
   } else {
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-      Rcpp::IntegerVector Vi = img(Rcpp::_,i_col);
-      if(Rcpp::is_true(Rcpp::any(Rcpp::is_na(Vi))) ||
-         Rcpp::is_true(Rcpp::any(Rcpp::is_infinite(Vi)))) {
-        Rcpp::stop("hpp_scale: non-finite values found");
-      }
-      Rcpp::IntegerVector col_ran = range(Vi);
-      if(col_ran[0] < mat_min) {
-        mat_min = col_ran[0];
-      } else {
-        if(col_ran[1] > mat_max) mat_max = col_ran[1];
+      for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
+        if(img(i_row, i_col) != NA_INTEGER) {
+          if(img(i_row, i_col) < mat_min) {
+            mat_min = img(i_row, i_col);
+          } else {
+            if(img(i_row, i_col) > mat_max) mat_max = img(i_row, i_col);
+          }
+        } else {
+          Rcpp::stop("hpp_scale: non-finite values found in 'img'");
+        }
       }
     }
     MAX_LEV_SCA /= (mat_max - mat_min);
