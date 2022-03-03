@@ -138,7 +138,7 @@ Rcpp::List hpp_cooc(const Rcpp::IntegerMatrix img,
   // Non normalized Gray-Level Co-occurence Matrix, GLCM
   // DO NOT USE IntegerMatrix 
   Rcpp::NumericMatrix G1 = Rcpp::no_init_matrix(depth, depth);
-  G1.fill(0);
+  G1.fill(0.0);
   Rcpp::NumericMatrix G2 = Rcpp::clone(G1);
   Rcpp::NumericMatrix G3 = Rcpp::clone(G1);
   Rcpp::NumericMatrix G4 = Rcpp::clone(G1);

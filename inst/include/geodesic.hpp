@@ -46,7 +46,7 @@ double nbr_min (const Rcpp::NumericMatrix M,
                 const double u,
                 const double v) {
   double res = u;
-  for(uint8_t i = 1; i <= n[0]; i++) if(res < M[n[i]]) res =  M[n[i]];
+  for(R_len_t i = 1; i <= n[0]; i++) if(res < M[n[i]]) res =  M[n[i]];
   return std::min(v, res);
 }
 
@@ -60,7 +60,7 @@ double nbr_max (const Rcpp::NumericMatrix M,
                 const double u,
                 const double v) {
   double res = u;
-  for(uint8_t i = 1; i <= n[0]; i++) if(res > M[n[i]]) res =  M[n[i]];
+  for(R_len_t i = 1; i <= n[0]; i++) if(res > M[n[i]]) res =  M[n[i]];
   return std::max(v, res);
 }
 
@@ -91,17 +91,18 @@ void rec_dilate (Rcpp::NumericMatrix r,
   Rcpp::IntegerMatrix on = offset_forward(o);                  // to be scanned after cur_pos is encountered, in raster order
   Rcpp::IntegerVector n(o.ncol() + 1);                         // vector of neighbors idx
   Rcpp::IntegerVector Q = fifo_create(MAX_SIZ + 3, NA_INTEGER);// hierarchical priority queue
+  unsigned short count = 1;
   
   // forward scan
   for(R_len_t p = 0; p < r.size(); p++) {
-    offset_nbr(p, mat_r, mat_c, op, n);
+    offset_nbr(p, mat_r, mat_c, op, n, &count);
     r[p] = nbr_min(r, n, r[p], s[p]);
   }
   // backward scan
   for(R_len_t p = r.size() - 1; p >= 0; p--) {
-    offset_nbr(p, mat_r, mat_c, on, n);
+    offset_nbr(p, mat_r, mat_c, on, n, &count);
     r[p] = nbr_min(r, n, r[p], s[p]);
-    for(uint8_t i = 1; i <= n[0]; i++) {
+    for(R_len_t i = 1; i <= n[0]; i++) {
       if((r[n[i]] < r[p]) && (r[n[i]] < s[n[i]])) {
         fifo_add(Q, p);
         break;
@@ -111,8 +112,8 @@ void rec_dilate (Rcpp::NumericMatrix r,
   // propagate
   while(Q[0] != 0) {
     R_len_t p = fifo_pop(Q);
-    offset_nbr(p, mat_r, mat_c, o, n);
-    for(uint8_t i = 1; i <= n[0]; i++) {
+    offset_nbr(p, mat_r, mat_c, o, n, &count);
+    for(R_len_t i = 1; i <= n[0]; i++) {
       if((r[n[i]] < r[p]) && (s[n[i]] != r[n[i]])) {
         r[n[i]] = std::min(r[p], s[n[i]]);
         fifo_add(Q, n[i]);
@@ -148,17 +149,18 @@ void rec_erode (Rcpp::NumericMatrix r,
   Rcpp::IntegerMatrix on = offset_forward(o);                  // to be scanned after cur_pos is encountered, in raster order
   Rcpp::IntegerVector n(o.ncol() + 1);                         // vector of neighbors idx
   Rcpp::IntegerVector Q = fifo_create(MAX_SIZ + 3, NA_INTEGER);// hierarchical priority queue
+  unsigned short count = 1;
   
   // forward scan
   for(R_len_t p = 0; p < r.size(); p++) {
-    offset_nbr(p, mat_r, mat_c, op, n);
+    offset_nbr(p, mat_r, mat_c, op, n, &count);
     r[p] = nbr_max(r, n, r[p], s[p]);
   }
   // backward scan
   for(R_len_t p = r.size() - 1; p >= 0; p--) {
-    offset_nbr(p, mat_r, mat_c, on, n);
+    offset_nbr(p, mat_r, mat_c, on, n, &count);
     r[p] = nbr_max(r, n, r[p], s[p]);
-    for(uint8_t i = 1; i <= n[0]; i++) {
+    for(R_len_t i = 1; i <= n[0]; i++) {
       if((r[n[i]] > r[p]) && (r[n[i]] > s[n[i]])) {
         fifo_add(Q, p);
         break;
@@ -168,8 +170,8 @@ void rec_erode (Rcpp::NumericMatrix r,
   // propagate
   while(Q[0] != 0) {
     R_len_t p = fifo_pop(Q);
-    offset_nbr(p, mat_r, mat_c, o, n);
-    for(uint8_t i = 1; i <= n[0]; i++) {
+    offset_nbr(p, mat_r, mat_c, o, n, &count);
+    for(R_len_t i = 1; i <= n[0]; i++) {
       if((r[n[i]] > r[p]) && (s[n[i]] != r[n[i]])) {
         r[n[i]] = std::max(r[p], s[n[i]]);
         fifo_add(Q, n[i]);

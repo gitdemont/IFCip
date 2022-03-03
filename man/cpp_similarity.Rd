@@ -18,6 +18,8 @@ This function is designed to score similarity between two images.
 }
 \details{
 the similarity is the log transformed Pearson's Correlation Coefficient.
-It is a measure of the degree to which two images are linearly correlated within a masked region.
+It is a measure of the degree to which two images are linearly correlated within a masked region.\cr
+See "Quantitative measurement of nuclear translocation events using similarity analysis of multispectral cellular images obtained in flow"
+by T.C. George et al. Journal of Immunological Methods Volume 311, Issues 1–2, 20 April 2006, Pages 117-129 \doi{doi.org/10.1016/j.jim.2006.01.018}
 }
 \keyword{internal}

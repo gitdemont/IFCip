@@ -470,6 +470,16 @@ NULL
 #' @keywords internal
 NULL
 
+#' @title Image Mean Filtering
+#' @name cpp_mean
+#' @description
+#' This function applies mean filtering on image.
+#' @param mat, a NumericMatrix.
+#' @param kernel, a NumericMatrix.
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
 #' @title Image Median Filtering
 #' @name cpp_median
 #' @description
@@ -773,8 +783,6 @@ NULL
 #' @description
 #' This function computes the watershed transformation of an image.
 #' @param mat, a NumericMatrix; a distance transform matrix is expected.
-#' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
-#' Default is R_NilValue, for using all 'mat' elements without masking anything.
 #' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
 #' @param draw_lines, a bool; whether to draw watershed lines or not. Default is true.
 #' @param invert, a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
@@ -782,6 +790,8 @@ NULL
 #' Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.
 #' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 #' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
+#' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+#' Default is R_NilValue, for using all 'mat' elements without masking anything.
 #' @details adaptation of 'Determining watersheds in digital pictures via flooding simulations' from P. Soille. and L. Vincent.
 #' In Proc. SPIE 1360, Visual Communications and Image Processing '90: Fifth in a Series, (1 September 1990) \url{https://doi:10.1117/12.24211}.
 #' @source MorphoLib plugin for ImageJ presents a Java implementation of the algorithm in  \url{https://github.com/ijpb/MorphoLibJ/blob/master/src/main/java/inra/ijpb/watershed/WatershedTransform2D.java} authored by Ignacio Arganda-Carreras 
@@ -794,8 +804,6 @@ NULL
 #' @description
 #' This function computes the watershed transformation of an image.
 #' @param mat, a NumericMatrix; a distance transform matrix is expected.
-#' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
-#' Default is R_NilValue, for using all 'mat' elements without masking anything.
 #' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
 #' @param draw_lines, a bool; whether to draw watershed lines or not. Default is true.
 #' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
@@ -803,6 +811,8 @@ NULL
 #' @param invert, a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
 #' When 'mat' is the result of the distance transformation of an image, peaks (highest values) represent largest distances from background.
 #' Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.
+#' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+#' Default is R_NilValue, for using all 'mat' elements without masking anything.
 #' @details adaptation of 'Watersheds in digital spaces: an efficient algorithm based on immersion simulations' from  L. Vincent and P. Soille.
 #' In IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(6):583-598, June 1991.\cr
 #' @source The algorithm is reviewed in 'The Watershed Transform: Definitions, Algorithms and Parallelization Strategies'
@@ -920,7 +930,24 @@ NULL
 #' @param img2 a NumericMatrix, containing image values.
 #' @param msk a LogicalMatrix, containing mask.
 #' @details the similarity is the log transformed Pearson's Correlation Coefficient.
-#' It is a measure of the degree to which two images are linearly correlated within a masked region.
+#' It is a measure of the degree to which two images are linearly correlated within a masked region.\cr
+#' See "Quantitative measurement of nuclear translocation events using similarity analysis of multispectral cellular images obtained in flow"
+#' by T.C. George et al. Journal of Immunological Methods Volume 311, Issues 1–2, 20 April 2006, Pages 117-129 \doi{doi.org/10.1016/j.jim.2006.01.018}
+#' @return a double, the similarity.
+#' @keywords internal
+NULL
+
+#' @title Images Bright Detail Similarity Measurement
+#' @name cpp_bright_similarity
+#' @description
+#' This function is designed to score similarity between two bright detail images.
+#' @param img1 a NumericMatrix, containing bright detail image values.
+#' @param img2 a NumericMatrix, containing bright detail image values.
+#' @param msk a LogicalMatrix, containing mask.
+#' @details the bright detail similarity is the non-mean normalized version of the log transformed Pearson's Correlation Coefficient.
+#' It is designed to compare the small bright image detail of two images within a masked region.\cr
+#' See "Quantitative analysis of protein co-localization on B cells opsonized with rituximab and complement using the ImageStream multispectral imaging flow cytometer"
+#' by P.V. Beum et al. Journal of Immunological Methods Volume 317, Issues 1–2, 20 December 2006, Pages 90-99 \doi{doi.org/10.1016/j.jim.2006.09.012}
 #' @return a double, the similarity.
 #' @keywords internal
 NULL
@@ -1133,6 +1160,10 @@ cpp_sd <- function(mat, kernel) {
     .Call(`_IFCip_cpp_sd`, mat, kernel)
 }
 
+cpp_mean <- function(mat, kernel) {
+    .Call(`_IFCip_cpp_mean`, mat, kernel)
+}
+
 cpp_median <- function(mat, kernel) {
     .Call(`_IFCip_cpp_median`, mat, kernel)
 }
@@ -1153,44 +1184,44 @@ cpp_correlate2d <- function(mat, kernel) {
     .Call(`_IFCip_cpp_correlate2d`, mat, kernel)
 }
 
-cpp_erode <- function(mat, kernel, iter = 0L) {
-    .Call(`_IFCip_cpp_erode`, mat, kernel, iter)
+cpp_erode <- function(mat, kernel, iter = 0L, msk_ = NULL) {
+    .Call(`_IFCip_cpp_erode`, mat, kernel, iter, msk_)
 }
 
-cpp_dilate <- function(mat, kernel, iter = 0L) {
-    .Call(`_IFCip_cpp_dilate`, mat, kernel, iter)
+cpp_dilate <- function(mat, kernel, iter = 0L, msk_ = NULL) {
+    .Call(`_IFCip_cpp_dilate`, mat, kernel, iter, msk_)
 }
 
-cpp_opening <- function(mat, kernel, iter = 0L) {
-    .Call(`_IFCip_cpp_opening`, mat, kernel, iter)
+cpp_opening <- function(mat, kernel, iter = 0L, msk_ = NULL) {
+    .Call(`_IFCip_cpp_opening`, mat, kernel, iter, msk_)
 }
 
-cpp_closing <- function(mat, kernel, iter = 0L) {
-    .Call(`_IFCip_cpp_closing`, mat, kernel, iter)
+cpp_closing <- function(mat, kernel, iter = 0L, msk_ = NULL) {
+    .Call(`_IFCip_cpp_closing`, mat, kernel, iter, msk_)
 }
 
-cpp_gradient <- function(mat, kernel, iter = 0L) {
-    .Call(`_IFCip_cpp_gradient`, mat, kernel, iter)
+cpp_gradient <- function(mat, kernel, iter = 0L, msk_ = NULL) {
+    .Call(`_IFCip_cpp_gradient`, mat, kernel, iter, msk_)
 }
 
-cpp_tophat_white <- function(mat, kernel, iter = 0L) {
-    .Call(`_IFCip_cpp_tophat_white`, mat, kernel, iter)
+cpp_tophat_white <- function(mat, kernel, iter = 0L, msk_ = NULL) {
+    .Call(`_IFCip_cpp_tophat_white`, mat, kernel, iter, msk_)
 }
 
-cpp_tophat_black <- function(mat, kernel, iter = 0L) {
-    .Call(`_IFCip_cpp_tophat_black`, mat, kernel, iter)
+cpp_tophat_black <- function(mat, kernel, iter = 0L, msk_ = NULL) {
+    .Call(`_IFCip_cpp_tophat_black`, mat, kernel, iter, msk_)
 }
 
-cpp_tophat_self <- function(mat, kernel, iter = 0L) {
-    .Call(`_IFCip_cpp_tophat_self`, mat, kernel, iter)
+cpp_tophat_self <- function(mat, kernel, iter = 0L, msk_ = NULL) {
+    .Call(`_IFCip_cpp_tophat_self`, mat, kernel, iter, msk_)
 }
 
-cpp_cont <- function(mat, kernel, iter = 0L) {
-    .Call(`_IFCip_cpp_cont`, mat, kernel, iter)
+cpp_cont <- function(mat, kernel, iter = 0L, msk_ = NULL) {
+    .Call(`_IFCip_cpp_cont`, mat, kernel, iter, msk_)
 }
 
-cpp_laplacian <- function(mat, kernel, iter = 0L) {
-    .Call(`_IFCip_cpp_laplacian`, mat, kernel, iter)
+cpp_laplacian <- function(mat, kernel, iter = 0L, msk_ = NULL) {
+    .Call(`_IFCip_cpp_laplacian`, mat, kernel, iter, msk_)
 }
 
 cpp_HMIN <- function(img, h = 0.0, img_min = 0.0, img_max = 1.0, kernel = NULL) {
@@ -1225,12 +1256,12 @@ cpp_geo_tophat_black <- function(img, kernel = NULL) {
     .Call(`_IFCip_cpp_geo_tophat_black`, img, kernel)
 }
 
-cpp_watershed_sv1 <- function(mat, msk_ = NULL, n_lev = 256L, draw_lines = TRUE, invert = FALSE, kernel = NULL) {
-    .Call(`_IFCip_cpp_watershed_sv1`, mat, msk_, n_lev, draw_lines, invert, kernel)
+cpp_watershed_sv1 <- function(mat, n_lev = 256L, draw_lines = TRUE, invert = FALSE, kernel = NULL, msk_ = NULL) {
+    .Call(`_IFCip_cpp_watershed_sv1`, mat, n_lev, draw_lines, invert, kernel, msk_)
 }
 
-cpp_watershed_sv2 <- function(mat, msk_ = NULL, n_lev = 256L, draw_lines = TRUE, invert = FALSE, kernel = NULL) {
-    .Call(`_IFCip_cpp_watershed_sv2`, mat, msk_, n_lev, draw_lines, invert, kernel)
+cpp_watershed_sv2 <- function(mat, n_lev = 256L, draw_lines = TRUE, invert = FALSE, kernel = NULL, msk_ = NULL) {
+    .Call(`_IFCip_cpp_watershed_sv2`, mat, n_lev, draw_lines, invert, kernel, msk_)
 }
 
 cpp_ctl <- function(mat, global = FALSE) {
@@ -1267,6 +1298,10 @@ cpp_thinning_bst <- function(mat) {
 
 cpp_similarity <- function(img1, img2, msk) {
     .Call(`_IFCip_cpp_similarity`, img1, img2, msk)
+}
+
+cpp_bright_similarity <- function(img1, img2, msk) {
+    .Call(`_IFCip_cpp_bright_similarity`, img1, img2, msk)
 }
 
 cpp_make_disc <- function(size = 3L) {

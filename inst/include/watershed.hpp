@@ -41,8 +41,6 @@ using namespace Rcpp;
 //' @description
 //' This function computes the watershed transformation of an image.
 //' @param mat, a NumericMatrix; a distance transform matrix is expected.
-//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
-//' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
 //' @param draw_lines, a bool; whether to draw watershed lines or not. Default is true.
 //' @param invert, a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
@@ -50,6 +48,8 @@ using namespace Rcpp;
 //' Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
+//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @details adaptation of 'Determining watersheds in digital pictures via flooding simulations' from P. Soille. and L. Vincent.
 //' In Proc. SPIE 1360, Visual Communications and Image Processing '90: Fifth in a Series, (1 September 1990) \doi{10.1117/12.24211}.
 //' @source MorphoLib plugin for ImageJ presents a Java implementation of the algorithm in  \url{https://github.com/ijpb/MorphoLibJ/blob/master/src/main/java/inra/ijpb/watershed/WatershedTransform2D.java} authored by Ignacio Arganda-Carreras 
@@ -58,11 +58,11 @@ using namespace Rcpp;
 ////' @export
 // [[Rcpp::export]]
 Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
-                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                       const unsigned short n_lev = 256,
                                       const bool draw_lines = true,
                                       const bool invert = false,
-                                      const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue) {
+                                      const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
+                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
   R_len_t mat_r = mat.nrow();
   R_len_t mat_c = mat.ncol();
   R_len_t MAX_SIZ = mat_r * mat_c;
@@ -92,6 +92,7 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
   Rcpp::IntegerMatrix o = offset_kernel(kernel);               // matrix of offsets in raster order
   Rcpp::IntegerVector nbr(o.ncol() + 1);                       // vector of neighbors idx
   Rcpp::IntegerVector Q = fifo_create(MAX_SIZ + 3, NA_INTEGER);// hierarchical priority queue
+  unsigned short count = 1;
   
   bool flag = true;
   int h, hop, k_start = 0, k = 0, k_stop = mat.size();
@@ -126,8 +127,8 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
     for(k = k_start; k < k_stop; k++) {
       int p = idx[k];
       out[p] = mask;
-      offset_nbr(p, mat_r, mat_c, o, nbr);
-      for(uint8_t i = 1; i <= nbr[0]; i++) {
+      offset_nbr(p, mat_r, mat_c, o, nbr, &count);
+      for(R_len_t i = 1; i <= nbr[0]; i++) {
         if((out[nbr[i]] > 0) || (out[p] == wshed)) {
           out[p] = inqueue;
           fifo_add(Q, p);
@@ -137,8 +138,8 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
     }
     while(Q[0] != 0) {
       int p = fifo_pop(Q);
-      offset_nbr(p, mat_r, mat_c, o, nbr);
-      for(uint8_t i = 1; i <= nbr[0]; i++) {
+      offset_nbr(p, mat_r, mat_c, o, nbr, &count);
+      for(R_len_t i = 1; i <= nbr[0]; i++) {
         if(out[nbr[i]] > 0) {
           if((out[p] == inqueue) || (flag && (out[p] == wshed))) {
             out[p] = out[nbr[i]];
@@ -172,8 +173,8 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
         out[p] = cur_lab;
         fifo_add(Q, p);
         while(Q[0] != 0) {
-          offset_nbr(fifo_pop(Q), mat_r, mat_c, o, nbr);
-          for(uint8_t i = 1; i <= nbr[0]; i++) {
+          offset_nbr(fifo_pop(Q), mat_r, mat_c, o, nbr, &count);
+          for(R_len_t i = 1; i <= nbr[0]; i++) {
             if(out[nbr[i]] == mask) {
               fifo_add(Q, nbr[i]);
               out[nbr[i]] = cur_lab;
@@ -189,8 +190,8 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
   if(!draw_lines) {
     for(k = 0; k < MAX_SIZ; k++) {
       if(out[k] == wshed) {
-        offset_nbr(k, mat_r, mat_c, o, nbr);
-        for(uint8_t i = 1; i <= nbr[0]; i++) {
+        offset_nbr(k, mat_r, mat_c, o, nbr, &count);
+        for(R_len_t i = 1; i <= nbr[0]; i++) {
           if(out[nbr[i]] > wshed) {
             fifo_add(Q, k);  
             break;
@@ -201,8 +202,8 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
     while(Q[0] != 0) {
       int p = fifo_pop(Q);
       double d, dmax = R_NegInf;
-      offset_nbr(p, mat_r, mat_c, o, nbr);
-      for(uint8_t i = 1; i <= nbr[0]; i++) {
+      offset_nbr(p, mat_r, mat_c, o, nbr, &count);
+      for(R_len_t i = 1; i <= nbr[0]; i++) {
         if(out[nbr[i]] > wshed) {
           d = std::abs(sca[nbr[i]] - sca[k]);
           if(d > dmax) {
@@ -225,8 +226,6 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 //' @description
 //' This function computes the watershed transformation of an image.
 //' @param mat, a NumericMatrix; a distance transform matrix is expected.
-//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
-//' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
 //' @param draw_lines, a bool; whether to draw watershed lines or not. Default is true.
 //' @param invert, a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
@@ -234,6 +233,8 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 //' Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
+//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @details adaptation of 'Watersheds in digital spaces: an efficient algorithm based on immersion simulations' from  L. Vincent and P. Soille.
 //' In IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(6):583-598, June 1991.\cr
 //' @source The algorithm is reviewed in 'The Watershed Transform: Definitions, Algorithms and Parallelization Strategies'
@@ -243,11 +244,11 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 ////' @export
 // [[Rcpp::export]]
 Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
-                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                       const unsigned short n_lev = 256,
                                       const bool draw_lines = true,
                                       const bool invert = false,
-                                      const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue) {
+                                      const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
+                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
   R_len_t mat_r = mat.nrow();
   R_len_t mat_c = mat.ncol();
   R_len_t MAX_SIZ = mat_r * mat_c;
@@ -279,6 +280,7 @@ Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
   Rcpp::IntegerMatrix o = offset_kernel(kernel);               // matrix of offsets in raster order
   Rcpp::IntegerVector nbr(o.ncol() + 1);                       // vector of neighbors idx
   Rcpp::IntegerVector Q = fifo_create(MAX_SIZ + 3, NA_INTEGER);// hierarchical priority queue
+  unsigned short count = 1;
   
   int h, hop, k_start = 0, k = 0, k_stop = mat.size();
   if(invert) {
@@ -312,8 +314,8 @@ Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
     for(k = k_start; k < k_stop; k++) {
       int p = idx[k];
       out[p] = mask;
-      offset_nbr(p, mat_r, mat_c, o, nbr);
-      for(uint8_t i = 1; i <= nbr[0]; i++) {
+      offset_nbr(p, mat_r, mat_c, o, nbr, &count);
+      for(R_len_t i = 1; i <= nbr[0]; i++) {
         if((out[nbr[i]] > 0) || (out[nbr[i]] == wshed)) {
           dst[p]  = 1;
           fifo_add(Q, p);
@@ -334,8 +336,8 @@ Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
           p = fifo_pop(Q);
         }
       }
-      offset_nbr(p, mat_r, mat_c, o, nbr);
-      for(uint8_t i = 1; i <= nbr[0]; i++) {
+      offset_nbr(p, mat_r, mat_c, o, nbr, &count);
+      for(R_len_t i = 1; i <= nbr[0]; i++) {
         int pp = nbr[i];
         if((dst[pp] < cur_dist) && ((out[pp] > 0) || (out[pp] == wshed))) {
           if((out[pp] > 0)) {
@@ -364,8 +366,8 @@ Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
         cur_lab++;
         fifo_add(Q, p); out[p] = cur_lab;
         while(Q[0] != 0) {
-          offset_nbr(fifo_pop(Q), mat_r, mat_c, o, nbr);
-          for(uint8_t i = 1; i <= nbr[0]; i++) {
+          offset_nbr(fifo_pop(Q), mat_r, mat_c, o, nbr, &count);
+          for(R_len_t i = 1; i <= nbr[0]; i++) {
             if(out[nbr[i]] == mask) {
               fifo_add(Q, nbr[i]);
               out[nbr[i]] = cur_lab;
@@ -381,8 +383,8 @@ Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
   if(!draw_lines) {
     for(k = 0; k < MAX_SIZ; k++) {
       if(out[k] == wshed) {
-        offset_nbr(k, mat_r, mat_c, o, nbr);
-        for(uint8_t i = 1; i <= nbr[0]; i++) {
+        offset_nbr(k, mat_r, mat_c, o, nbr, &count);
+        for(R_len_t i = 1; i <= nbr[0]; i++) {
           if(out[nbr[i]] > wshed) {
             fifo_add(Q, k);  
             break;
@@ -393,8 +395,8 @@ Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
     while(Q[0] != 0) {
       int p = fifo_pop(Q);
       double d, dmax = R_NegInf;
-      offset_nbr(p, mat_r, mat_c, o, nbr);
-      for(uint8_t i = 1; i <= nbr[0]; i++) {
+      offset_nbr(p, mat_r, mat_c, o, nbr, &count);
+      for(R_len_t i = 1; i <= nbr[0]; i++) {
         if(out[nbr[i]] > wshed) {
           d = std::abs(sca[nbr[i]] - sca[k]);
           if(d > dmax) {

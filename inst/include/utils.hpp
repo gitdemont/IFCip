@@ -77,8 +77,8 @@ Rcpp::NumericVector hpp_background(const Rcpp::NumericMatrix img,
   // compute variance
   double bkg_var = 0.0;
   for(R_len_t i_col = extra; i_col < mat_c - extra; i_col++) {
-    for(R_len_t i_row = 0; i_row < margin; i_row++) bkg_var += pow(img(i_row, i_col) - bkg_mean, 2);
-    for(R_len_t i_row = mat_r - margin; i_row < mat_r; i_row++) bkg_var += pow(img(i_row, i_col) - bkg_mean, 2);
+    for(R_len_t i_row = 0; i_row < margin; i_row++) bkg_var += std::pow(img(i_row, i_col) - bkg_mean, 2.0);
+    for(R_len_t i_row = mat_r - margin; i_row < mat_r; i_row++) bkg_var += std::pow(img(i_row, i_col) - bkg_mean, 2.0);
   }
   return Rcpp::NumericVector::create(_["BG_MEAN"] = bkg_mean, _["BG_STD"] = sqrt(bkg_var/(count_b - is_cif))); // n-1 for background
 }

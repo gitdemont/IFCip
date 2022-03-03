@@ -745,6 +745,21 @@ Rcpp::NumericMatrix cpp_sd(const Rcpp::NumericMatrix mat,
   return hpp_sd(mat, kernel);
 }
 
+//' @title Image Mean Filtering
+//' @name cpp_mean
+//' @description
+//' This function applies mean filtering on image.
+//' @param mat, a NumericMatrix.
+//' @param kernel, a NumericMatrix.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+Rcpp::NumericMatrix cpp_mean(const Rcpp::NumericMatrix mat,
+                             const Rcpp::NumericMatrix kernel) {
+  return hpp_mean(mat, kernel);
+}
+
 //' @title Image Median Filtering
 //' @name cpp_median
 //' @description
@@ -835,8 +850,9 @@ Rcpp::NumericMatrix cpp_correlate2d(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export]]
 Rcpp::NumericMatrix cpp_erode(const Rcpp::NumericMatrix mat,
                               const Rcpp::NumericMatrix kernel,
-                              const uint8_t iter = 0) {
-  return hpp_erode(mat, kernel, iter);
+                              const uint8_t iter = 0,
+                              const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+  return hpp_erode(mat, kernel, iter, msk_);
 }
 
 //' @title Image Dilatation
@@ -852,8 +868,9 @@ Rcpp::NumericMatrix cpp_erode(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export]]
 Rcpp::NumericMatrix cpp_dilate(const Rcpp::NumericMatrix mat,
                                const Rcpp::NumericMatrix kernel,
-                               const uint8_t iter = 0) {
-  return hpp_dilate(mat, kernel, iter);
+                               const uint8_t iter = 0,
+                               const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+  return hpp_dilate(mat, kernel, iter, msk_);
 }
 
 //' @title Image Opening
@@ -869,8 +886,9 @@ Rcpp::NumericMatrix cpp_dilate(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export]]
 Rcpp::NumericMatrix cpp_opening(const Rcpp::NumericMatrix mat,
                                 const Rcpp::NumericMatrix kernel,
-                                const uint8_t iter = 0) {
-  return hpp_opening(mat, kernel, iter);
+                                const uint8_t iter = 0,
+                                const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+  return hpp_opening(mat, kernel, iter, msk_);
 }
 
 //' @title Image Closing
@@ -886,8 +904,9 @@ Rcpp::NumericMatrix cpp_opening(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export]]
 Rcpp::NumericMatrix cpp_closing(const Rcpp::NumericMatrix mat,
                                 const Rcpp::NumericMatrix kernel,
-                                const uint8_t iter = 0) {
-  return hpp_closing(mat, kernel, iter);
+                                const uint8_t iter = 0,
+                                const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+  return hpp_closing(mat, kernel, iter, msk_);
 }
 
 //' @title Image Morphological Gradient
@@ -903,8 +922,9 @@ Rcpp::NumericMatrix cpp_closing(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export]]
 Rcpp::NumericMatrix cpp_gradient(const Rcpp::NumericMatrix mat,
                                  const Rcpp::NumericMatrix kernel,
-                                 const uint8_t iter = 0) {
-  return hpp_gradient(mat, kernel, iter);
+                                 const uint8_t iter = 0,
+                                 const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+  return hpp_gradient(mat, kernel, iter, msk_);
 }
 
 //' @title Image White Top Hat
@@ -920,8 +940,9 @@ Rcpp::NumericMatrix cpp_gradient(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export]]
 Rcpp::NumericMatrix cpp_tophat_white(const Rcpp::NumericMatrix mat,
                                      const Rcpp::NumericMatrix kernel,
-                                     const uint8_t iter = 0) {
-  return hpp_tophat_white(mat, kernel, iter);
+                                     const uint8_t iter = 0,
+                                     const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+  return hpp_tophat_white(mat, kernel, iter, msk_);
 }
 
 //' @title Image Black Top Hat
@@ -937,8 +958,9 @@ Rcpp::NumericMatrix cpp_tophat_white(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export]]
 Rcpp::NumericMatrix cpp_tophat_black(const Rcpp::NumericMatrix mat,
                                      const Rcpp::NumericMatrix kernel,
-                                     const uint8_t iter = 0) {
-  return hpp_tophat_black(mat, kernel, iter);
+                                     const uint8_t iter = 0,
+                                     const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+  return hpp_tophat_black(mat, kernel, iter, msk_);
 }
 
 //' @title Image Self Complementary Top Hat
@@ -954,8 +976,9 @@ Rcpp::NumericMatrix cpp_tophat_black(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export]]
 Rcpp::NumericMatrix cpp_tophat_self(const Rcpp::NumericMatrix mat,
                                     const Rcpp::NumericMatrix kernel,
-                                    const uint8_t iter = 0) {
-  return hpp_tophat_self(mat, kernel, iter);
+                                    const uint8_t iter = 0,
+                                    const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+  return hpp_tophat_self(mat, kernel, iter, msk_);
 }
 
 //' @title Image Contrast Enhancement
@@ -971,8 +994,9 @@ Rcpp::NumericMatrix cpp_tophat_self(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export]]
 Rcpp::NumericMatrix cpp_cont(const Rcpp::NumericMatrix mat,
                              const Rcpp::NumericMatrix kernel,
-                             const uint8_t iter = 0) {
-  return hpp_cont(mat, kernel, iter);
+                             const uint8_t iter = 0,
+                             const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+  return hpp_cont(mat, kernel, iter, msk_);
 }
 
 //' @title Image Laplacian
@@ -988,8 +1012,9 @@ Rcpp::NumericMatrix cpp_cont(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export]]
 Rcpp::NumericMatrix cpp_laplacian(const Rcpp::NumericMatrix mat,
                                   const Rcpp::NumericMatrix kernel,
-                                  const uint8_t iter = 0) {
-  return hpp_laplacian(mat, kernel, iter);
+                                  const uint8_t iter = 0,
+                                  const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+  return hpp_laplacian(mat, kernel, iter, msk_);
 }
 // END morphology
 
@@ -1195,8 +1220,6 @@ Rcpp::NumericMatrix cpp_geo_tophat_black (const Rcpp::NumericMatrix img,
 //' @description
 //' This function computes the watershed transformation of an image.
 //' @param mat, a NumericMatrix; a distance transform matrix is expected.
-//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
-//' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
 //' @param draw_lines, a bool; whether to draw watershed lines or not. Default is true.
 //' @param invert, a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
@@ -1204,6 +1227,8 @@ Rcpp::NumericMatrix cpp_geo_tophat_black (const Rcpp::NumericMatrix img,
 //' Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
+//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @details adaptation of 'Determining watersheds in digital pictures via flooding simulations' from P. Soille. and L. Vincent.
 //' In Proc. SPIE 1360, Visual Communications and Image Processing '90: Fifth in a Series, (1 September 1990) \url{https://doi:10.1117/12.24211}.
 //' @source MorphoLib plugin for ImageJ presents a Java implementation of the algorithm in  \url{https://github.com/ijpb/MorphoLibJ/blob/master/src/main/java/inra/ijpb/watershed/WatershedTransform2D.java} authored by Ignacio Arganda-Carreras 
@@ -1212,12 +1237,12 @@ Rcpp::NumericMatrix cpp_geo_tophat_black (const Rcpp::NumericMatrix img,
 ////' @export
 // [[Rcpp::export]]
 Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat,
-                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                       const unsigned short n_lev = 256,
                                       const bool draw_lines = true,
                                       const bool invert = false,
-                                      const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue) {
-  return hpp_watershed_sv1(mat, msk_, n_lev, draw_lines, invert, kernel);
+                                      const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
+                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+  return hpp_watershed_sv1(mat, n_lev, draw_lines, invert, kernel, msk_);
 }
 
 //' @title Watershed Transformation SV2
@@ -1225,8 +1250,6 @@ Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 //' @description
 //' This function computes the watershed transformation of an image.
 //' @param mat, a NumericMatrix; a distance transform matrix is expected.
-//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
-//' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
 //' @param draw_lines, a bool; whether to draw watershed lines or not. Default is true.
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
@@ -1234,6 +1257,8 @@ Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 //' @param invert, a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
 //' When 'mat' is the result of the distance transformation of an image, peaks (highest values) represent largest distances from background.
 //' Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.
+//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @details adaptation of 'Watersheds in digital spaces: an efficient algorithm based on immersion simulations' from  L. Vincent and P. Soille.
 //' In IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(6):583-598, June 1991.\cr
 //' @source The algorithm is reviewed in 'The Watershed Transform: Definitions, Algorithms and Parallelization Strategies'
@@ -1243,12 +1268,12 @@ Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 ////' @export
 // [[Rcpp::export]]
 Rcpp::IntegerVector cpp_watershed_sv2(const Rcpp::NumericMatrix mat,
-                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                       const unsigned short n_lev = 256,
                                       const bool draw_lines = true,
                                       const bool invert = false,
-                                      const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue) {
-  return hpp_watershed_sv2(mat, msk_, n_lev, draw_lines, invert, kernel);
+                                      const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
+                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+  return hpp_watershed_sv2(mat, n_lev, draw_lines, invert, kernel, msk_);
 }
 // END watershed
 
@@ -1410,7 +1435,9 @@ Rcpp::LogicalMatrix cpp_thinning_bst(const Rcpp::LogicalMatrix mat) {
 //' @param img2 a NumericMatrix, containing image values.
 //' @param msk a LogicalMatrix, containing mask.
 //' @details the similarity is the log transformed Pearson's Correlation Coefficient.
-//' It is a measure of the degree to which two images are linearly correlated within a masked region.
+//' It is a measure of the degree to which two images are linearly correlated within a masked region.\cr
+//' See "Quantitative measurement of nuclear translocation events using similarity analysis of multispectral cellular images obtained in flow"
+//' by T.C. George et al. Journal of Immunological Methods Volume 311, Issues 1–2, 20 April 2006, Pages 117-129 \doi{doi.org/10.1016/j.jim.2006.01.018}
 //' @return a double, the similarity.
 //' @keywords internal
 ////' @export
@@ -1419,6 +1446,27 @@ double cpp_similarity(const Rcpp::NumericMatrix img1,
                       const Rcpp::NumericMatrix img2,
                       const Rcpp::LogicalMatrix msk) {
   return hpp_similarity(img1, img2, msk);
+}
+
+//' @title Images Bright Detail Similarity Measurement
+//' @name cpp_bright_similarity
+//' @description
+//' This function is designed to score similarity between two bright detail images.
+//' @param img1 a NumericMatrix, containing bright detail image values.
+//' @param img2 a NumericMatrix, containing bright detail image values.
+//' @param msk a LogicalMatrix, containing mask.
+//' @details the bright detail similarity is the non-mean normalized version of the log transformed Pearson's Correlation Coefficient.
+//' It is designed to compare the small bright image detail of two images within a masked region.\cr
+//' See "Quantitative analysis of protein co-localization on B cells opsonized with rituximab and complement using the ImageStream multispectral imaging flow cytometer"
+//' by P.V. Beum et al. Journal of Immunological Methods Volume 317, Issues 1–2, 20 December 2006, Pages 90-99 \doi{doi.org/10.1016/j.jim.2006.09.012}
+//' @return a double, the similarity.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+double cpp_bright_similarity(const Rcpp::NumericMatrix img1,
+                             const Rcpp::NumericMatrix img2,
+                             const Rcpp::LogicalMatrix msk) {
+  return hpp_bright_similarity(img1, img2, msk);
 }
 // END similarity
 

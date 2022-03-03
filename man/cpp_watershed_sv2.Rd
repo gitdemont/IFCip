@@ -10,9 +10,6 @@ from Roerdink, J. B. T. M. and Meijster, A. (2000) in Fundamenta Informaticae, 4
 \arguments{
 \item{mat, }{a NumericMatrix; a distance transform matrix is expected.}
 
-\item{msk_, }{a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
-Default is R_NilValue, for using all 'mat' elements without masking anything.}
-
 \item{n_lev, }{an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.}
 
 \item{draw_lines, }{a bool; whether to draw watershed lines or not. Default is true.}
@@ -23,6 +20,9 @@ Default is R_NilValue, resulting in 8-connected pixels neighbors computation.}
 \item{invert, }{a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
 When 'mat' is the result of the distance transformation of an image, peaks (highest values) represent largest distances from background.
 Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.}
+
+\item{msk_, }{a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+Default is R_NilValue, for using all 'mat' elements without masking anything.}
 }
 \value{
 an IntegerMatrix.

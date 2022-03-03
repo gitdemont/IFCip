@@ -41,7 +41,9 @@ using namespace Rcpp;
 //' @param img2 a NumericMatrix, containing image values.
 //' @param msk a LogicalMatrix, containing mask.
 //' @details the similarity is the log transformed Pearson's Correlation Coefficient.
-//' It is a measure of the degree to which two images are linearly correlated within a masked region.
+//' It is a measure of the degree to which two images are linearly correlated within a masked region.\cr
+//' See "Quantitative measurement of nuclear translocation events using similarity analysis of multispectral cellular images obtained in flow"
+//' by T.C. George et al. Journal of Immunological Methods Volume 311, Issues 1–2, 20 April 2006, Pages 117-129 \doi{doi.org/10.1016/j.jim.2006.01.018}
 //' @return a double, the similarity.
 //' @keywords internal
 ////' @export
@@ -54,8 +56,6 @@ double hpp_similarity(const Rcpp::NumericMatrix img1,
   if(mat_r != img2.nrow() || mat_c != img2.ncol() || mat_r != msk.nrow() || mat_c != msk.ncol()) {
     Rcpp::stop("hpp_similarity: 'img1', 'img2' and 'msk' should have same dimensions");
   }
-  // formula in 'Highlighting curcumin-induced crosstalk between autophagy and apoptosis: A biochemical approach coupling impedancemetry, imaging, and flow cytometry.'
-  // from F. J. Sala de Oyanguren,  N. E. Rainey, A. Moustapha, A. Saric, F. Sureau, J-E O'Connor, P. X. Petit. https://doi.org/10.1101/827279 Fig.5.
   
   // compute means
   R_len_t i = 0, count = 0;
@@ -78,6 +78,45 @@ double hpp_similarity(const Rcpp::NumericMatrix img1,
       dif += foo * bar;
       sq_dif1 += foo * foo;
       sq_dif2 += bar * bar;
+    }
+  }
+  
+  // log transform
+  double ret = dif / std::sqrt(sq_dif1 * sq_dif2);
+  return std::log((1+ret)/(1-ret));
+}
+
+//' @title Images Bright Detail Similarity Measurement
+//' @name cpp_bright_similarity
+//' @description
+//' This function is designed to score similarity between two bright detail images.
+//' @param img1 a NumericMatrix, containing bright detail image values.
+//' @param img2 a NumericMatrix, containing bright detail image values.
+//' @param msk a LogicalMatrix, containing mask.
+//' @details the bright detail similarity is the non-mean normalized version of the log transformed Pearson's Correlation Coefficient.
+//' It is designed to compare the small bright image detail of two images within a masked region.\cr
+//' See "Quantitative analysis of protein co-localization on B cells opsonized with rituximab and complement using the ImageStream multispectral imaging flow cytometer"
+//' by P.V. Beum et al. Journal of Immunological Methods Volume 317, Issues 1–2, 20 December 2006, Pages 90-99 \doi{doi.org/10.1016/j.jim.2006.09.012}
+//' @return a double, the similarity.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+double hpp_bright_similarity(const Rcpp::NumericMatrix img1,
+                             const Rcpp::NumericMatrix img2,
+                             const Rcpp::LogicalMatrix msk) {
+  R_len_t mat_r = img1.nrow();
+  R_len_t mat_c = img1.ncol();
+  if(mat_r != img2.nrow() || mat_c != img2.ncol() || mat_r != msk.nrow() || mat_c != msk.ncol()) {
+    Rcpp::stop("hpp_bright_similarity: 'img1', 'img2' and 'msk' should have same dimensions");
+  }
+  
+  // compute score
+  double dif = 0.0, sq_dif1 = 0.0, sq_dif2 = 0.0;
+  for(R_len_t i = 0; i < mat_r * mat_c; i++) {
+    if(msk[i]) {
+      dif += img1[i] * img2[i];
+      sq_dif1 += img1[i] * img1[i];
+      sq_dif2 += img2[i] * img2[i];
     }
   }
   

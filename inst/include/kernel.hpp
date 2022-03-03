@@ -42,7 +42,7 @@ Rcpp::NumericMatrix get_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kernel 
   }
   if(kk.size() == 0) {
     kk = Rcpp::NumericMatrix(3,3);
-    kk.fill(1);
+    kk.fill(1.0);
   }
   return kk;
 }
@@ -110,7 +110,12 @@ void offset_nbr(const R_len_t idx,
                 const R_len_t nrow, 
                 const R_len_t ncol,
                 const Rcpp::IntegerMatrix offset,
-                Rcpp::IntegerVector nbr) {
+                Rcpp::IntegerVector nbr,
+                unsigned short *ptr) {
+  if(((*ptr)++ % 10000) == 0) {
+    *ptr = 1;
+    Rcpp::checkUserInterrupt();
+  }
   R_len_t n = 0;
   if((idx >= 0) && (idx < nrow * ncol)) {
     for(R_len_t i = 0, i_col = idx / nrow; i < offset.ncol(); i++) {

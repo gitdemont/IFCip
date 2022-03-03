@@ -43,7 +43,7 @@ Rcpp::NumericVector hpp_n_scale(Rcpp::NumericMatrix img,
   double mat_min = R_PosInf, mat_max = R_NegInf;
   if(msk_.isNotNull()) {
     Rcpp::NumericMatrix msk(msk_.get());
-    if(mat_r != msk.nrow() || mat_c != msk.ncol()) {
+    if((mat_r != msk.nrow()) || (mat_c != msk.ncol())) {
       Rcpp::stop("hpp_scale: when 'msk' is provided 'img' and 'msk' should have same dimensions");
     }
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {

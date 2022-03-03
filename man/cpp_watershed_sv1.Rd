@@ -9,9 +9,6 @@ MorphoLib plugin for ImageJ presents a Java implementation of the algorithm in  
 \arguments{
 \item{mat, }{a NumericMatrix; a distance transform matrix is expected.}
 
-\item{msk_, }{a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
-Default is R_NilValue, for using all 'mat' elements without masking anything.}
-
 \item{n_lev, }{an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.}
 
 \item{draw_lines, }{a bool; whether to draw watershed lines or not. Default is true.}
@@ -22,6 +19,9 @@ Thus, they are the ones to be filled first; this is the default behavior with 'i
 
 \item{kernel, }{a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 Default is R_NilValue, resulting in 8-connected pixels neighbors computation.}
+
+\item{msk_, }{a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+Default is R_NilValue, for using all 'mat' elements without masking anything.}
 }
 \value{
 an IntegerMatrix.
