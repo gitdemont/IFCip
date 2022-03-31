@@ -1230,7 +1230,7 @@ Rcpp::NumericMatrix cpp_geo_tophat_black (const Rcpp::NumericMatrix img,
 //' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 //' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @details adaptation of 'Determining watersheds in digital pictures via flooding simulations' from P. Soille. and L. Vincent.
-//' In Proc. SPIE 1360, Visual Communications and Image Processing '90: Fifth in a Series, (1 September 1990) \url{https://doi:10.1117/12.24211}.
+//' In Proc. SPIE 1360, Visual Communications and Image Processing '90: Fifth in a Series, (1 September 1990) \doi{10.1117/12.24211}.
 //' @source MorphoLib plugin for ImageJ presents a Java implementation of the algorithm in  \url{https://github.com/ijpb/MorphoLibJ/blob/master/src/main/java/inra/ijpb/watershed/WatershedTransform2D.java} authored by Ignacio Arganda-Carreras 
 //' @return an IntegerMatrix.
 //' @keywords internal

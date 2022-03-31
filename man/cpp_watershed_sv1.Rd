@@ -31,6 +31,6 @@ This function computes the watershed transformation of an image.
 }
 \details{
 adaptation of 'Determining watersheds in digital pictures via flooding simulations' from P. Soille. and L. Vincent.
-In Proc. SPIE 1360, Visual Communications and Image Processing '90: Fifth in a Series, (1 September 1990) \url{https://doi:10.1117/12.24211}.
+In Proc. SPIE 1360, Visual Communications and Image Processing '90: Fifth in a Series, (1 September 1990) \doi{10.1117/12.24211}.
 }
 \keyword{internal}
