@@ -8,7 +8,7 @@
 
 \item{mag}{a double, magnification scale. Default is 1.0. Use:\cr
 -1.0 for 20x\cr
--5.0 for 40x\cr
+-4.0 for 40x\cr
 -9.0 for 60x.}
 }
 \value{

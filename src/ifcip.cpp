@@ -233,7 +233,7 @@ Rcpp::NumericVector cpp_cmoment(const Rcpp::NumericMatrix img,
 //' @param img a NumericMatrix, containing image intensity values.
 //' @param mag a double, magnification scale. Default is 1.0. Use:\cr
 //' -1.0 for 20x\cr
-//' -5.0 for 40x\cr
+//' -4.0 for 40x\cr
 //' -9.0 for 60x.
 //' @return a NumericVector of Hu's moments values.\cr
 //' -Area: img's area\cr
@@ -264,7 +264,7 @@ Rcpp::NumericVector cpp_features_hu1(const Rcpp::NumericMatrix img,
 //' @param img a NumericMatrix, containing image intensity values.
 //' @param mag a double, magnification scale. Default is 1.0. Use:\cr
 //' -1.0 for 20x\cr
-//' -5.0 for 40x\cr
+//' -4.0 for 40x\cr
 //' -9.0 for 60x.
 //' @return a NumericVector of Hu's moments values.\cr
 //' -Area: img's area\cr
@@ -296,7 +296,7 @@ Rcpp::NumericVector cpp_features_hu2(const Rcpp::NumericMatrix img,
 //' @param img a NumericMatrix, containing image intensity values.
 //' @param mag a double, magnification scale. Default is 1.0. Use:\cr
 //' -1.0 for 20x\cr
-//' -5.0 for 40x\cr
+//' -4.0 for 40x\cr
 //' -9.0 for 60x.
 //' @return a NumericVector of basic features values.\cr
 //' -Area: msk's area\cr
@@ -335,7 +335,7 @@ Rcpp::NumericVector cpp_basic(const Rcpp::NumericMatrix img,
 //' Default is 0 to retrieve  features for all components.
 //' @param mag a double, magnification scale. Default is 1.0. Use:\cr
 //' -1.0 for 20x\cr
-//' -5.0 for 40x\cr
+//' -4.0 for 40x\cr
 //' -9.0 for 60x.
 //' @return a NumericMatrix whose rows are component numbers and columns are:\cr
 //' -Area, area of the component\cr
