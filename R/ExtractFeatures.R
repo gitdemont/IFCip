@@ -41,9 +41,10 @@
 #' @param removal whether to compute features on "masked" object fo each individual channels or on the globally detected object "MC".
 #' Allowed are "masked" or "MC". Default is "masked". Please note that it will overwrite 'param' value if provided.
 #' @param display_progress whether to display a progress bar. Default is TRUE.
-#' @param nmax maximal order of Zernike polynomials to be computed. Default value is 9. Values outside [0,99] will be clipped.
-#' Be aware that computation of Zernike's Moments can be quite long when 'nmax' is high.
-#' @param granularity an integer vector. Controls the grain of the Haralick texture. Default is 3. Allowed are [1-20].
+#' @param zmax maximal order of Zernike polynomials to be computed. Default is -1L for no computation.
+#' Values outside [0,99] will be clipped. Be aware that computation of Zernike's Moments can be quite long when 'zmax' is high.
+#' @param granularity an integer vector. Controls the grain of the Haralick texture.
+#' Default is -1L for no computation. Allowed are [1-20].
 #' For very fine textures, this value is small (1-3 pixels), while for very coarse textures, it is large (>10).
 #' @param batch number of objects to process at the same time. Default is 20.
 #' @param parallel whether to use parallelization. Default is FALSE. Note that parallelization requires a parallel backend to be registered (see example).
@@ -112,8 +113,8 @@ ExtractFeatures <- function(...,
                             offsets,
                             removal = "masked",
                             display_progress = TRUE,
-                            nmax = 9,
-                            granularity = 3,
+                            zmax = -1L,
+                            granularity = -1L,
                             batch = 20,
                             parallel = FALSE)  {
   dots=list(...)
@@ -253,14 +254,19 @@ ExtractFeatures <- function(...,
   
   ##### PAY ATTENTION TO MODIFY THIS PART IF NAMES ARE CHANGED IF DEDICATED FUNCTIONS
   # pre compute names in case object is not masked
-  names_zernike = unlist(lapply(0:(nmax+1), FUN = function(a) { 
-    foo = as.logical(sapply(0:a, FUN = function(b) {
-      return (b %% 2)
+  do_zernike = !all(zmax == -1L)
+  do_haralick = !all(granularity == -1L)
+  if(do_zernike) {
+    zmax = na.omit(as.integer(zmax)); zmax = zmax[(zmax>=0) && (zmax<=99)]; assert(zmax, len = 1, alw = 0:99)
+    names_zernike = unlist(lapply(0:(zmax+1), FUN = function(a) { 
+      foo = as.logical(sapply(0:a, FUN = function(b) {
+        return (b %% 2)
+      }))
+      if(a %% 2) foo = !foo
+      sprintf("zn%02im%02i", a-1, which(foo)-1)
     }))
-    if(a %% 2) foo = !foo
-    sprintf("zn%02im%02i", a-1, which(foo)-1)
-  }))
-  no_zernike = structure(rep(NA, length(names_zernike)), names = names_zernike)
+    no_zernike = structure(rep(NA, length(names_zernike)), names = names_zernike)
+  }
   names_shape = c("Perimeter", "Diameter", "Circularity", "convexity", "roundness", 
                   "Height", "Width", "Elongatedness", "convex perimeter",
                   "convex cx", "convex cy")
@@ -376,13 +382,18 @@ ExtractFeatures <- function(...,
             # modulation TODO ask Amnis
             # max_intensity -  min_intensity / max_intensity + min_intensity is not working
             # modulation = (attr(img, "BG_MEAN") - (hu["Raw Max Pixel"] - hu["Raw Min Pixel"])) / ((hu["Raw Max Pixel"] + hu["Raw Min Pixel"])) 
-            ze = try(moments_Zernike(img = i_chan, centroid = c(hu["pix cx"], hu["pix cy"]), radius = max(2, hu["pix maj axis"]/2+1), nmax = nmax, full = FALSE)$zmoment, silent = TRUE)
-            if(inherits(x = ze, what = "try-error")) {
-              ze = no_zernike
+            if(do_zernike) {
+              ze = try(moments_Zernike(img = i_chan, centroid = c(hu["pix cx"], hu["pix cy"]), radius = max(2, hu["pix maj axis"]/2+1), zmax = zmax, full = FALSE)$zmoment, silent = TRUE)
+              if(inherits(x = ze, what = "try-error")) ze = no_zernike
+            } else {
+              ze = NULL
             }
-            # return(c(hu, intensity, ze))
-            har = compute_haralick(img = i_chan, msk = msk, granularity = granularity, bits = 4)
-            return(c(hu, shape, intensities, ze, structure(unlist(har), names = paste0(apply(expand.grid(dimnames(har))[,c(2,1,3)], 1, paste0, collapse = " ")))))
+            if(do_haralick) {
+              har = compute_haralick(img = i_chan, msk = msk, granularity = granularity, bits = 4)
+              return(c(hu, shape, intensities, ze, structure(unlist(har), names = paste0(apply(expand.grid(dimnames(har))[,c(2,1,3)], 1, paste0, collapse = " ")))))
+            } else {
+              return(c(hu, shape, intensities, ze))
+            }
           })
           attr(foo, "object_id") <- attr(i_img, "object_id")
           attr(foo, "offset_id") <- attr(i_img, "offset_id")
@@ -392,12 +403,15 @@ ExtractFeatures <- function(...,
         })
       })
     } else {
-      if(show_pb) pb = newPB(session = dots$session, min = 0, max = L, initial = 0, style = 3)
-      if(show_pb) setPB(pb, value = 0, title = title_progress, label = "progress bar will not update with parallel work but it is computing features from images")
+      if(display_progress) {
+        show_pb <- TRUE
+        pb = newPB(session = dots$session, min = 0, max = L, initial = 0, style = 3)
+        setPB(pb, value = L, title = title_progress, label = "progress bar will not update with parallel work but it is computing features from images")
+      }
       ans = list(foreach::foreach(ifcip_iter = 1:L, .combine = "c", .verbose = FALSE, .packages = c("IFC","IFCip"),
                          .export = c("cpp_features_hu3", "compute_haralick","assert","cpp_h_features","cpp_cooc","cpp_ctl",
                                      "cpp_background","cpp_closing","cpp_sd","cpp_fill","cpp_k_equal_M","mask_identify2","make_kernel",
-                                     "cpp_getTAGS")) %op% { 
+                                     "cpp_getTAGS")) %op% {
                            img = do.call(what = "objectExtract", args = c(list(ifd = lapply(sel[[ifcip_iter]],
                                                                                             FUN = function(off) cpp_getTAGS(fname = param$fileName_image,
                                                                                                                             offset = off,
@@ -468,12 +482,18 @@ ExtractFeatures <- function(...,
             # modulation TODO ask Amnis
             # max_intensity -  min_intensity / max_intensity + min_intensity is not working
             # modulation = (attr(img, "BG_MEAN") - (hu["Raw Max Pixel"] - hu["Raw Min Pixel"])) / ((hu["Raw Max Pixel"] + hu["Raw Min Pixel"])) 
-            ze = try(moments_Zernike(img = i_chan, centroid = c(hu["pix cx"], hu["pix cy"]), radius = max(2, hu["pix maj axis"]/2+1), nmax = nmax, full = FALSE)$zmoment, silent = TRUE)
-            if(inherits(x = ze, what = "try-error")) {
-              ze = no_zernike
+            if(do_zernike) {
+              ze = try(moments_Zernike(img = i_chan, centroid = c(hu["pix cx"], hu["pix cy"]), radius = max(2, hu["pix maj axis"]/2+1), zmax = zmax, full = FALSE)$zmoment, silent = TRUE)
+              if(inherits(x = ze, what = "try-error")) ze = no_zernike
+            } else {
+              ze = NULL
             }
-            har = compute_haralick(img = i_chan, msk = msk, granularity = granularity, bits = 4)
-            return(c(hu, shape, intensities, ze, structure(unlist(har), names = paste0(apply(expand.grid(dimnames(har))[,c(2,1,3)], 1, paste0, collapse = " ")))))
+            if(do_haralick) {
+              har = compute_haralick(img = i_chan, msk = msk, granularity = granularity, bits = 4)
+              return(c(hu, shape, intensities, ze, structure(unlist(har), names = paste0(apply(expand.grid(dimnames(har))[,c(2,1,3)], 1, paste0, collapse = " ")))))
+            } else {
+              return(c(hu, shape, intensities, ze))
+            }
           })
           attr(foo, "object_id") <- attr(i_img, "object_id")
           attr(foo, "offset_id") <- attr(i_img, "offset_id")

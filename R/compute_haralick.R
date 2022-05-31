@@ -57,7 +57,7 @@ compute_haralick = function(img, msk, granularity = 3, bits = 4) {
   }
   assert(img, cla = "IFC_img")
   assert(bits, len = 1, alw = 2:10)
-  granularity = as.integer(granularity); granularity = granularity[granularity>0]; granularity = na.omit(granularity[is.finite(granularity)])
+  granularity = na.omit(as.integer(granularity));
   assert(granularity, alw = c(1:20))
   
   # clip img to 0-4095

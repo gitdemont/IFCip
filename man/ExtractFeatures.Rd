@@ -10,8 +10,8 @@ ExtractFeatures(
   offsets,
   removal = "masked",
   display_progress = TRUE,
-  nmax = 9,
-  granularity = 3,
+  zmax = -1L,
+  granularity = -1L,
   batch = 20,
   parallel = FALSE
 )
@@ -33,10 +33,11 @@ Allowed are "masked" or "MC". Default is "masked". Please note that it will over
 
 \item{display_progress}{whether to display a progress bar. Default is TRUE.}
 
-\item{nmax}{maximal order of Zernike polynomials to be computed. Default value is 9. Values outside [0,99] will be clipped.
-Be aware that computation of Zernike's Moments can be quite long when 'nmax' is high.}
+\item{zmax}{maximal order of Zernike polynomials to be computed. Default is -1L for no computation.
+Values outside [0,99] will be clipped. Be aware that computation of Zernike's Moments can be quite long when 'zmax' is high.}
 
-\item{granularity}{an integer vector. Controls the grain of the Haralick texture. Default is 3. Allowed are [1-20].
+\item{granularity}{an integer vector. Controls the grain of the Haralick texture.
+Default is -1L for no computation. Allowed are [1-20].
 For very fine textures, this value is small (1-3 pixels), while for very coarse textures, it is large (>10).}
 
 \item{batch}{number of objects to process at the same time. Default is 20.}

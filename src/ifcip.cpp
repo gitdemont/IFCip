@@ -526,8 +526,8 @@ Rcpp::IntegerMatrix cpp_voronoi_manh (const Rcpp::IntegerMatrix img) {
 //' @param img a NumericMatrix, containing image intensity values.
 //' @param cx a double. X centroid.
 //' @param cy a double. Y centroid.
-//' @param nmax a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
-//' Be aware that computation of Zernike's moments can be quite long when 'nmax' is high.
+//' @param zmax a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
+//' Be aware that computation of Zernike's moments can be quite long when 'zmax' is high.
 //' @param radius a numeric, radius of the circle in pixels around object centers from which the features are calculated. Default is 15.
 //' @source Adaptation from \url{https://github.com/aoles/EBImage} in v3.12.0, authored by Andrzej Oles, Gregoire Pau, Mike Smith, Oleg Sklyar, Wolfgang Huber, with contributions from Joseph Barry and Philip A. Marais \email{andrzej.oles@embl.de}.
 //' @keywords internal
@@ -536,9 +536,9 @@ Rcpp::IntegerMatrix cpp_voronoi_manh (const Rcpp::IntegerMatrix img) {
 Rcpp::List cpp_zernike1(const Rcpp::NumericMatrix img,
                         const double cx,
                         const double cy,
-                        const uint8_t nmax = 15,
+                        const uint8_t zmax = 15,
                         const double radius = 15.0) {
-  return hpp_zernike1(img, cx, cy, nmax, radius);
+  return hpp_zernike1(img, cx, cy, zmax, radius);
 }
 
 //' @title Zernike's Features with Projections
@@ -549,8 +549,8 @@ Rcpp::List cpp_zernike1(const Rcpp::NumericMatrix img,
 //' @param img a NumericMatrix, containing image intensity values.
 //' @param cx a double. X centroid.
 //' @param cy a double. Y centroid.
-//' @param nmax a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
-//' Be aware that computation of Zernike's moments can be quite long when 'nmax' is high.
+//' @param zmax a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
+//' Be aware that computation of Zernike's moments can be quite long when 'zmax' is high.
 //' @param radius a numeric, radius of the circle in pixels around object centers from which the features are calculated. Default is 15.
 //' @source Adaptation from \url{https://github.com/aoles/EBImage} in v3.12.0, authored by Andrzej Oles, Gregoire Pau, Mike Smith, Oleg Sklyar, Wolfgang Huber, with contributions from Joseph Barry and Philip A. Marais \email{andrzej.oles@embl.de}.
 //' @keywords internal
@@ -559,9 +559,9 @@ Rcpp::List cpp_zernike1(const Rcpp::NumericMatrix img,
 Rcpp::List cpp_zernike2(const Rcpp::NumericMatrix img, 
                         const double cx, 
                         const double cy, 
-                        const uint8_t nmax = 15, 
+                        const uint8_t zmax = 15, 
                         const double radius = 15.0) {
-  return hpp_zernike2(img, cx, cy, nmax, radius);
+  return hpp_zernike2(img, cx, cy, zmax, radius);
 }
 // END zernike
 

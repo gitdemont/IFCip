@@ -31,9 +31,9 @@
 #' @param img an object of class `IFC_img` or `IFC_msk`.
 #' @param centroid a length 2 numeric vector of img centroids.
 #' When missing, the default, it will be computed from img.
-#' @param nmax an integer. Indicates the maximal order of Zernike polynomials
+#' @param zmax an integer. Indicates the maximal order of Zernike polynomials
 #' to be computed. Default value is 15. Values outside [0,99] will be clipped.
-#' Be aware that computation of Zernike's moments can be quite long when 'nmax' is high.
+#' Be aware that computation of Zernike's moments can be quite long when 'zmax' is high.
 #' @param radius a numeric. Defines the radius of the circle in pixels around
 #' component center from which the features are calculated. Default is 30.
 #' @param full a logical. Controls the quantity of information that will be returned. Default is FALSE.
@@ -42,7 +42,7 @@
 #' @details Zernike features are computed by projecting image on Zernike complex polynomials.
 #' @source adapted from File src/features_zernike.c in EBImage R package in its version 3.12.0 available at \url{https://www.bioconductor.org/packages/2.10/bioc/html/EBImage.html}
 #' @export
-moments_Zernike <- function(img, centroid, nmax = 15, radius = 30, full = FALSE) {
+moments_Zernike <- function(img, centroid, zmax = 15, radius = 30, full = FALSE) {
   if(!any(inherits(img, what = c("IFC_img", "IFC_msk")))) stop("'img' be should of class `IFC_img` or `IFC_msk`")
   if(missing(centroid)) {
     centroid = cpp_centroid(img)
@@ -50,11 +50,11 @@ moments_Zernike <- function(img, centroid, nmax = 15, radius = 30, full = FALSE)
     centroid = na.omit(as.numeric(centroid));
     if(length(centroid) < 2) stop("when provided 'centroid' should be a numeric vector of at least length 2")
   }
-  nmax = na.omit(as.integer(nmax)); Namx = nmax[nmax>0]; assert(nmax, len = 1, typ = "integer")
+  zmax = na.omit(as.integer(zmax)); zmax = zmax[(zmax>=0) && (zmax<=99)]; assert(zmax, len = 1, alw = 0:99)
   radius = na.omit(as.integer(radius)); assert(radius, len = 1, typ = "integer")
   full = na.omit(as.logical(full)); assert(full, len = 1, alw = c(TRUE, FALSE))
   if(full) {
-    foo = cpp_zernike2(img = img, cx = centroid[1], cy = centroid[2], nmax = nmax, radius = radius)
+    foo = cpp_zernike2(img = img, cx = centroid[1], cy = centroid[2], zmax = zmax, radius = radius)
     L = length(foo$zmoment)
     even = array(foo[["even"]], dim = c(dim(img), L))
     odd = array(foo[["odd"]], dim = c(dim(img), L))
@@ -65,7 +65,7 @@ moments_Zernike <- function(img, centroid, nmax = 15, radius = 30, full = FALSE)
     foo[["even"]] = even
     foo[["odd"]] = odd
   }  else{
-    foo = cpp_zernike1(img = img, cx = centroid[1], cy = centroid[2], nmax = nmax, radius = radius)
+    foo = cpp_zernike1(img = img, cx = centroid[1], cy = centroid[2], zmax = zmax, radius = radius)
   }
   class(foo) = "IFCip_zernike"
   return(foo)

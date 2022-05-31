@@ -7,7 +7,7 @@
 adapted from File src/features_zernike.c in EBImage R package in its version 3.12.0 available at \url{https://www.bioconductor.org/packages/2.10/bioc/html/EBImage.html}
 }
 \usage{
-moments_Zernike(img, centroid, nmax = 15, radius = 30, full = FALSE)
+moments_Zernike(img, centroid, zmax = 15, radius = 30, full = FALSE)
 }
 \arguments{
 \item{img}{an object of class `IFC_img` or `IFC_msk`.}
@@ -15,9 +15,9 @@ moments_Zernike(img, centroid, nmax = 15, radius = 30, full = FALSE)
 \item{centroid}{a length 2 numeric vector of img centroids.
 When missing, the default, it will be computed from img.}
 
-\item{nmax}{an integer. Indicates the maximal order of Zernike polynomials
+\item{zmax}{an integer. Indicates the maximal order of Zernike polynomials
 to be computed. Default value is 15. Values outside [0,99] will be clipped.
-Be aware that computation of Zernike's moments can be quite long when 'nmax' is high.}
+Be aware that computation of Zernike's moments can be quite long when 'zmax' is high.}
 
 \item{radius}{a numeric. Defines the radius of the circle in pixels around
 component center from which the features are calculated. Default is 30.}

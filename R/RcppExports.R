@@ -333,8 +333,8 @@ NULL
 #' @param img a NumericMatrix, containing image intensity values.
 #' @param cx a double. X centroid.
 #' @param cy a double. Y centroid.
-#' @param nmax a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
-#' Be aware that computation of Zernike's moments can be quite long when 'nmax' is high.
+#' @param zmax a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
+#' Be aware that computation of Zernike's moments can be quite long when 'zmax' is high.
 #' @param radius a numeric, radius of the circle in pixels around object centers from which the features are calculated. Default is 15.
 #' @source Adaptation from \url{https://github.com/aoles/EBImage} in v3.12.0, authored by Andrzej Oles, Gregoire Pau, Mike Smith, Oleg Sklyar, Wolfgang Huber, with contributions from Joseph Barry and Philip A. Marais \email{andrzej.oles@embl.de}.
 #' @keywords internal
@@ -348,8 +348,8 @@ NULL
 #' @param img a NumericMatrix, containing image intensity values.
 #' @param cx a double. X centroid.
 #' @param cy a double. Y centroid.
-#' @param nmax a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
-#' Be aware that computation of Zernike's moments can be quite long when 'nmax' is high.
+#' @param zmax a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
+#' Be aware that computation of Zernike's moments can be quite long when 'zmax' is high.
 #' @param radius a numeric, radius of the circle in pixels around object centers from which the features are calculated. Default is 15.
 #' @source Adaptation from \url{https://github.com/aoles/EBImage} in v3.12.0, authored by Andrzej Oles, Gregoire Pau, Mike Smith, Oleg Sklyar, Wolfgang Huber, with contributions from Joseph Barry and Philip A. Marais \email{andrzej.oles@embl.de}.
 #' @keywords internal
@@ -1112,12 +1112,12 @@ cpp_voronoi_manh <- function(img) {
     .Call(`_IFCip_cpp_voronoi_manh`, img)
 }
 
-cpp_zernike1 <- function(img, cx, cy, nmax = 15L, radius = 15.0) {
-    .Call(`_IFCip_cpp_zernike1`, img, cx, cy, nmax, radius)
+cpp_zernike1 <- function(img, cx, cy, zmax = 15L, radius = 15.0) {
+    .Call(`_IFCip_cpp_zernike1`, img, cx, cy, zmax, radius)
 }
 
-cpp_zernike2 <- function(img, cx, cy, nmax = 15L, radius = 15.0) {
-    .Call(`_IFCip_cpp_zernike2`, img, cx, cy, nmax, radius)
+cpp_zernike2 <- function(img, cx, cy, zmax = 15L, radius = 15.0) {
+    .Call(`_IFCip_cpp_zernike2`, img, cx, cy, zmax, radius)
 }
 
 cpp_AND_M <- function(list) {

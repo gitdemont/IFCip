@@ -289,32 +289,32 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_zernike1
-Rcpp::List cpp_zernike1(const Rcpp::NumericMatrix img, const double cx, const double cy, const uint8_t nmax, const double radius);
-RcppExport SEXP _IFCip_cpp_zernike1(SEXP imgSEXP, SEXP cxSEXP, SEXP cySEXP, SEXP nmaxSEXP, SEXP radiusSEXP) {
+Rcpp::List cpp_zernike1(const Rcpp::NumericMatrix img, const double cx, const double cy, const uint8_t zmax, const double radius);
+RcppExport SEXP _IFCip_cpp_zernike1(SEXP imgSEXP, SEXP cxSEXP, SEXP cySEXP, SEXP zmaxSEXP, SEXP radiusSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
     Rcpp::traits::input_parameter< const double >::type cx(cxSEXP);
     Rcpp::traits::input_parameter< const double >::type cy(cySEXP);
-    Rcpp::traits::input_parameter< const uint8_t >::type nmax(nmaxSEXP);
+    Rcpp::traits::input_parameter< const uint8_t >::type zmax(zmaxSEXP);
     Rcpp::traits::input_parameter< const double >::type radius(radiusSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_zernike1(img, cx, cy, nmax, radius));
+    rcpp_result_gen = Rcpp::wrap(cpp_zernike1(img, cx, cy, zmax, radius));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_zernike2
-Rcpp::List cpp_zernike2(const Rcpp::NumericMatrix img, const double cx, const double cy, const uint8_t nmax, const double radius);
-RcppExport SEXP _IFCip_cpp_zernike2(SEXP imgSEXP, SEXP cxSEXP, SEXP cySEXP, SEXP nmaxSEXP, SEXP radiusSEXP) {
+Rcpp::List cpp_zernike2(const Rcpp::NumericMatrix img, const double cx, const double cy, const uint8_t zmax, const double radius);
+RcppExport SEXP _IFCip_cpp_zernike2(SEXP imgSEXP, SEXP cxSEXP, SEXP cySEXP, SEXP zmaxSEXP, SEXP radiusSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
     Rcpp::traits::input_parameter< const double >::type cx(cxSEXP);
     Rcpp::traits::input_parameter< const double >::type cy(cySEXP);
-    Rcpp::traits::input_parameter< const uint8_t >::type nmax(nmaxSEXP);
+    Rcpp::traits::input_parameter< const uint8_t >::type zmax(zmaxSEXP);
     Rcpp::traits::input_parameter< const double >::type radius(radiusSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_zernike2(img, cx, cy, nmax, radius));
+    rcpp_result_gen = Rcpp::wrap(cpp_zernike2(img, cx, cy, zmax, radius));
     return rcpp_result_gen;
 END_RCPP
 }

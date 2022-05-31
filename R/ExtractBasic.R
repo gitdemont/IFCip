@@ -264,9 +264,9 @@ ExtractBasic <- function(...,
     return(NULL)
   }
   
-  if(show_pb) pb = newPB(session = dots$session, min = 0, max = L, initial = 0, style = 3)
   tryCatch({
     if(show_pb) {
+      pb = newPB(session = dots$session, min = 0, max = L, initial = 0, style = 3)
       ans = lapply(1:L, FUN=function(ifcip_iter) {
         if(show_pb) setPB(pb, value = ifcip_iter, title = title_progress, label = "computing base features from images")
         img = do.call(what = "objectExtract", args = c(list(ifd = lapply(sel[[ifcip_iter]],
@@ -315,7 +315,11 @@ ExtractBasic <- function(...,
         })
       })
     } else {
-      if(show_pb) setPB(pb, value = 0, title = title_progress, label = "progress bar will not update with parallel work but it is computing base features from images")
+      if(display_progress) {
+        show_pb <- TRUE
+        pb = newPB(session = dots$session, min = 0, max = L, initial = 0, style = 3)
+        setPB(pb, value = L, title = title_progress, label = "progress bar will not update with parallel work but it is computing base features from images")
+      }
       ans = list(foreach::foreach(ifcip_iter = 1:L, .combine = "c", .verbose = FALSE, .packages = c("IFC","IFCip"),
                          .export = c("cpp_features_hu1","cpp_basic","cpp_background","cpp_closing","cpp_convolve2d","assert",
                                      "cpp_closing","cpp_sd","cpp_fill","cpp_ctl","cpp_k_equal_M","mask_identify2","make_kernel",

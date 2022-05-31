@@ -13,8 +13,8 @@ Adaptation from \url{https://github.com/aoles/EBImage} in v3.12.0, authored by A
 
 \item{cy}{a double. Y centroid.}
 
-\item{nmax}{a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
-Be aware that computation of Zernike's moments can be quite long when 'nmax' is high.}
+\item{zmax}{a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
+Be aware that computation of Zernike's moments can be quite long when 'zmax' is high.}
 
 \item{radius}{a numeric, radius of the circle in pixels around object centers from which the features are calculated. Default is 15.}
 }
