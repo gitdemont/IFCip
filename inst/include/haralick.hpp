@@ -192,37 +192,27 @@ Rcpp::List hpp_cooc(const Rcpp::IntegerMatrix img,
   Rcpp::NumericMatrix P2 = Rcpp::no_init_matrix(depth, depth);
   Rcpp::NumericMatrix P3 = Rcpp::no_init_matrix(depth, depth);
   Rcpp::NumericMatrix P4 = Rcpp::no_init_matrix(depth, depth);
-  // Rcpp::NumericMatrix P5 = Rcpp::no_init_matrix(depth, depth);
-  // Rcpp::NumericMatrix P6 = Rcpp::no_init_matrix(depth, depth);
-  
-  for(R_len_t i_col = 0; i_col < depth; i_col++) {
-    for(R_len_t i_row = 0; i_row < depth; i_row++) {
-      /* 
-       It could have been faster to determine mean but we need the 4 cooc matrices
-       to compute std afterwards
-       Rcpp::NumericVector V = Rcpp::NumericVector::create(G1(i_row, i_col)/ K1, 
-                                                     G2(i_row, i_col)/ K2, 
-                                                     G3(i_row, i_col)/ K3, 
-                                                     G4(i_row, i_col)/ K4);
-       P1(i_row, i_col) = V[0];
-       P2(i_row, i_col) = V[1];
-       P3(i_row, i_col) = V[2];
-       P4(i_row, i_col) = V[3];
-       P5(i_row, i_col) = Rcpp::mean(V);
-       P6(i_row, i_col) = Rcpp::sd(V);
-       Rcpp::List out = Rcpp::List::create(_["P+x0y"] = P3, // 000, 180
-                                           _["P+x-y"] = P4, // 045, 225
-                                           _["P0x+y"] = P1, // 090, 270
-                                           _["P+x+y"] = P2, // 135, 315
-                                           _["mean"] = P5,  // all directions
-                                           _["sd"] = P6);
-      */
-      P1(i_row, i_col) = G1(i_row, i_col)/ K1;
-      P2(i_row, i_col) = G2(i_row, i_col)/ K2;
-      P3(i_row, i_col) = G3(i_row, i_col)/ K3;
-      P4(i_row, i_col) = G4(i_row, i_col)/ K4;
-    }
+  if(K1 > 0){
+    for(R_len_t i = 0; i < P1.size(); i++) P1[i] = G1[i] / K1;
+  } else {
+    P1 = Rcpp::clone(G1);
   }
+  if(K2 > 0) {
+    for(R_len_t i = 0; i < P2.size(); i++) P2[i] = G2[i] / K2;
+  } else {
+    P2 = Rcpp::clone(G2);
+  }
+  if(K3 > 0) {
+    for(R_len_t i = 0; i < P3.size(); i++) P3[i] = G3[i] / K3;
+  } else {
+    P3 = Rcpp::clone(G3);
+  }
+  if(K4 > 0) {
+    for(R_len_t i = 0; i < P4.size(); i++) P4[i] = G4[i] / K4;
+  } else {
+    P4 = Rcpp::clone(G4);
+  }
+  
   P1.attr("class") = "IFCip_cooc";
   P1.attr("delta") = delta;
   P2.attr("class") = "IFCip_cooc";
@@ -256,7 +246,7 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::NumericMatrix cooc,
     Rcpp::stop("hpp_h_features: 'cooc' should be of class `IFCip_cooc`");
   }
   R_len_t N = cooc.ncol();
-  double mu_x, mu_y, sig_x, sig_y, mu_xpy, mu_xmy,
+  double mu_x, mu_y, sig_x, sig_y, sig_sqr, mu_xpy, mu_xmy,
          HX, HY, HXY, HXY1, HXY2;
   double a_cor, con, cor, d_ent, d_var, dis, nrj, ent, hom, // hom2, 
          imc1, imc2, i_dif, p_max, s_ent, s_var;
@@ -327,6 +317,7 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::NumericMatrix cooc,
     sig_y += std::pow(i_col1 * d - mu_y, 2.0) * p_y[i_col1];
   }
   
+  sig_sqr = std::sqrt(sig_x * sig_y);
   mu_xpy = 0.0;
   s_ent = 0.0;
   mu_xmy = 0.0;
@@ -377,6 +368,7 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::NumericMatrix cooc,
     }
   }
   imc1 = (HXY - HXY1) / std::max(HX, HY);
+  if(std::max(HX, HY) == 0.0) imc1 = 0.0; // to avoid division by 0
   imc2 = std::sqrt(1 - std::exp(-2*(HXY2 - HXY)));
   // mcc = std::sqrt(lambda(Q(i_col1, i_row1)))
   
@@ -407,7 +399,7 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::NumericMatrix cooc,
       c_sha += std::pow(i_row1 * d + i_col1 * d - mu, 4.0) * p(i_row, i_col);
       con += std::pow(i_row1 * d - i_col1 * d, 2.0) * p(i_row, i_col);
       // CORRELATION
-      cor += (i_row1 * d - mu_x) * (i_col1 * d - mu_y) * p(i_row, i_col) / std::sqrt(sig_x * sig_y);
+      cor += (i_row1 * d - mu_x) * (i_col1 * d - mu_y) * p(i_row, i_col) / sig_sqr;
       // CONTRAST
       dis += std::abs(i_row1 * d - i_col1 * d) * p(i_row, i_col);
       // ANGULAR SECOND MOMENT
@@ -426,6 +418,7 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::NumericMatrix cooc,
       s_sqr += (i_row1 - mu) * (i_row1 - mu) * p(i_row, i_col);
     }
   }
+  if(sig_sqr == 0.0) cor = 0.0; // to avoid division by 0
   
   return Rcpp::NumericVector::create(_["autocorrelation"] = a_cor,
                                      _["H Contrast"] = con / N / N, // IDEAS H_Contrast con is divided by probability since IDEAS claims contrast is [0,1]

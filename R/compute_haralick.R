@@ -65,7 +65,7 @@ compute_haralick = function(img, msk, granularity = 3, bits = 4) {
   # TODO ask Amnis what they choose: normalization / clip...
   # otherwise use cpp_R_shift_M which generate error when img is outside [0,4095]
   rescaled = cpp_rescale_M(img, bits = bits)
-
+  
   ans = lapply(granularity, FUN = function(i) {
     apply(sapply(cpp_cooc(img = rescaled, msk = msk, delta = i), cpp_h_features), 1, FUN = function(x) c(mean(x), sd(x)))
   })
