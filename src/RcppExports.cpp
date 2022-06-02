@@ -60,14 +60,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_rescale_M
-Rcpp::IntegerMatrix cpp_rescale_M(const Rcpp::NumericMatrix mat, const uint8_t bits);
-RcppExport SEXP _IFCip_cpp_rescale_M(SEXP matSEXP, SEXP bitsSEXP) {
+Rcpp::IntegerMatrix cpp_rescale_M(const Rcpp::IntegerMatrix img, const Rcpp::Nullable<Rcpp::NumericMatrix> msk_, const uint8_t bits);
+RcppExport SEXP _IFCip_cpp_rescale_M(SEXP imgSEXP, SEXP msk_SEXP, SEXP bitsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix >::type img(imgSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type msk_(msk_SEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type bits(bitsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_rescale_M(mat, bits));
+    rcpp_result_gen = Rcpp::wrap(cpp_rescale_M(img, msk_, bits));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -994,7 +995,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_antipodalpairs", (DL_FUNC) &_IFCip_cpp_antipodalpairs, 1},
     {"_IFCip_cpp_bbox", (DL_FUNC) &_IFCip_cpp_bbox, 2},
     {"_IFCip_cpp_R_shift_M", (DL_FUNC) &_IFCip_cpp_R_shift_M, 2},
-    {"_IFCip_cpp_rescale_M", (DL_FUNC) &_IFCip_cpp_rescale_M, 2},
+    {"_IFCip_cpp_rescale_M", (DL_FUNC) &_IFCip_cpp_rescale_M, 3},
     {"_IFCip_cpp_cooc", (DL_FUNC) &_IFCip_cpp_cooc, 3},
     {"_IFCip_cpp_h_features", (DL_FUNC) &_IFCip_cpp_h_features, 2},
     {"_IFCip_cpp_centroid", (DL_FUNC) &_IFCip_cpp_centroid, 1},

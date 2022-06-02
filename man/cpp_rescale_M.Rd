@@ -4,13 +4,15 @@
 \alias{cpp_rescale_M}
 \title{hpp_rescale_M}
 \arguments{
-\item{mat}{a Rcpp::NumericMatrix, containing image intensity values.}
+\item{img}{a Rcpp::IntegerMatrix, containing image intensity values.}
 
-\item{bits}{uint8_t number of bit to shift matrix values. Default is 4. Allowed are [2,10].
-Rescaled values will normalized to [0, 2^bits - 1]}
+\item{msk_, }{a Rcpp::NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+Default is R_NilValue, for using all 'img' elements without masking anything.}
+
+\item{bits}{uint8_t number of bit to shift matrix values. Default is 4. Allowed are [2,10].}
 }
 \value{
-an Rcpp::IntegerMatrix.
+a Rcpp::IntegerMatrix.
 }
 \description{
 This function is designed to rescale a matrix to [0, 2^bits - 1]

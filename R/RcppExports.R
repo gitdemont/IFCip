@@ -39,10 +39,11 @@ NULL
 #' @name cpp_rescale_M
 #' @description
 #' This function is designed to rescale a matrix to [0, 2^bits - 1]
-#' @param mat a Rcpp::NumericMatrix, containing image intensity values.
+#' @param img a Rcpp::IntegerMatrix, containing image intensity values.
+#' @param msk_, a Rcpp::NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+#' Default is R_NilValue, for using all 'img' elements without masking anything.
 #' @param bits uint8_t number of bit to shift matrix values. Default is 4. Allowed are [2,10].
-#' Rescaled values will normalized to [0, 2^bits - 1]
-#' @return an Rcpp::IntegerMatrix.
+#' @return a Rcpp::IntegerMatrix.
 #' @keywords internal
 NULL
 
@@ -1036,8 +1037,8 @@ cpp_R_shift_M <- function(mat, bits = 4L) {
     .Call(`_IFCip_cpp_R_shift_M`, mat, bits)
 }
 
-cpp_rescale_M <- function(mat, bits = 4L) {
-    .Call(`_IFCip_cpp_rescale_M`, mat, bits)
+cpp_rescale_M <- function(img, msk_ = NULL, bits = 4L) {
+    .Call(`_IFCip_cpp_rescale_M`, img, msk_, bits)
 }
 
 cpp_cooc <- function(img, msk, delta = 1L) {

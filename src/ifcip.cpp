@@ -125,16 +125,18 @@ Rcpp::IntegerMatrix cpp_R_shift_M(const Rcpp::IntegerMatrix mat,
 //' @name cpp_rescale_M
 //' @description
 //' This function is designed to rescale a matrix to [0, 2^bits - 1]
-//' @param mat a Rcpp::NumericMatrix, containing image intensity values.
+//' @param img a Rcpp::IntegerMatrix, containing image intensity values.
+//' @param msk_, a Rcpp::NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' Default is R_NilValue, for using all 'img' elements without masking anything.
 //' @param bits uint8_t number of bit to shift matrix values. Default is 4. Allowed are [2,10].
-//' Rescaled values will normalized to [0, 2^bits - 1]
-//' @return an Rcpp::IntegerMatrix.
+//' @return a Rcpp::IntegerMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export]]
-Rcpp::IntegerMatrix cpp_rescale_M(const Rcpp::NumericMatrix mat,
+Rcpp::IntegerMatrix cpp_rescale_M(const Rcpp::IntegerMatrix img,
+                                  const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                   const uint8_t bits = 4) {
-  return hpp_rescale_M(mat, bits);
+  return hpp_rescale_M(img, msk_, bits);
 }
 
 

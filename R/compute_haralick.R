@@ -42,8 +42,8 @@
 #' -3rd: the granularity.
 #' @export
 compute_haralick = function(img, msk, granularity = 3, bits = 4) {
+  # check inputs
   if(!any(inherits(img, what = "IFC_img"))) stop("'img' should be of class `IFC_img`")
-  if(!attr(img, "mode") == "raw") stop("'img' should have been extracted using 'mode' = \"raw\"")
   if(missing(msk)) {
     msk = attr(img, "mask")
     if(attr(msk, "removal") == "raw") {
@@ -55,17 +55,14 @@ compute_haralick = function(img, msk, granularity = 3, bits = 4) {
     if(!any(inherits(msk, what = "IFC_msk"))) stop("When provided 'msk' should be of class `IFC_msk`")
     msk = (msk > 0)
   }
-  assert(img, cla = "IFC_img")
   assert(bits, len = 1, alw = 2:10)
   granularity = na.omit(as.integer(granularity));
   assert(granularity, alw = c(1:20))
   
-  # clip img to 0-4095
-  # due to compensation raw img may exceed this range
-  # TODO ask Amnis what they choose: normalization / clip...
-  # otherwise use cpp_R_shift_M which generate error when img is outside [0,4095]
-  rescaled = cpp_rescale_M(img, bits = bits)
+  # rescale masked image to bin ranging [0, 2^bits -1]
+  rescaled = cpp_rescale_M(attr(img, "raw"), msk, bits = bits)
   
+  # compute 0, 45, 90 and 315 degree GLCM and then Haralick's features for each granularity
   ans = lapply(granularity, FUN = function(i) {
     apply(sapply(cpp_cooc(img = rescaled, msk = msk, delta = i), cpp_h_features), 1, FUN = function(x) c(mean(x), sd(x)))
   })
