@@ -389,7 +389,8 @@ ExtractBasic <- function(...,
                                          length(ans[[1]]),
                                          length(objects))),
               perm = c(3, 1, 2))
-  dimnames(ret) = list("object" = ids,
+  
+  dimnames(ret) = list("object" = num_to_string(ids),
                        "feature" = names(ans[[1]][[1]]),
                        "channel" = channel_id)
   attr(ret, "offset_id") <- sapply(ans, attr, which = "offset_id")

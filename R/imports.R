@@ -49,3 +49,7 @@ endPB <- getFromNamespace("endPB", "IFC")
 #' @name cpp_getTAGS
 #' @keywords internal
 cpp_getTAGS <- getFromNamespace("cpp_getTAGS", "IFC")
+
+#' @name num_to_string
+#' @keywords internal
+num_to_string <- getFromNamespace("num_to_string", "IFC")
