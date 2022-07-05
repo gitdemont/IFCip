@@ -257,10 +257,10 @@ ExtractFeatures <- function(...,
   do_zernike = any(zmax != -1L)
   do_haralick = any(granularity != -1L)
   if(do_haralick) {
-    granularity = na.omit(as.integer(granularity)); granularity = granularity[(granularity>=1) && (granularity<=20)]; assert(zmax, len = 1, alw = 1:20)
+    granularity = na.omit(as.integer(granularity)); granularity = granularity[(granularity>=1) & (granularity<=20)]; assert(granularity, alw = 1:20)
   }
   if(do_zernike) {
-    zmax = na.omit(as.integer(zmax)); zmax = zmax[(zmax>=0) && (zmax<=99)]; assert(zmax, len = 1, alw = 0:99)
+    zmax = na.omit(as.integer(zmax)); zmax = zmax[(zmax>=0) & (zmax<=99)]; assert(zmax, len = 1, alw = 0:99)
     names_zernike = unlist(lapply(0:(zmax+1), FUN = function(a) { 
       foo = as.logical(sapply(0:a, FUN = function(b) {
         return (b %% 2)
