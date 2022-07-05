@@ -71,17 +71,21 @@ as_IFC_features <- function(x) {
         buildFeature(name = sprintf("%s_%s_%s", feat, mask, image),
                      val = x[,feat,chan])
       } else {
-        buildFeature(name = gsub("|", "_", name, fixed = T), type = "single", def = paste0(name, ifelse(grepl("H ", feat, ignore.case = FALSE), "|Granularity:|1|20", "")),
+        buildFeature(name = gsub("|", "_", name, fixed = T), 
+                     type = "single", 
+                     def = paste0(name, ifelse(grepl("H ", feat, ignore.case = FALSE), "|Granularity:|1|20", "")),
                      val = x[,feat,chan])
       }
     })
   })
   if(length(ans) > 1) {
     ans = do.call(what = "c", args = ans)
+  } else {
+    ans = ans[[1]]
   }
   # remove duplicated, which came from using MC mask
   ans = ans[!duplicated(sapply(ans, simplify = TRUE, USE.NAMES = FALSE, FUN = function(i) i$name))]
-  return(list(features = structure(data.frame("Object Number" = as.numeric(dimnames(x)[[1]]), 
+  return(list(features = structure(data.frame("Object Number" = as.integer(dimnames(x)[[1]]), 
                                               do.call(what = cbind, args = lapply(ans, FUN = function(i) i$val)),
                                               stringsAsFactors = FALSE, check.names = FALSE),
                                    names = c("Object Number", sapply(ans, simplify = TRUE, USE.NAMES = FALSE, FUN = function(i) i$name)),

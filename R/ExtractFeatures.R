@@ -254,8 +254,11 @@ ExtractFeatures <- function(...,
   
   ##### PAY ATTENTION TO MODIFY THIS PART IF NAMES ARE CHANGED IF DEDICATED FUNCTIONS
   # pre compute names in case object is not masked
-  do_zernike = !all(zmax == -1L)
-  do_haralick = !all(granularity == -1L)
+  do_zernike = any(zmax != -1L)
+  do_haralick = any(granularity != -1L)
+  if(do_haralick) {
+    granularity = na.omit(as.integer(granularity)); granularity = granularity[(granularity>=1) && (granularity<=20)]; assert(zmax, len = 1, alw = 1:20)
+  }
   if(do_zernike) {
     zmax = na.omit(as.integer(zmax)); zmax = zmax[(zmax>=0) && (zmax<=99)]; assert(zmax, len = 1, alw = 0:99)
     names_zernike = unlist(lapply(0:(zmax+1), FUN = function(a) { 
