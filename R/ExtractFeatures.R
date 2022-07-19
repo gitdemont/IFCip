@@ -33,7 +33,8 @@
 #' @param ... arguments to be passed to \code{\link{objectExtract}} with the exception of 'ifd' and 'bypass'(=TRUE).\cr
 #' If 'param' is provided 'export'(="matrix"), 'mode'(="raw"), 'size'(="c(0,0)"), 'force_width'(="FALSE") and 'removal' will be overwritten.\cr
 #' If 'offsets' are not provided extra arguments can also be passed with ... to \code{\link{getOffsets}}.\cr
-#' /!\ If not any of 'fileName', 'info' and 'param' can be found in ... then attr(offsets, "fileName_image") will be used as 'fileName' input parameter to pass to \code{\link{objectParam}}.
+#' /!\ If not any of 'fileName', 'info' and 'param' can be found in ... then attr(offsets, "fileName_image") will be used as 'fileName' input parameter to pass to \code{\link{objectParam}}.\cr
+#' Remaining arguments with the exception of 'strategy' will be passed to \link[future]{plan}.
 #' @param objects integers, indices of objects to use.
 #' This argument is not mandatory, if missing, the default, all objects will be used.
 #' @param offsets object of class `IFC_offset`. 
@@ -47,63 +48,24 @@
 #' Default is -1L for no computation. Allowed are [1-20].
 #' For very fine textures, this value is small (1-3 pixels), while for very coarse textures, it is large (>10).
 #' @param batch number of objects to process at the same time. Default is 20.
-#' @param parallel whether to use parallelization. Default is FALSE. Note that parallelization requires a parallel backend to be registered (see example).
-#' In addition when parallelization is possible display_progress will be turned to FALSE.
+#' @param parallel whether to use parallelization. Default is NULL to use current \pkg{future}'s plan strategy.\cr
+#' When FALSE, \link[future]{plan} will be called with sequential 'strategy'.
+#' When TRUE, \link[future]{plan} will be called with either multisession 'strategy' on Windows or multicore otherwise..
 #' @examples
-#' msg_dat = character()
-#' msg_par = character()
-#' if(!requireNamespace("IFCdata", quietly = TRUE)) msg_dat = "IFCdata"
-#' if(!requireNamespace("parallel", quietly = TRUE)) msg_par = c(msg_par, "parallel")
-#' if(!requireNamespace("doParallel", quietly = TRUE)) msg_par = c(msg_par, "doParallel")
-#' if(!requireNamespace("foreach", quietly = TRUE)) msg_par = c(msg_par, "foreach")
-#' if(length(msg_dat) == 0) {
+#' if(!requireNamespace("IFCdata", quietly = TRUE)) {
 #'   ## use a cif file
 #'   file_cif <- system.file("extdata", package = "IFCdata", "example.cif")
-#'   ## features extraction
-#'   ## the extraction is run for only objects 1 to 50 to allow example to run 
-#'   ## in a reasonable amount of time to fulfill CRAN policies
-#'   ## in current usage 'objects' argument may be missing to allow features extraction for all objects
-#'   time_seq <- system.time({
-#'     feat_seq <- ExtractFeatures(fileName = file_cif, 
-#'                                 objects = 1:50,
-#'                                 display_progress = TRUE,
-#'                                 parallel = FALSE)
-#'   })
-#'   if(length(msg_par) == 0) {
-#'     ## same extraction with a parallel backend,
-#'     ## use of parallelization can clearly speed up the process,
-#'     ## notably when Zernike features are extracted on a large amount of objects
-#'     ## here is a small example that requires 'parallel', 'doParallel', and 'foreach' packages
-#'     ## not installed along with 'IFCip' package
-#'     library(parallel)
-#'     library(doParallel)
-#'     library(foreach)
-#'     no_cores <- max(1, parallel::detectCores() - 1)
-#'     ## the following is for R CMD cran check which allows to use at most 2 cores
-#'     if("TRUE" %in% Sys.getenv("_R_CHECK_LIMIT_CORES_", "")) no_cores = min(2, no_cores)
-#'     cl <- parallel::makePSOCKcluster(no_cores)
-#'     doParallel::registerDoParallel(cl)
-#'     time_par <- system.time({
-#'        feat_par <- ExtractFeatures(fileName = file_cif, 
-#'                                    objects = 1:50, 
-#'                                    display_progress = TRUE, 
-#'                                    parallel = TRUE)
-#'     })
-#'     parallel::stopCluster(cl)
-#'     foreach::registerDoSEQ()
-#'   } else {
-#'     message(sprintf('Please run `install.packages(%s)` %s',
-#'                     paste0("c(", paste0('"',msg_par,'"', collapse = ", "), ")"),
-#'                    'to use parallelization.'))
-#'   }
+#'   ## features extraction:
+#'   ## the extraction is done for objects 1 to 50 only to allow example to run 
+#'   ## in a reasonable amount of time and without parallelization to fulfill CRAN policies
+#'   feat <- ExtractFeatures(fileName = file_cif, 
+#'                           objects = 1:50,
+#'                           display_progress = TRUE,
+#'                           parallel = FALSE)
 #' } else {
-#'   message(paste0(sprintf('Please run `install.packages("IFCdata",repos="%s",type="source")` %s',
-#'                  'https://gitdemont.github.io/IFCdata/',
-#'                  'to install extra files required to run this example.'),
-#'                  ifelse(length(msg_par) == 0, "" ,
-#'                         sprintf('Please run `install.packages(%s)` %s',
-#'                                 paste0("c(", paste0('"',msg_par,'"', collapse = ", "),")"),
-#'                                'to use example of features extraction with parallelization.'))))
+#'   message(sprintf('Please run `install.packages("IFCdata", repos = "%s", type = "source")` %s',
+#'                   'https://gitdemont.github.io/IFCdata/',
+#'                   'to install extra files required to run this example.'))
 #' }
 #' @details arguments of objectExtract() from IFC package will be deduced from \code{\link{ExtractFeatures}} input arguments.
 #' @return a 3D array of features values whose dimensions are [object, features, channel] of class `IFCip_features`.
@@ -116,7 +78,7 @@ ExtractFeatures <- function(...,
                             zmax = -1L,
                             granularity = -1L,
                             batch = 20,
-                            parallel = FALSE)  {
+                            parallel = NULL)  {
   dots=list(...)
   
   # check input
@@ -287,21 +249,6 @@ ExtractFeatures <- function(...,
                "Raw Min Pixel","Raw Max Pixel", #+Inf,-Inf
                "Std Dev","skewness","kurtosis")
   no_hu = structure(c(0.000, rep(NaN, 17), 0.000, rep(NaN, 8), +Inf, -Inf, NaN, NaN, NaN), names = names_hu)
-  #####
-  show_pb = display_progress
-  if(display_progress && 
-     parallel &&
-     requireNamespace("foreach", quietly = TRUE) &&
-     (foreach::getDoParWorkers() > 1)) {
-    show_pb = FALSE
-    message("A parallel backend has been detected. 'display_progress' has been turned to FALSE")
-  }
-  
-  if(parallel && requireNamespace("foreach", quietly = TRUE) && (foreach::getDoParWorkers() > 1)) {
-    `%op%` <- foreach::`%dopar%`
-  } else {
-    `%op%` <- foreach::`%do%`
-  }
   
   # extract objects
   sel = subsetOffsets(offsets = offsets, objects = objects, image_type = "img")
@@ -311,206 +258,159 @@ ExtractFeatures <- function(...,
     warning("ExtractFeatures: No objects to extract, check the objects you provided.", immediate. = TRUE, call. = FALSE)
     return(NULL)
   }
-  tryCatch({
-    if(show_pb) {
-      pb = newPB(session = dots$session, min = 0, max = L, initial = 0, style = 3)
-      ans = lapply(1:L, FUN=function(ifcip_iter) {
-        setPB(pb, value = ifcip_iter, title = title_progress, label = "computing features from images")
-        img = do.call(what = "objectExtract", args = c(list(ifd = lapply(sel[[ifcip_iter]],
-                                                                         FUN = function(off) cpp_getTAGS(fname = param$fileName_image,
-                                                                                                         offset = off,
-                                                                                                         trunc_bytes = 1, 
-                                                                                                         force_trunc = TRUE, 
-                                                                                                         verbose = verbose)),
-                                                            param = param,
-                                                            verbose = verbose,
-                                                            bypass = TRUE),
-                                                       dots))
-        bar = lapply(img, FUN=function(i_img) {
-          foo = lapply(i_img, FUN=function(i_chan) {
-            if(compute_mask) {
-              back = cpp_background(i_chan, is_cif = is_cif)
-              bg_mean = back["BG_MEAN"]
-              bg_sd = back["BG_STD"]
-              msk = mask_identify2(img = i_chan, threshold = 3 * bg_sd)
-              msk_i = which.max(attr(msk, "perimeter"))
-              if(length(msk_i) != 0) {
-                msk = cpp_k_equal_M(msk, msk_i)
-              } else {
-                msk = msk
-              }
-            } else {
-              msk = !attr(i_chan, "mask")
-            }
-            class(msk) = "IFC_msk"
-            hu = cpp_features_hu3(img = i_chan, msk = msk, components = 1, mag = mag)
-            if((nrow(hu) == 0) || !is.finite(hu[1,1]) || (hu[1,1] == 0)) {
-              hu = no_hu
-              shape = no_shape
-            } else {
-              hu = hu[1,]
-              ctl = cpp_ctl(msk, global = TRUE)
-              contours = ctl$contours
-              contours = by(contours[, c(1,2,4,5)], contours[, 3], FUN =function(d) by(d[,c(1,2,3)], d[,4], FUN = function(dd) dd))
-              contours = contours[as.integer(names(contours)) > 0] 
-              contours = contours[[1]]
-              if(inherits(contours, what = "by")) contours = contours[[1]]
-              
-              perimeter = k * sum(ctl$perimeter)
-              # if(length(perimeter) == 0) perimeter = NA
-              
-              diameter = 2 * sqrt(hu["Area"] / pi)
-              
-              center = apply(contours[,1:2], 2, mean)
-              center = hu[c("pix cy", "pix cx")]
-              distance = k * apply(contours[,1:2], 1, FUN =function(coord)  sqrt((coord[1] - center[1])^2 + (coord[2] - center[2])^2))
-              radius = mean(distance)
-              circularity = radius / sd(distance)
-              
-              bbox = try(cpp_bbox(cpp_convexhull(as.matrix(contours)), k), silent = TRUE)
-              if(inherits(x = bbox, what = "try-error")) {
-                shape = structure(c(perimeter, diameter, circularity, rep(NA, 8)), names = names_shape)
-              } else {
-                convexity = bbox["convex perimeter"] / perimeter
-                roundness = 4 * pi * hu["Area"] / bbox["convex perimeter"]^2
-                shape = structure(c(perimeter, diameter, circularity, convexity, roundness, bbox), names = names_shape) 
-              }
-            }
-            avg_intensity = hu["Raw Mean Pixel"] - attr(i_chan, "BG_MEAN")
-            min_intensity = hu["Raw Min Pixel"] - attr(i_chan, "BG_MEAN")
-            max_intensity = hu["Raw Max Pixel"] - attr(i_chan, "BG_MEAN")
-            intensities = structure(c(attr(i_chan, "BG_MEAN"), attr(i_chan, "BG_STD"),
-                                      min_intensity, max_intensity, avg_intensity, avg_intensity * hu["pix count"]), 
-                                    names = c("Bkgd Mean", "Bkgd StdDev", "Min Pixel", "Max Pixel", "Mean Pixel", "Intensity"))
-            # modulation TODO ask Amnis
-            # max_intensity -  min_intensity / max_intensity + min_intensity is not working
-            # modulation = (attr(img, "BG_MEAN") - (hu["Raw Max Pixel"] - hu["Raw Min Pixel"])) / ((hu["Raw Max Pixel"] + hu["Raw Min Pixel"])) 
-            if(do_zernike) {
-              ze = try(moments_Zernike(img = i_chan, centroid = c(hu["pix cx"], hu["pix cy"]), radius = max(2, hu["pix maj axis"]/2+1), zmax = zmax, full = FALSE)$zmoment, silent = TRUE)
-              if(inherits(x = ze, what = "try-error")) ze = no_zernike
-            } else {
-              ze = NULL
-            }
-            if(do_haralick) {
-              har = compute_haralick(img = i_chan, msk = msk, granularity = granularity, bits = 4)
-              return(c(hu, shape, intensities, ze, structure(unlist(har), names = paste0(apply(expand.grid(dimnames(har))[,c(2,1,3)], 1, paste0, collapse = " ")))))
-            } else {
-              return(c(hu, shape, intensities, ze))
-            }
-          })
-          attr(foo, "object_id") <- attr(i_img, "object_id")
-          attr(foo, "offset_id") <- attr(i_img, "offset_id")
-          attr(foo, "channel_id") <- attr(i_img, "channel_id")
-          attr(foo, "removal") <- attr(i_img, "removal")
-          return(foo)
-        })
-      })
-    } else {
-      if(display_progress) {
-        show_pb <- TRUE
-        pb = newPB(session = dots$session, min = 0, max = L, initial = 0, style = 3)
-        setPB(pb, value = L, title = title_progress, label = "progress bar will not update with parallel work but it is computing features from images")
+  
+  # force future to use all mem
+  old_opt <- options(future.globals.maxSize = Inf)
+  on.exit(options(old_opt), add = TRUE)
+  
+  # define future plan
+  dots=dots[!(names(dots) %in% c("strategy", "fileName"))]
+  if(missing(parallel) || is.null(parallel)) {
+    strategy = NULL
+  } else {
+    assert(parallel, alw = c(TRUE, FALSE))
+    if(parallel) {
+      if(.Platform$OS.type == "windows") {
+        strategy = future::multisession
+      } else {
+        strategy = future::multicore
       }
-      ans = list(foreach::foreach(ifcip_iter = 1:L, .combine = "c", .verbose = FALSE, .packages = c("IFC","IFCip"),
-                         .export = c("cpp_features_hu3", "compute_haralick","assert","cpp_h_features","cpp_cooc","cpp_ctl",
-                                     "cpp_background","cpp_closing","cpp_sd","cpp_fill","cpp_k_equal_M","mask_identify2","make_kernel",
-                                     "cpp_getTAGS")) %op% {
-                           img = do.call(what = "objectExtract", args = c(list(ifd = lapply(sel[[ifcip_iter]],
-                                                                                            FUN = function(off) cpp_getTAGS(fname = param$fileName_image,
-                                                                                                                            offset = off,
-                                                                                                                            trunc_bytes = 1, 
-                                                                                                                            force_trunc = TRUE, 
-                                                                                                                            verbose = verbose)),
-                                                                               param = param,
-                                                                               verbose = verbose,
-                                                                               bypass = TRUE),
-                                                                          dots))
-        bar = lapply(img, FUN=function(i_img) {
-          foo = lapply(i_img, FUN=function(i_chan) {
-            if(compute_mask) {
-              back = cpp_background(i_chan, is_cif = is_cif)
-              bg_mean = back["BG_MEAN"]
-              bg_sd = back["BG_STD"]
-              msk = mask_identify2(img = i_chan, threshold = 3 * bg_sd)
-              msk_i = which.max(attr(msk, "perimeter"))
-              if(length(msk_i) != 0) {
-                msk = cpp_k_equal_M(msk, msk_i)
-              } else {
-                msk = msk
-              }
-            } else {
-              msk = !attr(i_chan, "mask")
-            }
-            class(msk) = "IFC_msk"
-            hu = cpp_features_hu3(img = i_chan, msk = msk, components = 1, mag = mag)
-            if((nrow(hu) == 0) || !is.finite(hu[1,1]) || (hu[1,1] == 0)) {
-              hu = no_hu
-              shape = no_shape
-            } else {
-              hu = hu[1,]
-              ctl = cpp_ctl(msk, global = TRUE)
-              contours = ctl$contours
-              contours = by(contours[, c(1,2,4,5)], contours[, 3], FUN =function(d) by(d[,c(1,2,3)], d[,4], FUN = function(dd) dd))
-              contours = contours[as.integer(names(contours)) > 0] 
-              contours = contours[[1]]
-              if(inherits(contours, what = "by")) contours = contours[[1]]
-              
-              perimeter = k * sum(ctl$perimeter)
-              # if(length(perimeter) == 0) perimeter = 0
-              
-              diameter = 2 * sqrt(hu["Area"] / pi)
-              
-              center = apply(contours[,1:2], 2, mean)
-              center = hu[c("pix cy", "pix cx")]
-              distance = k * apply(contours[,1:2], 1, FUN =function(coord)  sqrt((coord[1] - center[1])^2 + (coord[2] - center[2])^2))
-              radius = mean(distance)
-              circularity = radius / sd(distance)
-              
-              bbox = try(cpp_bbox(cpp_convexhull(as.matrix(contours)), k), silent = TRUE)
-              if(inherits(x = bbox, what = "try-error")) {
-                shape = structure(c(perimeter, diameter, circularity, rep(NA, 8)), names = names_shape)
-              } else {
-                convexity = bbox["convex perimeter"] / perimeter
-                roundness = 4 * pi * hu["Area"] / bbox["convex perimeter"]^2
-                shape = structure(c(perimeter, diameter, circularity, convexity, roundness, bbox), names = names_shape) 
-              }
-            }
-            
-            avg_intensity = hu["Raw Mean Pixel"] - attr(i_chan, "BG_MEAN")
-            min_intensity = hu["Raw Min Pixel"] - attr(i_chan, "BG_MEAN")
-            max_intensity = hu["Raw Max Pixel"] - attr(i_chan, "BG_MEAN")
-            intensities = structure(c(attr(i_chan, "BG_MEAN"), attr(i_chan, "BG_STD"),
-                                      min_intensity, max_intensity, avg_intensity, avg_intensity * hu["pix count"]), 
-                                    names = c("Bkgd Mean", "Bkgd StdDev", "Min Pixel", "Max Pixel", "Mean Pixel", "Intensity"))
-            # modulation TODO ask Amnis
-            # max_intensity -  min_intensity / max_intensity + min_intensity is not working
-            # modulation = (attr(img, "BG_MEAN") - (hu["Raw Max Pixel"] - hu["Raw Min Pixel"])) / ((hu["Raw Max Pixel"] + hu["Raw Min Pixel"])) 
-            if(do_zernike) {
-              ze = try(moments_Zernike(img = i_chan, centroid = c(hu["pix cx"], hu["pix cy"]), radius = max(2, hu["pix maj axis"]/2+1), zmax = zmax, full = FALSE)$zmoment, silent = TRUE)
-              if(inherits(x = ze, what = "try-error")) ze = no_zernike
-            } else {
-              ze = NULL
-            }
-            if(do_haralick) {
-              har = compute_haralick(img = i_chan, msk = msk, granularity = granularity, bits = 4)
-              return(c(hu, shape, intensities, ze, structure(unlist(har), names = paste0(apply(expand.grid(dimnames(har))[,c(2,1,3)], 1, paste0, collapse = " ")))))
-            } else {
-              return(c(hu, shape, intensities, ze))
-            }
-          })
-          attr(foo, "object_id") <- attr(i_img, "object_id")
-          attr(foo, "offset_id") <- attr(i_img, "offset_id")
-          attr(foo, "channel_id") <- attr(i_img, "channel_id")
-          attr(foo, "removal") <- attr(i_img, "removal")
-          return(foo)
-        })
-      })
+    } else {
+      strategy = future::sequential
     }
-  }, error = function(e) {
-    stop(e$message, call. = FALSE)
-  }, finally = {
-    if(show_pb) endPB(pb)
-  })
+  }
+  oplan=do.call(what = future::plan, args = c(list(strategy = strategy), dots))
+  on.exit(future::plan(oplan), add = TRUE)
+  
+  # define handler used to monitor progress
+  lab = ""
+  if(display_progress) {
+    hand = progressr::handler_txtprogressbar(title = title_progress)
+    # if(.Platform$GUI == "RStudio") {
+    #   hand = progressr::handler_rstudio(title = title_progress)
+    # }
+    if(.Platform$OS.type == "windows") {
+      lab="computing features from images"
+      hand = ifcip_handler_winprogressbar(title = title_progress, label = lab)
+    }
+    if(length(dots$session) != 0 &&
+       requireNamespace("shiny", quietly = TRUE) &&
+       length(shiny::getDefaultReactiveDomain()) != 0) {
+      lab="computing features from images"
+      hand = progressr::handler_shiny(inputs = list(message = title_progress, detail = lab))
+    }
+  } else {
+    hand = progressr::handler_void()
+  }
+  prev_handl = progressr::handlers()
+  on.exit(progressr::handlers(prev_handl), add = TRUE)
+  # add handler
+  progressr::handlers("void")
+  progressr::handlers(global = TRUE, default = progressr::handler_txtprogressbar)
+  progressr::handlers(hand)
+  p <- progressr::progressor(along = 1:L, label = lab)
+  ans <- future.apply::future_lapply(
+    X = 1:L, 
+    future.packages = c("IFC","IFCip"),
+    future.seed = NULL, # NULL to avoid checking + to not force L'Ecuyer-CMRG RNG
+    # .export = c("cpp_features_hu1","cpp_basic","cpp_background","cpp_closing","cpp_convolve2d","assert",
+    #             "cpp_closing","cpp_sd","cpp_fill","cpp_ctl","cpp_k_equal_M","mask_identify2","make_kernel",
+    #             "cpp_getTAGS"),
+    FUN = function(ifcip_iter) { 
+          p(sprintf("%s %i%%", lab, round(100*ifcip_iter/L)))
+          img = do.call(args = c(list(ifd = lapply(sel[[ifcip_iter]],
+                                                   FUN = function(off) cpp_getTAGS(fname = param$fileName_image,
+                                                                                   offset = off,
+                                                                                   trunc_bytes = 1, 
+                                                                                   force_trunc = TRUE, 
+                                                                                   verbose = verbose)),
+                                      param = param,
+                                      verbose = verbose,
+                                      bypass = TRUE),
+                                 dots),
+                        what = "objectExtract")
+          bar = lapply(img, FUN=function(i_img) {
+            foo = lapply(i_img, FUN=function(i_chan) {
+              if(compute_mask) {
+                back = cpp_background(i_chan, is_cif = is_cif)
+                bg_mean = back["BG_MEAN"]
+                bg_sd = back["BG_STD"]
+                msk = mask_identify2(img = i_chan, threshold = 3 * bg_sd)
+                msk_i = which.max(attr(msk, "perimeter"))
+                if(length(msk_i) != 0) {
+                  msk = cpp_k_equal_M(msk, msk_i)
+                } else {
+                  msk = msk
+                }
+              } else {
+                msk = !attr(i_chan, "mask")
+              }
+              class(msk) = "IFC_msk"
+              hu = cpp_features_hu3(img = i_chan, msk = msk, components = 1, mag = mag)
+              if((nrow(hu) == 0) || !is.finite(hu[1,1]) || (hu[1,1] == 0)) {
+                hu = no_hu
+                shape = no_shape
+              } else {
+                hu = hu[1,]
+                ctl = cpp_ctl(msk, global = TRUE)
+                contours = ctl$contours
+                contours = by(contours[, c(1,2,4,5)], contours[, 3], FUN =function(d) by(d[,c(1,2,3)], d[,4], FUN = function(dd) dd))
+                contours = contours[as.integer(names(contours)) > 0] 
+                contours = contours[[1]]
+                if(inherits(contours, what = "by")) contours = contours[[1]]
+                
+                perimeter = k * sum(ctl$perimeter)
+                # if(length(perimeter) == 0) perimeter = 0
+                
+                diameter = 2 * sqrt(hu["Area"] / pi)
+                
+                center = apply(contours[,1:2], 2, mean)
+                center = hu[c("pix cy", "pix cx")]
+                distance = k * apply(contours[,1:2], 1, FUN =function(coord)  sqrt((coord[1] - center[1])^2 + (coord[2] - center[2])^2))
+                radius = mean(distance)
+                circularity = radius / sd(distance)
+                
+                bbox = try(cpp_bbox(cpp_convexhull(as.matrix(contours)), k), silent = TRUE)
+                if(inherits(x = bbox, what = "try-error")) {
+                  shape = structure(c(perimeter, diameter, circularity, rep(NA, 8)), names = names_shape)
+                } else {
+                  convexity = bbox["convex perimeter"] / perimeter
+                  roundness = 4 * pi * hu["Area"] / bbox["convex perimeter"]^2
+                  shape = structure(c(perimeter, diameter, circularity, convexity, roundness, bbox), names = names_shape) 
+                }
+              }
+              
+              avg_intensity = hu["Raw Mean Pixel"] - attr(i_chan, "BG_MEAN")
+              min_intensity = hu["Raw Min Pixel"] - attr(i_chan, "BG_MEAN")
+              max_intensity = hu["Raw Max Pixel"] - attr(i_chan, "BG_MEAN")
+              intensities = structure(c(attr(i_chan, "BG_MEAN"), attr(i_chan, "BG_STD"),
+                                        min_intensity, max_intensity, avg_intensity, avg_intensity * hu["pix count"]), 
+                                      names = c("Bkgd Mean", "Bkgd StdDev", "Min Pixel", "Max Pixel", "Mean Pixel", "Intensity"))
+              # modulation TODO ask Amnis
+              # max_intensity -  min_intensity / max_intensity + min_intensity is not working
+              # modulation = (attr(img, "BG_MEAN") - (hu["Raw Max Pixel"] - hu["Raw Min Pixel"])) / ((hu["Raw Max Pixel"] + hu["Raw Min Pixel"])) 
+              if(do_zernike) {
+                ze = try(moments_Zernike(img = i_chan, centroid = c(hu["pix cx"], hu["pix cy"]), radius = max(2, hu["pix maj axis"]/2+1), zmax = zmax, full = FALSE)$zmoment, silent = TRUE)
+                if(inherits(x = ze, what = "try-error")) ze = no_zernike
+              } else {
+                ze = NULL
+              }
+              if(do_haralick) {
+                har = compute_haralick(img = i_chan, msk = msk, granularity = granularity, bits = 4)
+                return(c(hu, shape, intensities, ze, structure(unlist(har), names = paste0(apply(expand.grid(dimnames(har))[,c(2,1,3)], 1, paste0, collapse = " ")))))
+              } else {
+                return(c(hu, shape, intensities, ze))
+              }
+            })
+            attr(foo, "object_id") <- attr(i_img, "object_id")
+            attr(foo, "offset_id") <- attr(i_img, "offset_id")
+            attr(foo, "channel_id") <- attr(i_img, "channel_id")
+            attr(foo, "removal") <- attr(i_img, "removal")
+            return(foo)
+          })
+        })
+    # })
+  # ans <- future::value(f)
   channel_id = attr(ans[[1]][[1]], "channel_id")
   channel_removal = attr(ans[[1]][[1]], "removal")
   if(L > 1) {

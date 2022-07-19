@@ -11,7 +11,7 @@ ExtractBasic(
   removal = "masked",
   display_progress = TRUE,
   batch = 20,
-  parallel = FALSE
+  parallel = NULL
 )
 }
 \arguments{
@@ -33,8 +33,9 @@ Allowed are "masked" or "MC". Default is "masked". Please note that it will over
 
 \item{batch}{number of objects to process at the same time. Default is 20.}
 
-\item{parallel}{whether to use parallelization. Default is FALSE. Note that parallelization requires a parallel backend to be registered (see example).
-In addition when parallelization is possible display_progress will be turned to FALSE.}
+\item{parallel}{whether to use parallelization. Default is NULL to use current \pkg{future}'s plan strategy.\cr
+When FALSE, \link[future]{plan} will be called with sequential 'strategy'.
+When TRUE, \link[future]{plan} will be called with either multisession 'strategy' on Windows or multicore otherwise..}
 }
 \value{
 a 3D array of features values whose dimensions are [object, features, channel] of class `IFCip_features`.
@@ -46,56 +47,19 @@ Function to extract basic features (hu moments + intensities) from objects store
 arguments of objectExtract() from IFC package will be deduced from \code{\link{ExtractBasic}} input arguments.
 }
 \examples{
-msg_dat = character()
-msg_par = character()
-if(!requireNamespace("IFCdata", quietly = TRUE)) msg_dat = "IFCdata"
-if(!requireNamespace("parallel", quietly = TRUE)) msg_par = c(msg_par, "parallel")
-if(!requireNamespace("doParallel", quietly = TRUE)) msg_par = c(msg_par, "doParallel")
-if(!requireNamespace("foreach", quietly = TRUE)) msg_par = c(msg_par, "foreach")
-if(length(msg_dat) == 0) {
+if(!requireNamespace("IFCdata", quietly = TRUE)) {
   ## use a cif file
   file_cif <- system.file("extdata", package = "IFCdata", "example.cif")
-  ## features extraction
-  ## the extraction is run for only objects 1 to 50 to allow example to run 
-  ## in a reasonable amount of time to fulfill CRAN policies
-  ## in current usage 'objects' argument may be missing to allow features extraction for all objects
-  time_seq <- system.time({
-    feat_seq <- ExtractBasic(fileName = file_cif, 
-                             objects = 1:50,
-                             display_progress = TRUE,
-                             parallel = FALSE)
-  })
-  if(length(msg_par) == 0) {
-    ## same extraction with a parallel backend,
-    ## use of parallelization can clearly speed up the process,
-    ## notably when Zernike features are extracted on a large amount of objects
-    ## here is a small example that requires 'parallel', 'doParallel', and 'foreach' packages
-    ## not installed along with 'IFCip' package
-    no_cores <- max(1, parallel::detectCores() - 1)
-    ## the following is for R CMD cran check which allows to use at most 2 cores
-    if("TRUE" \%in\% Sys.getenv("_R_CHECK_LIMIT_CORES_", "")) no_cores = min(2, no_cores)
-    cl <- parallel::makePSOCKcluster(no_cores)
-    doParallel::registerDoParallel(cl)
-    time_par <- system.time({
-       feat_par <- ExtractBasic(fileName = file_cif, 
-                                   objects = 1:50, 
-                                   display_progress = TRUE, 
-                                   parallel = TRUE)
-    })
-    parallel::stopCluster(cl)
-    foreach::registerDoSEQ()
-  } else {
-    message(sprintf('Please run `install.packages(\%s)` \%s',
-                    paste0("c(", paste0('"',msg_par,'"', collapse = ", "), ")"),
-                   'to use parallelization.'))
-  }
+  ## features extraction:
+  ## the extraction is done for objects 1 to 50 only to allow example to run 
+  ## in a reasonable amount of time and without parallelization to fulfill CRAN policies
+  feat <- ExtractBasic(fileName = file_cif,
+                       objects = 1:50,
+                       display_progress = TRUE,
+                       parallel = FALSE)
 } else {
-  message(paste0(sprintf('Please run `install.packages("IFCdata",repos="\%s",type="source")` \%s',
-                 'https://gitdemont.github.io/IFCdata/',
-                 'to install extra files required to run this example.'),
-                 ifelse(length(msg_par) == 0, "" ,
-                        sprintf('Please run `install.packages(\%s)` \%s',
-                                paste0("c(", paste0('"',msg_par,'"', collapse = ", "),")"),
-                               'to use example of features extraction with parallelization.'))))
+  message(sprintf('Please run `install.packages("IFCdata", repos = "\%s", type = "source")` \%s',
+                  'https://gitdemont.github.io/IFCdata/',
+                  'to install extra files required to run this example.'))
 }
 }

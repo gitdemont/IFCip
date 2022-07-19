@@ -34,18 +34,6 @@ assert <- getFromNamespace("assert", "IFC")
 #' @keywords internal
 whoami <- getFromNamespace("whoami", "IFC")
 
-#' @name newPB
-#' @keywords internal
-newPB <- getFromNamespace("newPB", "IFC")
-
-#' @name setPB
-#' @keywords internal
-setPB <- getFromNamespace("setPB", "IFC")
-
-#' @name endPB
-#' @keywords internal
-endPB <- getFromNamespace("endPB", "IFC")
-
 #' @name cpp_getTAGS
 #' @keywords internal
 cpp_getTAGS <- getFromNamespace("cpp_getTAGS", "IFC")
@@ -53,3 +41,50 @@ cpp_getTAGS <- getFromNamespace("cpp_getTAGS", "IFC")
 #' @name num_to_string
 #' @keywords internal
 num_to_string <- getFromNamespace("num_to_string", "IFC")
+
+#' @name ifcip_handler_winprogressbar
+#' @source modified from \link[progressr]{handler_winprogressbar} to allow to pass label argument
+#' @keywords internal
+ifcip_handler_winprogressbar <- function (intrusiveness = getOption("progressr.intrusiveness.gui", 1), target = "gui", ...) {
+  backend_args <- list(...)
+  winProgressBar <- utils::winProgressBar
+  setWinProgressBar <- utils::setWinProgressBar
+  reporter <- local({
+    pb <- NULL
+    make_pb <- function(...) {
+      if (!is.null(pb)) return(pb)
+      args <- c(backend_args, list(...))
+      alw_names <- methods::formalArgs(winProgressBar)
+      args <- args[names(args) %in% alw_names]
+      args <- args[!duplicated(names(args))]
+      #### trick
+      # Empty title or label are replaced to avoid error while creating the progress bar
+      # In addition, if the progress bar has been created with default label="" value label,
+      # it won't be possible to modify with setProgressBar afterwards,
+      # so as a trick label value is replaced with " " when NULL or equal to ""
+      if(length(args$title) == 0) args$title = " "
+      if((length(args$label) == 0) || (args$label == "")) args$label = " "
+      pb <<- do.call(winProgressBar, args = args)
+      pb
+    }
+    list(reset = function(...) { pb <<- NULL },
+         initiate = function(config, state, progression, ...) {
+           if (!state$enabled || config$times == 1L) return()
+           make_pb(max = config$max_steps, label = state$message, ...) },
+         update = function(config, state, progression, ...) {
+           if (!state$enabled || progression$amount == 0 || config$times <= 2L) return()
+           make_pb(max = config$max_steps, label = state$message, ...)
+           setWinProgressBar(pb, value = state$step, label = paste0(state$message, "")) },
+         finish = function(config, state, progression, ...) {
+           if (is.null(pb)) return()
+           if (!state$enabled) return()
+           if (config$clear) {
+             close(pb)
+             pb <<- NULL
+           } else {
+             setWinProgressBar(pb, value = state$step, label = paste0(state$message, ""))
+           }
+         })
+  })
+  progressr::make_progression_handler("winprogressbar", reporter, intrusiveness = intrusiveness, target = target, ...)
+}
