@@ -238,40 +238,41 @@ ExtractBasic <- function(...,
   
   # define handler used to monitor progress
   lab = ""
-  if(display_progress) {
-    hand = progressr::handler_txtprogressbar(title = title_progress)
-    # if(.Platform$GUI == "RStudio") {
-    #   hand = progressr::handler_rstudio(title = title_progress)
-    # }
-    if(.Platform$OS.type == "windows") {
-      lab="computing features from images"
-      hand = ifcip_handler_winprogressbar(title = title_progress, label = lab)
-    }
-    if(length(dots$session) != 0 &&
-       requireNamespace("shiny", quietly = TRUE) &&
-       length(shiny::getDefaultReactiveDomain()) != 0) {
-      lab="computing features from images"
-      hand = progressr::handler_shiny(inputs = list(message = title_progress, detail = lab))
-    }
-  } else {
-    hand = progressr::handler_void()
+  hand = progressr::handler_txtprogressbar(title = title_progress)
+  # if(.Platform$GUI == "RStudio") {
+  #   hand = progressr::handler_rstudio(title = title_progress)
+  # }
+  if(.Platform$OS.type == "windows") {
+    lab="computing features from images"
+    hand = ifcip_handler_winprogressbar(title = title_progress, label = lab)
   }
-  prev_handl = progressr::handlers()
-  on.exit(progressr::handlers(prev_handl), add = TRUE)
-  # add handler
-  progressr::handlers("void")
-  suppressWarnings(rm(".Last.progression"))
-  progressr::handlers(global = TRUE, default = progressr::handler_txtprogressbar)
-  progressr::handlers(hand)
+  if(length(dots$session) != 0 &&
+     requireNamespace("shiny", quietly = TRUE) &&
+     length(shiny::getDefaultReactiveDomain()) != 0) {
+    lab="computing features from images"
+    hand = progressr::handler_shiny(inputs = list(message = "sticky_message", detail = "non_sticky_message"),
+                                    style = shiny::getShinyOption("progress.style", default = "notification"))
+  }
+  if(display_progress) {
+    prev_handl = progressr::handlers()
+    on.exit(progressr::handlers(prev_handl), add = TRUE)
+    # add handler
+    progressr::handlers("void")
+    suppressWarnings(rm(".Last.progression"))
+    progressr::handlers(global = TRUE, default = progressr::handler_txtprogressbar)
+    progressr::handlers(hand)
+  }
   p <- progressr::progressor(along = 1:L, label = lab)
+  p(title_progress, class = "sticky", amount = 0)
   ans <- future.apply::future_lapply(
-    X = 1:L, 
+    X = 1:L,
+    # future.globals = FALSE,
     future.packages = c("IFC","IFCip"),
     future.seed = NULL, # NULL to avoid checking + to not force L'Ecuyer-CMRG RNG
     future.lazy = FALSE,
-    # .export = c("cpp_features_hu1","cpp_basic","cpp_background","cpp_closing","cpp_convolve2d","assert",
-    #             "cpp_closing","cpp_sd","cpp_fill","cpp_ctl","cpp_k_equal_M","mask_identify2","make_kernel",
-    #             "cpp_getTAGS"),
+    future.scheduling = +Inf,
+    future.chunk.size = NULL,
+    future.globals = c("cpp_basic","cpp_background","cpp_k_equal_M","mask_identify2","cpp_getTAGS"),
     FUN = function(ifcip_iter) { 
       p(sprintf("%s %i%%", lab, round(100*ifcip_iter/L)))
       img = do.call(what = "objectExtract", args = c(list(ifd = lapply(sel[[ifcip_iter]],
