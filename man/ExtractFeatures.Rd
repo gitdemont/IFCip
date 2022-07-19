@@ -32,7 +32,10 @@ This argument is not mandatory but it may allow to save time for repeated image 
 \item{removal}{whether to compute features on "masked" object fo each individual channels or on the globally detected object "MC".
 Allowed are "masked" or "MC". Default is "masked". Please note that it will overwrite 'param' value if provided.}
 
-\item{display_progress}{whether to display a progress bar. Default is TRUE.}
+\item{display_progress}{whether to display a progress bar. Default is TRUE.\cr
+When FALSE, \link[progressr]{handler_void} will be called inside \link[progressr]{with_progress}.\cr
+When TRUE, \link[progressr]{handlers} will be automatically selected and called inside inside \link[progressr]{with_progress}.\cr
+When NULL, execution will not be wrapped inside \link[progressr]{with_progress}.}
 
 \item{zmax}{maximal order of Zernike polynomials to be computed. Default is -1L for no computation.
 Values outside [0,99] will be clipped. Be aware that computation of Zernike's Moments can be quite long when 'zmax' is high.}

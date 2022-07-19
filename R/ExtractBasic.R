@@ -40,7 +40,10 @@
 #' This argument is not mandatory but it may allow to save time for repeated image export on same file.
 #' @param removal whether to compute features on "masked" object for each individual channels or on the globally detected object "MC".
 #' Allowed are "masked" or "MC". Default is "masked". Please note that it will overwrite 'param' value if provided.
-#' @param display_progress whether to display a progress bar. Default is TRUE.
+#' @param display_progress whether to display a progress bar. Default is TRUE.\cr
+#' When FALSE, \link[progressr]{handler_void} will be called inside \link[progressr]{with_progress}.\cr
+#' When TRUE, \link[progressr]{handlers} will be automatically selected and called inside inside \link[progressr]{with_progress}.\cr
+#' When NULL, execution will not be wrapped inside \link[progressr]{with_progress}.
 #' @param batch number of objects to process at the same time. Default is 20.
 #' @param parallel whether to use parallelization. Default is NULL to use current \pkg{future}'s plan strategy.\cr
 #' When FALSE, \link[future]{plan} will be called with sequential 'strategy'.
@@ -87,8 +90,6 @@ ExtractBasic <- function(...,
   } else {
     fileName = attr(offsets, "fileName_image")
   }
-  # check mandatory param
-  display_progress = as.logical(display_progress); assert(display_progress, len = 1, alw = c(TRUE, FALSE))
   
   # process extra parameters
   if(length(dots[["verbose"]]) == 0) { 
@@ -131,6 +132,7 @@ ExtractBasic <- function(...,
                                     size = c(0,0),
                                     force_width = FALSE,
                                     removal = removal,
+                                    warn = FALSE,
                                     export = "matrix"), dots_param))
     } else {
       param = do.call(what = "objectParam",
@@ -139,6 +141,7 @@ ExtractBasic <- function(...,
                                     size = c(0,0),
                                     force_width = FALSE,
                                     removal = removal,
+                                    warn = FALSE,
                                     export = "matrix"), dots_param))
     }
   } else {
@@ -167,7 +170,7 @@ ExtractBasic <- function(...,
     }
   }
   if(compute_offsets) {
-    offsets = suppressMessages(getOffsets(fileName = param$fileName_image, fast = fast, display_progress = display_progress, verbose = verbose))
+    offsets = suppressMessages(getOffsets(fileName = param$fileName_image, fast = fast, display_progress = FALSE, verbose = verbose))
   }
   
   compute_mask <- FALSE
@@ -238,6 +241,7 @@ ExtractBasic <- function(...,
   
   # define handler used to monitor progress
   lab = ""
+  fun = progressr::with_progress
   hand = progressr::handler_txtprogressbar(title = title_progress)
   # if(.Platform$GUI == "RStudio") {
   #   hand = progressr::handler_rstudio(title = title_progress)
@@ -250,76 +254,76 @@ ExtractBasic <- function(...,
      requireNamespace("shiny", quietly = TRUE) &&
      length(shiny::getDefaultReactiveDomain()) != 0) {
     lab="computing features from images"
-    hand = progressr::handler_shiny(inputs = list(message = "sticky_message", detail = "non_sticky_message"),
-                                    style = shiny::getShinyOption("progress.style", default = "notification"))
+    fun = progressr::withProgressShiny
+    hand = c(shiny = progressr::handler_shiny(inputs = list(message = "sticky_message", detail = "non_sticky_message"),
+                                              style = shiny::getShinyOption("progress.style", default = "notification")))
   }
-  if(display_progress) {
-    prev_handl = progressr::handlers()
-    on.exit(progressr::handlers(prev_handl), add = TRUE)
-    # add handler
-    progressr::handlers("void")
-    suppressWarnings(rm(".Last.progression"))
-    progressr::handlers(global = TRUE, default = progressr::handler_txtprogressbar)
-    progressr::handlers(hand)
+  if(is.null(display_progress)) {
+    fun = function(expr, ...) { expr }
+  } else {
+    display_progress = as.logical(display_progress); assert(display_progress, len = 1, alw = c(TRUE, FALSE))
+    if(!display_progress) hand = progressr::handler_void
   }
-  p <- progressr::progressor(along = 1:L, label = lab)
-  p(title_progress, class = "sticky", amount = 0)
-  ans <- future.apply::future_lapply(
-    X = 1:L,
-    # future.globals = FALSE,
-    future.packages = c("IFC","IFCip"),
-    future.seed = NULL, # NULL to avoid checking + to not force L'Ecuyer-CMRG RNG
-    future.lazy = FALSE,
-    future.scheduling = +Inf,
-    future.chunk.size = NULL,
-    future.globals = c("cpp_basic","cpp_background","cpp_k_equal_M","mask_identify2","cpp_getTAGS"),
-    FUN = function(ifcip_iter) { 
-      p(sprintf("%s %i%%", lab, round(100*ifcip_iter/L)))
-      img = do.call(what = "objectExtract", args = c(list(ifd = lapply(sel[[ifcip_iter]],
-                                                                       FUN = function(off) cpp_getTAGS(fname = param$fileName_image,
-                                                                                                       offset = off,
-                                                                                                       trunc_bytes = 1, 
-                                                                                                       force_trunc = TRUE, 
-                                                                                                       verbose = verbose)),
-                                                          param = param,
-                                                          verbose = verbose,
-                                                          bypass = TRUE),
-                                                     dots))
-      bar = lapply(img, FUN=function(i_img) {
-        foo = lapply(i_img, FUN=function(i_chan) {
-          if(compute_mask) {
-            # identify object(s) and select the biggest one
-            back = cpp_background(i_chan, is_cif = is_cif)
-            bg_mean = back["BG_MEAN"]
-            bg_sd = back["BG_STD"]
-            msk = mask_identify2(img = i_chan, threshold = 3 * bg_sd)
-            msk_i = which.max(attr(msk, "perimeter"))
-            if(length(msk_i) != 0) {
-              msk = !cpp_k_equal_M(msk, msk_i)
+  fun(handlers = hand, expr = {
+    p <- progressr::progressor(along = 1:L, label = lab)
+    p(title_progress, class = "sticky", amount = 0)
+    ans <- future.apply::future_lapply(
+      X = 1:L,
+      # future.globals = FALSE,
+      future.packages = c("IFC","IFCip"),
+      future.seed = NULL, # NULL to avoid checking + to not force L'Ecuyer-CMRG RNG
+      future.lazy = FALSE,
+      future.scheduling = +Inf,
+      future.chunk.size = NULL,
+      future.globals = c("cpp_basic","cpp_background","cpp_k_equal_M","mask_identify2","cpp_getTAGS"),
+      FUN = function(ifcip_iter) { 
+        p(sprintf("%s %i%%", lab, round(100*ifcip_iter/L)))
+        img = do.call(what = "objectExtract", args = c(list(ifd = lapply(sel[[ifcip_iter]],
+                                                                         FUN = function(off) cpp_getTAGS(fname = param$fileName_image,
+                                                                                                         offset = off,
+                                                                                                         trunc_bytes = 1, 
+                                                                                                         force_trunc = TRUE, 
+                                                                                                         verbose = verbose)),
+                                                            param = param,
+                                                            verbose = verbose,
+                                                            bypass = TRUE),
+                                                       dots))
+        bar = lapply(img, FUN=function(i_img) {
+          foo = lapply(i_img, FUN=function(i_chan) {
+            if(compute_mask) {
+              # identify object(s) and select the biggest one
+              back = cpp_background(i_chan, is_cif = is_cif)
+              bg_mean = back["BG_MEAN"]
+              bg_sd = back["BG_STD"]
+              msk = mask_identify2(img = i_chan, threshold = 3 * bg_sd)
+              msk_i = which.max(attr(msk, "perimeter"))
+              if(length(msk_i) != 0) {
+                msk = !cpp_k_equal_M(msk, msk_i)
+              } else {
+                msk = !msk
+              }
+              hu = cpp_basic(img = i_chan, msk = msk, mag = mag)
             } else {
-              msk = !msk
+              hu = cpp_basic(img = i_chan, msk = attr(i_chan, "mask"), mag = mag)
+              bg_mean = attr(i_chan, "BG_MEAN")
+              bg_sd = attr(i_chan, "BG_STD")
             }
-            hu = cpp_basic(img = i_chan, msk = msk, mag = mag)
-          } else {
-            hu = cpp_basic(img = i_chan, msk = attr(i_chan, "mask"), mag = mag)
-            bg_mean = attr(i_chan, "BG_MEAN")
-            bg_sd = attr(i_chan, "BG_STD")
-          }
-          avg_intensity = hu["Raw Mean Pixel"] - bg_mean
-          min_intensity = hu["Raw Min Pixel"] - bg_mean
-          max_intensity = hu["Raw Max Pixel"] - bg_mean
-          intensities = structure(c(bg_mean, bg_sd,
-                                    min_intensity, max_intensity, avg_intensity, avg_intensity * hu["pix count"]), 
-                                  names = c("Bkgd Mean", "Bkgd StdDev", "Min Pixel", "Max Pixel", "Mean Pixel", "Intensity"))
-          return(c(hu, intensities))
+            avg_intensity = hu["Raw Mean Pixel"] - bg_mean
+            min_intensity = hu["Raw Min Pixel"] - bg_mean
+            max_intensity = hu["Raw Max Pixel"] - bg_mean
+            intensities = structure(c(bg_mean, bg_sd,
+                                      min_intensity, max_intensity, avg_intensity, avg_intensity * hu["pix count"]), 
+                                    names = c("Bkgd Mean", "Bkgd StdDev", "Min Pixel", "Max Pixel", "Mean Pixel", "Intensity"))
+            return(c(hu, intensities))
+          })
+          attr(foo, "object_id") <- attr(i_img, "object_id")
+          attr(foo, "offset_id") <- attr(i_img, "offset_id")
+          attr(foo, "channel_id") <- attr(i_img, "channel_id")
+          attr(foo, "removal") <- attr(i_img, "removal")
+          return(foo)
         })
-        attr(foo, "object_id") <- attr(i_img, "object_id")
-        attr(foo, "offset_id") <- attr(i_img, "offset_id")
-        attr(foo, "channel_id") <- attr(i_img, "channel_id")
-        attr(foo, "removal") <- attr(i_img, "removal")
-        return(foo)
       })
-    })
+  })
   channel_id = attr(ans[[1]][[1]], "channel_id")
   channel_removal = attr(ans[[1]][[1]], "removal")
   if(L > 1) {
