@@ -18,7 +18,8 @@ ExtractBasic(
 \item{...}{arguments to be passed to \code{\link{objectExtract}} with the exception of 'ifd' and 'bypass'(=TRUE).\cr
 If 'param' is provided 'export'(="matrix"), 'mode'(="raw"), 'size'(="c(0,0)"), 'force_width'(="FALSE") and 'removal' will be overwritten.\cr
 If 'offsets' are not provided extra arguments can also be passed with ... to \code{\link{getOffsets}}.\cr
-/!\ If not any of 'fileName', 'info' and 'param' can be found in ... then attr(offsets, "fileName_image") will be used as 'fileName' input parameter to pass to \code{\link{objectParam}}.}
+/!\ If not any of 'fileName', 'info' and 'param' can be found in ... then attr(offsets, "fileName_image") will be used as 'fileName' input parameter to pass to \code{\link{objectParam}}.
+Remaining arguments with the exception of 'strategy', 'envir' and '...' will be passed to \link[future]{plan}.}
 
 \item{objects}{integers, indices of objects to use.
 This argument is not mandatory, if missing, the default, all objects will be used.}
@@ -36,9 +37,9 @@ When NULL, execution will not be wrapped inside \link[progressr]{with_progress}.
 
 \item{batch}{number of objects to process at the same time. Default is 20.}
 
-\item{parallel}{whether to use parallelization. Default is NULL to use current \pkg{future}'s plan strategy.\cr
-When FALSE, \link[future]{plan} will be called with sequential 'strategy'.
-When TRUE, \link[future]{plan} will be called with either multisession 'strategy' on Windows or multicore otherwise..}
+\item{parallel}{whether to use parallelization. Default is NULL to use current \pkg{future}'s plan 'strategy'.\cr
+When FALSE, \link[future]{plan} will be called with "sequential" 'strategy'.
+When TRUE, \link[future]{plan} will be called with either "multisession" 'strategy' on Windows or "multicore" otherwise.}
 }
 \value{
 a 3D array of features values whose dimensions are [object, features, channel] of class `IFCip_features`.

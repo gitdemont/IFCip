@@ -34,7 +34,7 @@
 #' If 'param' is provided 'export'(="matrix"), 'mode'(="raw"), 'size'(="c(0,0)"), 'force_width'(="FALSE") and 'removal' will be overwritten.\cr
 #' If 'offsets' are not provided extra arguments can also be passed with ... to \code{\link{getOffsets}}.\cr
 #' /!\ If not any of 'fileName', 'info' and 'param' can be found in ... then attr(offsets, "fileName_image") will be used as 'fileName' input parameter to pass to \code{\link{objectParam}}.\cr
-#' Remaining arguments with the exception of 'strategy' will be passed to \link[future]{plan}.
+#' Remaining arguments with the exception of 'strategy', 'envir' and '...' will be passed to \link[future]{plan}.
 #' @param objects integers, indices of objects to use.
 #' This argument is not mandatory, if missing, the default, all objects will be used.
 #' @param offsets object of class `IFC_offset`. 
@@ -51,9 +51,9 @@
 #' Default is -1L for no computation. Allowed are [1-20].
 #' For very fine textures, this value is small (1-3 pixels), while for very coarse textures, it is large (>10).
 #' @param batch number of objects to process at the same time. Default is 20.
-#' @param parallel whether to use parallelization. Default is NULL to use current \pkg{future}'s plan strategy.\cr
-#' When FALSE, \link[future]{plan} will be called with sequential 'strategy'.
-#' When TRUE, \link[future]{plan} will be called with either multisession 'strategy' on Windows or multicore otherwise..
+#' @param parallel whether to use parallelization. Default is NULL to use current \pkg{future}'s plan 'strategy'.\cr
+#' When FALSE, \link[future]{plan} will be called with "sequential" 'strategy'.
+#' When TRUE, \link[future]{plan} will be called with either "multisession" 'strategy' on Windows or "multicore" otherwise.
 #' @examples
 #' if(!requireNamespace("IFCdata", quietly = TRUE)) {
 #'   ## use a cif file
@@ -262,31 +262,9 @@ ExtractFeatures <- function(...,
     return(NULL)
   }
   
-  # force future to use all mem
-  old_opt <- options(future.globals.maxSize = Inf)
-  on.exit(options(old_opt), add = TRUE)
-  
-  # define future plan
-  dots=dots[!(names(dots) %in% c("strategy", "fileName"))]
-  if(missing(parallel) || is.null(parallel)) {
-    strategy = NULL
-  } else {
-    assert(parallel, alw = c(TRUE, FALSE))
-    if(parallel) {
-      if(.Platform$OS.type == "windows") {
-        strategy = future::multisession
-      } else {
-        strategy = future::multicore
-      }
-    } else {
-      strategy = future::sequential
-    }
-  }
-  oplan=do.call(what = future::plan, args = c(list(strategy = strategy), dots))
-  on.exit(future::plan(oplan), add = TRUE)
-  
   # define handler used to monitor progress
   lab = ""
+  lab_init = "preparing future plan"
   fun = progressr::with_progress
   hand = progressr::handler_txtprogressbar(title = title_progress)
   # if(.Platform$GUI == "RStudio") {
@@ -294,7 +272,7 @@ ExtractFeatures <- function(...,
   # }
   if(.Platform$OS.type == "windows") {
     lab="computing features from images"
-    hand = ifcip_handler_winprogressbar(title = title_progress, label = lab)
+    hand = ifcip_handler_winprogressbar(title = title_progress, label = lab_init)
   }
   if(length(dots$session) != 0 &&
      requireNamespace("shiny", quietly = TRUE) &&
@@ -310,9 +288,51 @@ ExtractFeatures <- function(...,
     display_progress = as.logical(display_progress); assert(display_progress, len = 1, alw = c(TRUE, FALSE))
     if(!display_progress) hand = progressr::handler_void
   }
+  
+  # use minimum required variables from envirronement
+  e1 = environment()
+  e2 = new.env()
+  for(x in c("sel","param","L",
+             "title_progress","lab","verbose",
+             "do_haralick","do_zernike","granularity","zmax","k",
+             "names_hu","names_shape","no_hu","no_shape",
+             "is_cif","compute_mask","msk","removal","mag")) assign(x, get(x, envir = e1), envir = e2)
+  
+  # force future to use all mem
+  old_opt <- options(future.globals.maxSize = Inf)
+  on.exit(options(old_opt), add = TRUE)
+  
+  # define future plan
+  if(missing(parallel) || is.null(parallel)) {
+    strategy = NULL
+  } else {
+    assert(parallel, alw = c(TRUE, FALSE))
+    if(parallel) {
+      if(.Platform$OS.type == "windows") {
+        strategy = future::multisession
+      } else {
+        strategy = future::multicore
+      }
+    } else {
+      strategy = future::sequential
+    }
+  }
+  future_args = list(strategy = strategy,
+                     envir = e2,
+                     packages = c("IFC","IFCip"),
+                     seed = NULL, # NULL to avoid checking + to not force L'Ecuyer-CMRG RNG
+                     lazy = FALSE,
+                     globals = c("cpp_background","cpp_ctl","cpp_k_equal_M","mask_identify2","cpp_features_hu3","cpp_getTAGS"))
+  dots=dots[!(names(dots) %in% names(future_args))]
+  if(!is.null(strategy)) dots=dots[names(dots) %in% setdiff(names(formals(strategy)), "...")]
+  oplan=do.call(what = future::plan, args = c(future_args, dots))
+  on.exit(future::plan(oplan), add = TRUE)
+  
+  # compute features
   fun(handlers = hand, expr = {
-    p <- progressr::progressor(along = 1:L, label = lab)
+    p <- progressr::progressor(along = 1:L)
     p(title_progress, class = "sticky", amount = 0)
+    p(lab_init, amount = 0)
     ans <- future.apply::future_lapply(
       X = 1:L,
       # future.globals = FALSE,
@@ -321,6 +341,7 @@ ExtractFeatures <- function(...,
       future.lazy = FALSE,
       future.scheduling = +Inf,
       future.chunk.size = NULL,
+      future.envir = e2,
       future.globals = c("cpp_background","cpp_ctl","cpp_k_equal_M","mask_identify2","cpp_features_hu3","cpp_getTAGS"),
       FUN = function(ifcip_iter) { 
         p(sprintf("%s %i%%", lab, round(100*ifcip_iter/L)))
