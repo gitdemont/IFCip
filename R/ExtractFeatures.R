@@ -264,7 +264,6 @@ ExtractFeatures <- function(...,
   
   # define handler used to monitor progress
   lab = ""
-  lab_init = "preparing future plan"
   fun = progressr::with_progress
   hand = progressr::handler_txtprogressbar(title = title_progress)
   # if(.Platform$GUI == "RStudio") {
@@ -272,7 +271,7 @@ ExtractFeatures <- function(...,
   # }
   if(.Platform$OS.type == "windows") {
     lab="computing features from images"
-    hand = ifcip_handler_winprogressbar(title = title_progress, label = lab_init)
+    hand = ifcip_handler_winprogressbar(title = title_progress)
   }
   if(length(dots$session) != 0 &&
      requireNamespace("shiny", quietly = TRUE) &&
@@ -332,7 +331,11 @@ ExtractFeatures <- function(...,
   fun(handlers = hand, expr = {
     p <- progressr::progressor(along = 1:L)
     p(title_progress, class = "sticky", amount = 0)
-    p(lab_init, amount = 0)
+    p(paste0("initialising [workers=", future::nbrOfWorkers(),"] ",
+             paste0(setdiff(class(future::plan()),
+                            c("FutureStrategy", "uniprocess", "future", "function")),
+                    collapse = "|")),
+      class = ifelse(lab == "" || is.null(display_progress), "sticky", "non_sticky"), amount = 0)
     ans <- future.apply::future_lapply(
       X = 1:L,
       # future.globals = FALSE,

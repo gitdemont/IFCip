@@ -45,46 +45,106 @@ num_to_string <- getFromNamespace("num_to_string", "IFC")
 #' @name ifcip_handler_winprogressbar
 #' @source modified from \link[progressr]{handler_winprogressbar} to allow to pass label argument
 #' @keywords internal
-ifcip_handler_winprogressbar <- function (intrusiveness = getOption("progressr.intrusiveness.gui", 1), target = "gui", ...) {
+ifcip_handler_winprogressbar <- function(intrusiveness = getOption("progressr.intrusiveness.gui", 1), target = "gui", inputs = list(title = "sticky_message", label = "non_sticky_message"), ...) {
   backend_args <- list(...)
-  winProgressBar <- utils::winProgressBar
-  setWinProgressBar <- utils::setWinProgressBar
+  not_fake <- TRUE
+  if (not_fake) {
+    if (.Platform$OS.type != "windows") {
+      stop("handler_winprogressbar requires MS Windows: ",
+           sQuote(.Platform$OS.type))
+    }
+    ## Import functions
+    winProgressBar <- utils::winProgressBar
+    setWinProgressBar <- utils::setWinProgressBar
+  } else {
+    winProgressBar <- function(...) rawConnection(raw(0L))
+    setWinProgressBar <- function(...) NULL
+  }
+  alw_ini <- methods::formalArgs(winProgressBar)
+  alw_upd <- methods::formalArgs(setWinProgressBar)
+  
   reporter <- local({
     pb <- NULL
-    make_pb <- function(...) {
-      if (!is.null(pb)) return(pb)
-      args <- c(backend_args, list(...))
-      alw_names <- methods::formalArgs(winProgressBar)
-      args <- args[names(args) %in% alw_names]
-      args <- args[!duplicated(names(args))]
-      #### trick
-      # Empty title or label are replaced to avoid error while creating the progress bar
-      # In addition, if the progress bar has been created with default label="" value label,
-      # it won't be possible to modify with setProgressBar afterwards,
-      # so as a trick label value is replaced with " " when NULL or equal to ""
-      if(length(args$title) == 0) args$title = " "
-      if((length(args$label) == 0) || (args$label == "")) args$label = " "
-      pb <<- do.call(winProgressBar, args = args)
-      pb
+    
+    stopifnot(
+      is.list(inputs),
+      !is.null(names(inputs)),
+      all(names(inputs) %in% c("title", "label")),
+      all(vapply(inputs, FUN = function(x) {
+        if (is.null(x)) return(TRUE)
+        if (!is.character(x)) return(FALSE)
+        x %in% c("message", "non_sticky_message", "sticky_message")
+      }, FUN.VALUE = FALSE))
+    )
+    
+    ## Expand 'message' => c("non_sticky_message", "sticky_message")
+    for (name in names(inputs)) {
+      input <- inputs[[name]]
+      if ("message" %in% input) {
+        input <- setdiff(input, "message")
+        input <- c(input, "non_sticky_message", "sticky_message")
+      }
+      inputs[[name]] <- unique(input)
     }
-    list(reset = function(...) { pb <<- NULL },
-         initiate = function(config, state, progression, ...) {
-           if (!state$enabled || config$times == 1L) return()
-           make_pb(max = config$max_steps, label = state$message, ...) },
-         update = function(config, state, progression, ...) {
-           if (!state$enabled || progression$amount == 0 || config$times <= 2L) return()
-           make_pb(max = config$max_steps, label = state$message, ...)
-           setWinProgressBar(pb, value = state$step, label = paste0(state$message, "")) },
-         finish = function(config, state, progression, ...) {
-           if (is.null(pb)) return()
-           if (!state$enabled) return()
-           if (config$clear) {
-             close(pb)
-             pb <<- NULL
-           } else {
-             setWinProgressBar(pb, value = state$step, label = paste0(state$message, ""))
-           }
-         })
+    
+    ## Update winProgressBar
+    set_pb <- function(state, progression) {
+      args <- list()
+      for (target in c("title", "label")) {
+        if (inherits(progression, "sticky")) {
+          if ("sticky_message" %in% inputs[[target]])
+            args[[target]] <- progression$message
+        } else {
+          if ("non_sticky_message" %in% inputs[[target]])
+            args[[target]] <- progression$message
+        }
+      }
+      for (target in c("title", "label")) if (is.null(args[[target]])) args[[target]] <- pb$args[[target]]
+      args <- c(list(pb = pb$bar, value = state$step), args)
+      if(not_fake) args <- args[names(args) %in% alw_upd]
+      pb$args <<- args[setdiff(names(args), "pb")]
+      do.call(what = setWinProgressBar, args = args)
+    }
+    
+    list(
+      reset = function(...) {
+        pb <<- NULL
+      },
+      
+      initiate = function(config, state, progression, ...) {
+        if (!state$enabled || config$times == 1L) return()
+        ## NOTE: 'pb' may be re-used for winProgressBar:s
+        if (config$clear) stopifnot(is.null(pb))
+        args <- c(backend_args, list(max = config$max_steps, initial = state$step), list(...))
+        if(not_fake) args <- args[names(args) %in% alw_ini]
+        # Empty title or label are replaced to avoid error while creating the progress bar
+        # In addition, if the progress bar has been created with default label="" value label,
+        # it won't be possible to modify with setProgressBar afterwards,
+        # so as a trick label value is replaced with " " when NULL or equal to ""
+        if (length(args$title) == 0) args$title = " "
+        if (length(args$label) == 0 || args$label == "") args$label = " "
+        pb <<- c(list(bar = do.call(winProgressBar, args = args)), list(args = args))
+        pb
+      },
+      
+      update = function(config, state, progression, ...) {
+        if (!state$enabled || config$times <= 2L) return()
+        set_pb(state, progression)
+      },
+      
+      finish = function(config, state, progression, ...) {
+        ## Already finished?
+        if (is.null(pb)) return()
+        if (!state$enabled) return()
+        if (config$clear) {
+          close(pb$bar)
+          pb <<- NULL
+        } else {
+          set_pb(state, progression)
+        }
+      }
+    )
   })
+  
   progressr::make_progression_handler("winprogressbar", reporter, intrusiveness = intrusiveness, target = target, ...)
 }
