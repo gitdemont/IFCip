@@ -31,13 +31,18 @@ This argument is not mandatory but it may allow to save time for repeated image 
 Allowed are "masked" or "MC". Default is "masked". Please note that it will overwrite 'param' value if provided.}
 
 \item{display_progress}{whether to display a progress bar. Default is TRUE.\cr
-When FALSE, \link[progressr]{handler_void} will be called inside \link[progressr]{with_progress}.\cr
-When TRUE, \link[progressr]{handlers} will be automatically selected and called inside inside \link[progressr]{with_progress}.\cr
-When NULL, execution will not be wrapped inside \link[progressr]{with_progress}.}
+When NULL, execution will not be wrapped inside \link[progressr]{with_progress} nor \link[progressr]{withProgressShiny}. This allow user to call the function with \link[progressr]{with_progress} nor \link[progressr]{withProgressShiny} or to use global handler see \link[progressr]{handlers}.\cr
+When FALSE, execution will be performed inside \link[progressr]{without_progress}.\cr
+When TRUE, execution will be wrapped inside \link[progressr]{with_progress} or \link[progressr]{withProgressShiny}
+and \link[progressr]{handlers} will be automatically selected (the last available will be chosen beween either):\cr
+- \link[progressr]{handler_txtprogressbar},\cr
+- a customized version of \link[progressr]{handler_winprogressbar}, (if on windows OS),\cr
+- \link[progressr]{handler_shiny} (if shiny is detected).}
 
 \item{batch}{number of objects to process at the same time. Default is 20.}
 
-\item{parallel}{whether to use parallelization. Default is NULL to use current \pkg{future}'s plan 'strategy'.\cr
+\item{parallel}{whether to use parallelization. Default is NULL.\cr
+When NULL, current \pkg{future}'s plan 'strategy' will be used.\cr
 When FALSE, \link[future]{plan} will be called with "sequential" 'strategy'.
 When TRUE, \link[future]{plan} will be called with either "multisession" 'strategy' on Windows or "multicore" otherwise.}
 }
