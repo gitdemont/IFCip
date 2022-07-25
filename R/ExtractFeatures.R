@@ -411,7 +411,7 @@ ExtractFeatures <- function(...,
                   
                   diameter = 2 * sqrt(hu["Area"] / pi)
                   
-                  center = apply(contours[,1:2], 2, mean)
+                  # center = apply(contours[,1:2], 2, mean)
                   center = hu[c("pix cy", "pix cx")]
                   distance = k * apply(contours[,1:2], 1, FUN =function(coord)  sqrt((coord[1] - center[1])^2 + (coord[2] - center[2])^2))
                   radius = mean(distance)
