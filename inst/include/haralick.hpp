@@ -122,8 +122,7 @@ Rcpp::List hpp_cooc(const Rcpp::IntegerMatrix img,
   
   // Non normalized Gray-Level Co-occurence Matrix, GLCM
   // DO NOT USE IntegerMatrix 
-  Rcpp::NumericMatrix G1 = Rcpp::no_init_matrix(depth, depth);
-  G1.fill(0.0);
+  Rcpp::NumericMatrix G1(depth, depth);
   Rcpp::NumericMatrix G2 = Rcpp::clone(G1);
   Rcpp::NumericMatrix G3 = Rcpp::clone(G1);
   Rcpp::NumericMatrix G4 = Rcpp::clone(G1);
@@ -135,35 +134,35 @@ Rcpp::List hpp_cooc(const Rcpp::IntegerMatrix img,
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     R_len_t t_col = i_col + delta;
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
-      R_len_t t_row = i_row + delta;
-      // 270 identical to 90
-      if(t_row < mat_r) {
-        if(msk(i_row, i_col) && msk(t_row, i_col)) {
-          G1(img(i_row, i_col), img(t_row, i_col))++;
-          G1(img(t_row, i_col), img(i_row, i_col))++;
-          K1 += 2;
+      if(msk(i_row, i_col)) {
+        R_len_t t_row = i_row + delta;
+        if(t_row < mat_r) {
+          // 270 identical to 90
+          if(msk(t_row, i_col)) {
+            G1(img(i_row, i_col), img(t_row, i_col))++;
+            G1(img(t_row, i_col), img(i_row, i_col))++;
+            K1 += 2;
+          }
+          // 315 identical to 135
+          if(t_col < mat_c &&
+             msk(t_row, t_col)) {
+            G2(img(i_row, i_col), img(t_row, t_col))++;
+            G2(img(t_row, t_col), img(i_row, i_col))++;
+            K2 += 2;
+          }
         }
-      }
-      // 315 identical to 135
-      if((t_row < mat_r) && (t_col < mat_c)) {
-        if(msk(i_row, i_col) && msk(t_row, t_col)) {
-          G2(img(i_row, i_col), img(t_row, t_col))++;
-          G2(img(t_row, t_col), img(i_row, i_col))++;
-          K2 += 2;
-        }
-      }
-      // 0 identical to 180
-      if(t_col < mat_c) {
-        if(msk(i_row, i_col) && msk(i_row, t_col)) {
+        // 0 identical to 180
+        if(t_col < mat_c &&
+           msk(i_row, t_col)) {
           G3(img(i_row, i_col), img(i_row, t_col))++;
           G3(img(i_row, t_col), img(i_row, i_col))++;
           K3 += 2;
         }
-      }
-      // 45 identical to 225
-      t_row = i_row - delta;
-      if((t_row >= 0) && (t_col < mat_c)) {
-        if(msk(i_row, i_col) && msk(t_row, t_col)) {
+        // 45 identical to 225
+        t_row = i_row - delta;
+        if(t_row >= 0 &&
+           t_col < mat_c &&
+           msk(t_row, t_col)) {
           G4(img(i_row, i_col), img(t_row, t_col))++;
           G4(img(t_row, t_col), img(i_row, i_col))++;
           K4 += 2;
@@ -174,38 +173,32 @@ Rcpp::List hpp_cooc(const Rcpp::IntegerMatrix img,
   
   // Normalization
   Rcpp::NumericMatrix P1 = Rcpp::no_init_matrix(depth, depth);
-  Rcpp::NumericMatrix P2 = Rcpp::no_init_matrix(depth, depth);
-  Rcpp::NumericMatrix P3 = Rcpp::no_init_matrix(depth, depth);
-  Rcpp::NumericMatrix P4 = Rcpp::no_init_matrix(depth, depth);
-  if(K1 > 0){
-    for(R_len_t i = 0; i < P1.size(); i++) P1[i] = G1[i] / K1;
-  } else {
-    P1 = Rcpp::clone(G1);
-  }
-  if(K2 > 0) {
-    for(R_len_t i = 0; i < P2.size(); i++) P2[i] = G2[i] / K2;
-  } else {
-    P2 = Rcpp::clone(G2);
-  }
-  if(K3 > 0) {
-    for(R_len_t i = 0; i < P3.size(); i++) P3[i] = G3[i] / K3;
-  } else {
-    P3 = Rcpp::clone(G3);
-  }
-  if(K4 > 0) {
-    for(R_len_t i = 0; i < P4.size(); i++) P4[i] = G4[i] / K4;
-  } else {
-    P4 = Rcpp::clone(G4);
-  }
-  
   P1.attr("class") = "IFCip_cooc";
   P1.attr("delta") = delta;
-  P2.attr("class") = "IFCip_cooc";
-  P2.attr("delta") = delta;
-  P3.attr("class") = "IFCip_cooc";
-  P3.attr("delta") = delta;
-  P4.attr("class") = "IFCip_cooc";
-  P4.attr("delta") = delta;
+  Rcpp::NumericMatrix P2 = Rcpp::clone(P1);
+  Rcpp::NumericMatrix P3 = Rcpp::clone(P1);
+  Rcpp::NumericMatrix P4 = Rcpp::clone(P1);
+  R_len_t dd = P1.size() - 1;
+  if(K1 > 0){
+    for(R_len_t i = 0; i <= dd; i++) P1[i] = G1[dd - i] / K1;
+  } else {
+    P1.fill(0.0);
+  }
+  if(K2 > 0) {
+    for(R_len_t i = 0; i <= dd; i++) P2[i] = G2[dd - i] / K2;
+  } else {
+    P2.fill(0.0);
+  }
+  if(K3 > 0) {
+    for(R_len_t i = 0; i <= dd; i++) P3[i] = G3[dd - i] / K3;
+  } else {
+    P3.fill(0.0);
+  }
+  if(K4 > 0) {
+    for(R_len_t i = 0; i <= dd; i++) P4[i] = G4[dd - i] / K4;
+  } else {
+    P4.fill(0.0);
+  }
   return Rcpp::List::create(_["P+x0y"] = P3,  // 000, 180
                             _["P+x-y"] = P4,  // 045, 225
                             _["P0x+y"] = P1,  // 090, 270
@@ -277,18 +270,18 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::NumericMatrix cooc,
     }
   }
   
-  mu_x = 0.0;
+  mu_x = 1.0;
   HX   = 0.0;
   for(R_len_t i_row1 = 1; i_row1 <= N; i_row1++) {
-    mu_x += i_row1 * d * p_x[i_row1];
+    mu_x += (i_row1 - 1) * d * p_x[i_row1];
     HX += p_x[i_row1] ? p_x[i_row1] * std::log2(p_x[i_row1]) : p_x[i_row1] * std::log2(p_x[i_row1] + eps);
   }
   HX *= -1.0;
   
-  mu_y = 0.0;
+  mu_y = 1.0;
   HY   = 0.0;
   for(R_len_t i_col1 = 1; i_col1 <= N; i_col1++) {
-    mu_y += i_col1 * d * p_y[i_col1];
+    mu_y += (i_col1 - 1) * d * p_y[i_col1];
     HY += p_y[i_col1] ? p_y[i_col1] * std::log2(p_y[i_col1]) : p_y[i_col1] * std::log2(p_y[i_col1] + eps);
   }
   HY *= -1.0;
