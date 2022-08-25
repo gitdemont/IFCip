@@ -128,8 +128,7 @@ Rcpp::IntegerMatrix cpp_rescale_M(const Rcpp::IntegerMatrix img,
 //' @description
 //' This function is designed to compute Haralick co-occurrence matrix
 //' @param img a Rcpp::IntegerMatrix of class `IFCip_rescale`, containing image intensity values.
-//' @param delta a Rcpp::IntegerVector of column and row shifts. If only one value is provided only column will be shifted.
-//' Shifts are computed from bottom-left to top-right.
+//' @param delta a Rcpp::IntegerVector of column and row shifts. If only one value is provided only row will be shifted.
 //' @details See 'Textural Features for Image Classification', Haralick et. al (1979),
 //' available at: \url{https://haralick.org/journals/TexturalFeatures.pdf}
 //' @return a Rcpp::IntegerMatrix Gray-Level Co-occurrence Matrices.
