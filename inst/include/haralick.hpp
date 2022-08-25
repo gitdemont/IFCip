@@ -35,33 +35,22 @@
 #include <utils.hpp>
 using namespace Rcpp;
 
-//' @title Right Shift Matrix
-//' @name cpp_R_shift_M
-//' @description
-//' This function is designed to right shift bits of a matrix to [0, 2^bits - 1]
-//' @param mat a Rcpp::IntegerMatrix, containing image intensity values.
-//' @param bits uint8_t number of bit to shift matrix values. Default is 4. Allowed are [2,10].
-//' If shifted value does not respect [0, 2^bits - 1] an error is thrown.
-//' @return an Rcpp::IntegerMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export]]
-Rcpp::IntegerMatrix hpp_R_shift_M(const Rcpp::IntegerMatrix mat,
-                                  const uint8_t bits = 4) {
-  if(bits > 12 || bits < 2) {
-    Rcpp::stop("hpp_R_shift_M: 'bits' should be a [2,10] integer");
-  }
-  int min = 0, max = std::pow(2.0, bits) - 1;
-  Rcpp::IntegerMatrix out(mat.nrow(), mat.ncol());
-  for(R_len_t i = 0; i < mat.size(); i++) {
-    out[i] = mat[i] >> (bits - 1);
-    if(out[i] < min || out[i] > max) {
-      Rcpp::stop("hpp_R_shift_M: shifted value does not respect allowed interval");
+// retrieve mask matrix or set new one filled with true
+Rcpp::LogicalMatrix get_mask(const Rcpp::Nullable<Rcpp::LogicalMatrix> msk_ = R_NilValue,
+                             const R_len_t mat_r = 0,
+                             const R_len_t mat_c = 0) {
+  if(msk_.isNotNull()) {
+    Rcpp::LogicalMatrix msk(msk_.get());
+    if(mat_r != msk.nrow() || mat_c != msk.ncol()) {
+      Rcpp::LogicalMatrix mskk = Rcpp::no_init(mat_r, mat_c);
+      mskk.fill(true);
+      return mskk;
     }
+    return msk;
   }
-  out.attr("class") = "IFCip_rescale";
-  out.attr("bits") = bits;
-  return out;
+  Rcpp::LogicalMatrix msk(mat_r, mat_c);
+  msk.fill(true);
+  return msk;
 }
 
 //' @title hpp_rescale_M
@@ -79,12 +68,13 @@ Rcpp::IntegerMatrix hpp_R_shift_M(const Rcpp::IntegerMatrix mat,
 Rcpp::IntegerMatrix hpp_rescale_M(const Rcpp::IntegerMatrix img,
                                   const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                   const uint8_t bits = 4) {
-  if(bits > 12 || bits < 2) {
+  if(bits > 10 || bits < 2) {
     Rcpp::stop("hpp_rescale_M: 'bits' should be a [2,10] integer");
   }
   Rcpp::IntegerMatrix out = Rcpp::clone(img);
   Rcpp::NumericVector sca = hpp_scale(out, msk_, NA_REAL, std::pow(2.0, bits), true);
   out.attr("class") = "IFCip_rescale";
+  out.attr("msk") = msk_;
   out.attr("scale") = sca;
   out.attr("bits") = bits;
   return out;
@@ -95,121 +85,80 @@ Rcpp::IntegerMatrix hpp_rescale_M(const Rcpp::IntegerMatrix img,
 //' @description
 //' This function is designed to compute Haralick co-occurrence matrix
 //' @param img a Rcpp::IntegerMatrix of class `IFCip_rescale`, containing image intensity values.
-//' @param msk a LogicalMatrix, containing mask.
-//' @param delta uint8_t offset from which co-occurence has to be computed to. Default is 1.
+//' @param delta a Rcpp::IntegerVector of column and row shifts. If only one value is provided only row will be shifted.
 //' @details See 'Textural Features for Image Classification', Haralick et. al (1979),
 //' available at: \url{https://haralick.org/journals/TexturalFeatures.pdf}
-//' @return a list whose members are normalized Gray-Level Co-occurrence Matrices at angles 0, 45, 90 and 315.
+//' @return a Rcpp::IntegerMatrix Gray-Level Co-occurrence Matrices.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export]]
-Rcpp::List hpp_cooc(const Rcpp::IntegerMatrix img,
-                    const Rcpp::LogicalMatrix msk,
-                    const uint8_t delta = 1) {
+Rcpp::IntegerMatrix hpp_cooc(const Rcpp::IntegerMatrix img,
+                             const Rcpp::IntegerVector delta) {
   if(!Rf_inherits(img, "IFCip_rescale")) {
-   Rcpp::stop("hpp_cooc: 'img' should be of class `IFCip_rescale`");
+    Rcpp::stop("hpp_cooc: 'img' should be of class `IFCip_rescale`");
   }
-
+  
   uint16_t depth = std::pow(2.0, as<int>(img.attr("bits")));
   R_len_t mat_r = img.nrow();
   R_len_t mat_c = img.ncol();
-  if(mat_r != msk.nrow() || mat_c != msk.ncol()) {
-    Rcpp::stop("hpp_cooc: 'img' and 'msk' should have same dimensions");
+  
+  int dy = delta[0];
+  int dx = delta.size() > 1 ? delta[1] : 0;
+  
+  if(std::abs(dx) >= mat_c) {
+    Rcpp::warning("hpp_cooc: 'dx'[%i] should be smaller than 'img' ncol [%i,%i]", dx, mat_r, mat_c);
   }
-  if((delta >= mat_c) || (delta >= mat_r)) {
-    Rcpp::warning("hpp_cooc: 'delta'[%i] should be smaller than 'img' size [%i,%i]", delta, mat_r, mat_c);
+  if(std::abs(dy) >= mat_r) {
+    Rcpp::warning("hpp_cooc: 'dy'[%i] should be smaller than 'img' nrow [%i,%i]", dy, mat_r, mat_c);
+  }
+  
+  // Ensure no NA will be encountered
+  Rcpp::LogicalMatrix msk = get_mask(img.attr("msk"), mat_r, mat_c);
+  Rcpp::LogicalMatrix M = Rcpp::no_init(mat_r, mat_c);
+  for(R_len_t i = 0; i < img.size(); i++) {
+    if(img[i] == NA_INTEGER ||
+       msk[i] == NA_LOGICAL) {
+      M[i] = false;
+    } else {
+      M[i] = msk[i];
+    }
   }
   
   // Non normalized Gray-Level Co-occurence Matrix, GLCM
-  // DO NOT USE IntegerMatrix 
-  Rcpp::NumericMatrix G1(depth, depth);
-  Rcpp::NumericMatrix G2 = Rcpp::clone(G1);
-  Rcpp::NumericMatrix G3 = Rcpp::clone(G1);
-  Rcpp::NumericMatrix G4 = Rcpp::clone(G1);
+  Rcpp::IntegerMatrix out(depth, depth);
+  out.attr("class") = "IFCip_cooc";
+  out.attr("delta") = delta;
   
-  // Initialize normalization constant
-  R_len_t K1 = 0, K2 = 0, K3 = 0, K4 = 0;
+  // Initialize count
+  int K = 0;
   
   // Compute co-occurence
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-    R_len_t t_col = i_col + delta;
+    R_len_t t_col = i_col + dx;
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
-      if(msk(i_row, i_col)) {
-        R_len_t t_row = i_row + delta;
-        if(t_row < mat_r) {
-          // 270 identical to 90
-          if(msk(t_row, i_col)) {
-            G1(img(i_row, i_col), img(t_row, i_col))++;
-            G1(img(t_row, i_col), img(i_row, i_col))++;
-            K1 += 2;
+      if(M(i_row, i_col)) {
+        R_len_t t_row = i_row + dy;
+        if(t_row >= 0 && t_row < mat_r && 
+           t_col >= 0 && t_col < mat_c) {
+          if(M(t_row, t_col)) {
+            out(img(i_row, i_col), img(t_row, t_col))++;
+            out(img(t_row, t_col), img(i_row, i_col))++;
+            K += 2;
           }
-          // 315 identical to 135
-          if(t_col < mat_c &&
-             msk(t_row, t_col)) {
-            G2(img(i_row, i_col), img(t_row, t_col))++;
-            G2(img(t_row, t_col), img(i_row, i_col))++;
-            K2 += 2;
-          }
-        }
-        // 0 identical to 180
-        if(t_col < mat_c &&
-           msk(i_row, t_col)) {
-          G3(img(i_row, i_col), img(i_row, t_col))++;
-          G3(img(i_row, t_col), img(i_row, i_col))++;
-          K3 += 2;
-        }
-        // 45 identical to 225
-        t_row = i_row - delta;
-        if(t_row >= 0 &&
-           t_col < mat_c &&
-           msk(t_row, t_col)) {
-          G4(img(i_row, i_col), img(t_row, t_col))++;
-          G4(img(t_row, t_col), img(i_row, i_col))++;
-          K4 += 2;
         }
       }
     }
   }
   
-  // Normalization
-  Rcpp::NumericMatrix P1 = Rcpp::no_init_matrix(depth, depth);
-  P1.attr("class") = "IFCip_cooc";
-  P1.attr("delta") = delta;
-  Rcpp::NumericMatrix P2 = Rcpp::clone(P1);
-  Rcpp::NumericMatrix P3 = Rcpp::clone(P1);
-  Rcpp::NumericMatrix P4 = Rcpp::clone(P1);
-  R_len_t dd = P1.size() - 1;
-  if(K1 > 0){
-    for(R_len_t i = 0; i <= dd; i++) P1[i] = G1[dd - i] / K1;
-  } else {
-    P1.fill(0.0);
-  }
-  if(K2 > 0) {
-    for(R_len_t i = 0; i <= dd; i++) P2[i] = G2[dd - i] / K2;
-  } else {
-    P2.fill(0.0);
-  }
-  if(K3 > 0) {
-    for(R_len_t i = 0; i <= dd; i++) P3[i] = G3[dd - i] / K3;
-  } else {
-    P3.fill(0.0);
-  }
-  if(K4 > 0) {
-    for(R_len_t i = 0; i <= dd; i++) P4[i] = G4[dd - i] / K4;
-  } else {
-    P4.fill(0.0);
-  }
-  return Rcpp::List::create(_["P+x0y"] = P3,  // 000, 180
-                            _["P+x-y"] = P4,  // 045, 225
-                            _["P0x+y"] = P1,  // 090, 270
-                            _["P+x+y"] = P2); // 135, 315
+  out.attr("total") = K;
+  return out;
 }
 
 //' @title Haralick Features
 //' @name cpp_h_features
 //' @description
 //' This function is designed to compute Haralick's features
-//' @param cooc a Rcpp::NumericMatrix of class `IFCip_cooc`, normalized co-occurrence matrix to compute Haralick's features from.
+//' @param cooc a Rcpp::NumericMatrix of class `IFCip_cooc`, co-occurrence matrix to compute Haralick's features from.
 //' @param invariant a bool, whether to compute invariant Haralick's texture features. Default is false.
 //' Not yet supported.
 //' @details Haralick's invariant texture features are described in Löfstedt T, Brynolfsson P, Asklund T, Nyholm T, Garpebring A (2019) Gray-level invariant Haralick texture features.
@@ -218,13 +167,21 @@ Rcpp::List hpp_cooc(const Rcpp::IntegerMatrix img,
 //' @keywords internal
 ////' @export
 // [[Rcpp::export]]
-Rcpp::NumericVector hpp_h_features(const Rcpp::NumericMatrix cooc,
+Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
                                    const bool invariant = false) {
   if(!Rf_inherits(cooc, "IFCip_cooc")) {
     Rcpp::stop("hpp_h_features: 'cooc' should be of class `IFCip_cooc`");
   }
   R_len_t N = cooc.ncol();
-  double mu_x, mu_y, sig_x, sig_y, mu_xpy, mu_xmy,
+  R_len_t NN = cooc.size() - 1;
+  if(N < 4) {
+    Rcpp::stop("hpp_h_features: 'cooc' is too small");
+  }
+  if(N != cooc.nrow() || (N % 2)) {
+    Rcpp::stop("hpp_h_features: 'cooc' should be a square matrix");
+  }
+  double S = cooc.attr("total");
+  double mu_x, mu_y, sig_x, sig_y, sig_xy, mu_xpy, mu_xmy,
          HX, HY, HXY, HXY1, HXY2;
   double a_cor, con, cor, d_ent, d_var, dis, nrj, ent, hom,
          imc1, imc2, i_dif, p_max, s_ent, s_var;
@@ -239,18 +196,18 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::NumericMatrix cooc,
   double d, d_xpy, d_ij;
   if(invariant) {
     // TODO check to add invariant
-    // d = 1/N, d_xpy = 1 / (2 * N - 1), d_ij = 1 / (N * N);
-    d = 1, d_xpy = 1, d_ij = 1;
+    // d = 1/N, d_xpy = 1 / (2 * N - 1), d_ij = 1 / (N * N) / S;
+    d = 1, d_xpy = 1, d_ij = 1 / S;
   } else {
-    d = 1, d_xpy = 1, d_ij = 1;
+    d = 1, d_xpy = 1, d_ij = 1 / S;
   }
   // copy and weight cooc to p, in addition add +1 index offset
-  for(R_len_t i_col = 0; i_col < N; i_col++) {
-    for(R_len_t i_row = 0; i_row < N; i_row++) {
-      p(i_row + 1, i_col + 1) = cooc(i_row, i_col) * d_ij;
+  for(R_len_t i = 0, i_col1 = 1; i_col1 <= N; i_col1++) {
+    for(R_len_t i_row1 = 1; i_row1 <= N; i_row1++, i++) {
+      p(i_row1, i_col1) = cooc[NN - i] * d_ij;
     }
   }
-  
+
   // compute variables
   Rcpp::NumericVector p_x(N + 1, 0.0);
   for(R_len_t i_row1 = 1; i_row1 <= N; i_row1++) {
@@ -270,33 +227,32 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::NumericMatrix cooc,
     }
   }
   
-  mu_x = 1.0;
+  mu_x = 0.0;
   HX   = 0.0;
   for(R_len_t i_row1 = 1; i_row1 <= N; i_row1++) {
     mu_x += (i_row1 - 1) * d * p_x[i_row1];
-    HX += p_x[i_row1] ? p_x[i_row1] * std::log2(p_x[i_row1]) : p_x[i_row1] * std::log2(p_x[i_row1] + eps);
+    HX -= p_x[i_row1] ? p_x[i_row1] * std::log2(p_x[i_row1]) : 0.0;
   }
-  HX *= -1.0;
   
-  mu_y = 1.0;
+  mu_y = 0.0;
   HY   = 0.0;
   for(R_len_t i_col1 = 1; i_col1 <= N; i_col1++) {
     mu_y += (i_col1 - 1) * d * p_y[i_col1];
-    HY += p_y[i_col1] ? p_y[i_col1] * std::log2(p_y[i_col1]) : p_y[i_col1] * std::log2(p_y[i_col1] + eps);
+    HY -= p_y[i_col1] ? p_y[i_col1] * std::log2(p_y[i_col1]) : 0.0;
   }
-  HY *= -1.0;
   
   sig_x = 0.0;
-  for(R_len_t i_row1 = 1; i_row1 <= N; i_row1++) {
-    sig_x += std::pow(i_row1 * d - mu_x, 2.0) * p_x[i_row1];
+  for(R_len_t i_row = 0; i_row < N; i_row++) {
+    sig_x += std::pow(i_row * d - mu_x, 2.0) * p_x[i_row + 1];
   }
   sig_x = std::sqrt(sig_x);
   
   sig_y = 0.0;
-  for(R_len_t i_col1 = 1; i_col1 <= N; i_col1++) {
-    sig_y += std::pow(i_col1 * d - mu_y, 2.0) * p_y[i_col1];
+  for(R_len_t i_col = 0; i_col < N; i_col++) {
+    sig_y += std::pow(i_col * d - mu_y, 2.0) * p_y[i_col + 1];
   }
   sig_y = std::sqrt(sig_y);
+  sig_xy = sig_x * sig_y;
   
   mu_xpy = 0.0;
   mu_xmy = 0.0;
@@ -306,29 +262,39 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::NumericMatrix cooc,
   s_var  = 0.0;
   if(invariant) {
     for(double k = 2; k <= 2 * N; k++) {
+      // 11
       mu_xpy += 2 * (k - 1) * d_xpy * p_xpy[k];
-      s_ent += p_xpy[k] ? p_xpy[k] * std::log2(p_xpy[k]) : p_xpy[k] * std::log2(p_xpy[k] + eps);
+      // 12
+      s_ent -= p_xpy[k] ? p_xpy[k] * std::log2(p_xpy[k]) : 0.0;
     }
     for(double k = 0; k < N; k++) {
+      // 20
       mu_xmy += (k + 1) * d * p_xmy[k];
-      d_ent += p_xmy[k] ? p_xmy[k] * std::log2(p_xmy[k]) : p_xmy[k] * std::log2(p_xmy[k] + eps);
+      // 09
+      d_ent -= p_xmy[k] ? p_xmy[k] * std::log2(p_xmy[k]) : 0.0;
     }
+    // 10
     for(double k = 0; k < N; k++) d_var += std::pow((k + 1) * d - mu_xmy, 2.0) * p_xmy[k];
+    // 13
     for(double k = 2; k <= 2 * N; k++) s_var += std::pow(2 * (k - 1) * d_xpy - mu_xpy, 2.0) * p_xpy[k];
   } else {
     for(double k = 2; k <= 2 * N; k++) {
+      // 11
       mu_xpy += k * p_xpy[k];
-      s_ent += p_xpy[k] ? p_xpy[k] * std::log2(p_xpy[k]) : p_xpy[k] * std::log2(p_xpy[k] + eps);
+      // 12
+      s_ent -= p_xpy[k] ? p_xpy[k] * std::log2(p_xpy[k]) : 0.0;
     }
     for(double k = 0; k < N; k++) {
+      // 20
       mu_xmy += k * p_xmy[k];
-      d_ent += p_xmy[k] ? p_xmy[k] * std::log2(p_xmy[k]) : p_xmy[k] * std::log2(p_xmy[k] + eps);
+      // 09
+      d_ent -= p_xmy[k] ? p_xmy[k] * std::log2(p_xmy[k]) : 0.0;
     }
+    // 10
     for(double k = 0; k < N; k++) d_var += std::pow(k - mu_xmy, 2.0) * p_xmy(k);
+    // 13
     for(double k = 2; k <= 2 * N; k++) s_var += std::pow(k - mu_xpy, 2.0) * p_xpy(k);
   }
-  s_ent *= -1.0;
-  d_ent *= -1.0;
   
   HXY  = 0.0;
   HXY1 = 0.0;
@@ -337,10 +303,10 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::NumericMatrix cooc,
   // Q.fill(0.0);
   for(R_len_t i_col1 = 1; i_col1 <= N; i_col1++) {
     for(R_len_t i_row1 = 1; i_row1 <= N; i_row1++) {
-      HXY += p(i_row1, i_col1) ? p(i_row1, i_col1) * std::log2(p(i_row1, i_col1)) : p(i_row1, i_col1) * std::log2(p(i_row1, i_col1) + eps);
+      if(p(i_row1, i_col1)) HXY += p(i_row1, i_col1) * std::log2(p(i_row1, i_col1));
       if(p_x[i_row1] * p_y[i_col1] == 0.0) {
         HXY1 += p(i_row1, i_col1) * std::log2(p_x[i_row1] * p_y[i_col1] + eps);
-        HXY2 += p_x[i_row1] * p_y[i_col1] * std::log2(p_x[i_row1] * p_y[i_col1] + eps);
+        // HXY2 += p_x[i_row1] * p_y[i_col1] * std::log2(p_x[i_row1] * p_y[i_col1] + eps);
       } else {
         HXY1 += p(i_row1, i_col1) * std::log2(p_x[i_row1] * p_y[i_col1]);
         HXY2 += p_x[i_row1] * p_y[i_col1] * std::log2(p_x[i_row1] * p_y[i_col1]);
@@ -350,9 +316,6 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::NumericMatrix cooc,
       // }
     }
   }
-  HXY  *= -1.0;
-  HXY1 *= -1.0;
-  HXY2 *= -1.0;
   
   imc1 = (HXY - HXY1) / std::max(HX, HY);
   imc2 = std::sqrt(1 - std::exp(-2*(HXY2 - HXY)));
@@ -372,37 +335,47 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::NumericMatrix cooc,
   mu = (mu_x + mu_y) / 2;
   p_max = p(0, 0);
   
-  for(R_len_t i_col1 = 1; i_col1 <= N; i_col1++) {
-    for(R_len_t i_row1 = 1; i_row1 <= N; i_row1++) {
-      // AUTOCORRELATION
-      a_cor += (i_row1 * d * i_col1 * d) * p(i_row1, i_col1); 
-      // CLUSTER PROMINENCE
-      c_pro += std::pow(i_row1 * d + i_col1 * d - 2 * mu, 3.0) * p(i_row1, i_col1);
-      // CLUSTER SHAPE
-      c_sha += std::pow(i_row1 * d + i_col1 * d - 2 * mu, 4.0) * p(i_row1, i_col1);
-      // H Contrast
-      con += std::pow(i_row1 * d - i_col1 * d, 2.0) * p(i_row1, i_col1);
-      // CORRELATION
-      cor += (i_row1 * d - mu_x) * (i_col1 * d - mu_y) * p(i_row1, i_col1) / sig_x / sig_y;
-      // CONTRAST
-      dis += std::abs(i_row1 * d - i_col1 * d) * p(i_row1, i_col1);
-      // ANGULAR SECOND MOMENT
-      nrj += std::pow(p(i_row1, i_col1), 2.0); 
-      // ENTROPY
-      ent += p(i_row1, i_col1) ? p(i_row1, i_col1) * std::log2(p(i_row1, i_col1)) : p(i_row1, i_col1) * std::log2(p(i_row1, i_col1) + eps);
-      // HOMOGENEITY (it is INVERSE DIFFERENCE MOMENT in Haralick paper)
-      hom += p(i_row1, i_col1) / (1 + std::pow(i_row1 * d - i_col1 * d, 2.0));
-      // INVERSE DIFFERENT MOMENT
-      i_dif += p(i_row1, i_col1) / (1 + std::abs(i_row1 * d - i_col1 * d));
-      // MAXIMUM PROBABILITY
-      p_max = std::max(p(i_row1, i_col1), p_max);
-      // SUM OF SQUARE
-      s_sqr += (i_row1 - mu) * (i_row1 - mu) * p(i_row1, i_col1);
+  for(R_len_t i_col = 0; i_col < N; i_col++) {
+    double i_cold = i_col * d;
+    for(R_len_t i_row = 0; i_row < N; i_row++) {
+      double i_rowd = i_row * d;
+      double pij = p(i_row + 1, i_col + 1);
+      double m = i_rowd - i_cold;
+      double a = std::abs(m);
+      double b = std::pow(m, 2.0);
+      // 00: AUTOCORRELATION
+      a_cor += i_rowd * i_cold * pij;
+      // 01: H Contrast
+      con += b * pij;
+      // 02: CORRELATION
+      cor += (i_rowd - mu_x) * (i_cold - mu_y) * pij / sig_xy;
+      // 03: CONTRAST
+      dis += a * pij;
+      // 04: ANGULAR SECOND MOMENT
+      nrj += std::pow(pij, 2.0); 
+      // 05: ENTROPY
+      ent -= pij ? pij * std::log2(pij) : 0.0;
+      // 06: HOMOGENEITY (it is INVERSE DIFFERENCE MOMENT in Haralick paper)
+      hom += pij / (1 + b);
+      // 07: MAXIMUM PROBABILITY
+      p_max = std::max(pij, p_max);
+      // 08: INVERSE DIFFERENT MOMENT
+      i_dif += pij / (1 + a);
+      
+      double v = i_rowd + i_cold - 2 * mu;
+      double w = std::pow(v, 3.0) * pij;
+      // 14: SUM OF SQUARE
+      s_sqr += (i_rowd - mu) * (i_rowd - mu) * pij;
+      // 15: CLUSTER PROMINENCE
+      c_pro += w;
+      // 16: CLUSTER SHAPE
+      c_sha += v * w;
     }
   }
   
   // to handle potential division by 0
-  if(std::max(HX, HY) == 0.0) imc1 = 0.0; 
+  if(std::max(HX, HY) == 0.0) imc1 = 0.0;
+  if(imc2 == R_NaN) imc2 = 0.0;
   if((sig_x == 0.0) || (sig_y == 0.0)) cor = 0.0;
   
   return Rcpp::NumericVector::create(_["autocorrelation"] = a_cor,
@@ -410,9 +383,8 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::NumericMatrix cooc,
                                      _["H Correlation"] = cor, // IDEAS H_Correlation;
                                      _["dissimilarity"] = dis,
                                      _["H Energy"] = nrj, // IDEAS H_Energy
-                                     _["H Entropy"] = -1.0 * ent, // IDEAS H_Entropy
+                                     _["H Entropy"] = ent, // IDEAS H_Entropy
                                      _["homogeneity"] = hom,
-                                     // _["H Homogeneity"] = hom2, // IDEAS H_Homogeneity
                                      _["maximum probability"] = p_max,
                                      _["inverse difference"] = i_dif,
                                      _["difference entropy"] = d_ent,

@@ -105,22 +105,6 @@ Rcpp::NumericVector cpp_bbox(const Rcpp::NumericMatrix pts,
 // END caliper
 
 // FROM haralick
-//' @title Right Shift Matrix
-//' @name cpp_R_shift_M
-//' @description
-//' This function is designed to right shift bits of a matrix to [0, 2^bits - 1]
-//' @param mat a Rcpp::IntegerMatrix, containing image intensity values.
-//' @param bits uint8_t number of bit to shift matrix values. Default is 4. Allowed are [2,10].
-//' If shifted value does not respect [0, 2^bits - 1] an error is thrown.
-//' @return an Rcpp::IntegerMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export]]
-Rcpp::IntegerMatrix cpp_R_shift_M(const Rcpp::IntegerMatrix mat,
-                                  const uint8_t bits = 4) {
-  return hpp_R_shift_M(mat, bits);
-}
-
 //' @title hpp_rescale_M
 //' @name cpp_rescale_M
 //' @description
@@ -139,31 +123,29 @@ Rcpp::IntegerMatrix cpp_rescale_M(const Rcpp::IntegerMatrix img,
   return hpp_rescale_M(img, msk_, bits);
 }
 
-
-//' @title Haralick Co-Occurrence Matrix
+//' @title Haralick Co-occurrence Matrix
 //' @name cpp_cooc
 //' @description
 //' This function is designed to compute Haralick co-occurrence matrix
 //' @param img a Rcpp::IntegerMatrix of class `IFCip_rescale`, containing image intensity values.
-//' @param msk a LogicalMatrix, containing mask.
-//' @param delta uint8_t offset from which co-occurence has to be computed to. Default is 1.
+//' @param delta a Rcpp::IntegerVector of column and row shifts. If only one value is provided only column will be shifted.
+//' Shifts are computed from bottom-left to top-right.
 //' @details See 'Textural Features for Image Classification', Haralick et. al (1979),
 //' available at: \url{https://haralick.org/journals/TexturalFeatures.pdf}
-//' @return a list whose members are normalized Gray-Level Co-occurrence Matrices at angles 0, 45, 90 and 315.
+//' @return a Rcpp::IntegerMatrix Gray-Level Co-occurrence Matrices.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export]]
-Rcpp::List cpp_cooc(const Rcpp::IntegerMatrix img,
-                    const Rcpp::LogicalMatrix msk,
-                    const uint8_t delta = 1) {
-  return hpp_cooc(img, msk, delta);
+Rcpp::IntegerMatrix cpp_cooc(const Rcpp::IntegerMatrix img,
+                             const Rcpp::IntegerVector delta) {
+  return hpp_cooc(img, delta);
 }
 
 //' @title Haralick Features
 //' @name cpp_h_features
 //' @description
 //' This function is designed to compute Haralick's features
-//' @param cooc a Rcpp::NumericMatrix of class `IFCip_cooc`, normalized co-occurrence matrix to compute Haralick's features from.
+//' @param cooc a Rcpp::NumericMatrix of class `IFCip_cooc`, co-occurrence matrix to compute Haralick's features from.
 //' @param invariant a bool, whether to compute invariant Haralick's texture features. Default is false.
 //' Not yet supported.
 //' @details Haralick's invariant texture features are described in Löfstedt T, Brynolfsson P, Asklund T, Nyholm T, Garpebring A (2019) Gray-level invariant Haralick texture features.
@@ -172,11 +154,10 @@ Rcpp::List cpp_cooc(const Rcpp::IntegerMatrix img,
 //' @keywords internal
 ////' @export
 // [[Rcpp::export]]
-Rcpp::NumericVector cpp_h_features(const Rcpp::NumericMatrix cooc,
+Rcpp::NumericVector cpp_h_features(const Rcpp::IntegerMatrix cooc,
                                    const bool invariant = false) {
   return hpp_h_features(cooc, invariant);
 }
-
 // END haralick
 
 // FROM hu
@@ -694,7 +675,7 @@ Rcpp::NumericMatrix cpp_shift( const Rcpp::NumericMatrix mat,
 // [[Rcpp::export]]
 Rcpp::NumericMatrix cpp_flip(const Rcpp::NumericMatrix mat, const bool which = true) {
   if(which) return hpp_hflip(mat);
-  return hpp_hflip(mat);
+  return hpp_vflip(mat);
 }
 // END flip
 

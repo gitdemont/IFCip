@@ -4,7 +4,7 @@
 \alias{cpp_h_features}
 \title{Haralick Features}
 \arguments{
-\item{cooc}{a Rcpp::NumericMatrix of class `IFCip_cooc`, normalized co-occurrence matrix to compute Haralick's features from.}
+\item{cooc}{a Rcpp::NumericMatrix of class `IFCip_cooc`, co-occurrence matrix to compute Haralick's features from.}
 
 \item{invariant}{a bool, whether to compute invariant Haralick's texture features. Default is false.
 Not yet supported.}

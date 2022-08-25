@@ -24,17 +24,6 @@ NULL
 #' @keywords internal
 NULL
 
-#' @title Right Shift Matrix
-#' @name cpp_R_shift_M
-#' @description
-#' This function is designed to right shift bits of a matrix to [0, 2^bits - 1]
-#' @param mat a Rcpp::IntegerMatrix, containing image intensity values.
-#' @param bits uint8_t number of bit to shift matrix values. Default is 4. Allowed are [2,10].
-#' If shifted value does not respect [0, 2^bits - 1] an error is thrown.
-#' @return an Rcpp::IntegerMatrix.
-#' @keywords internal
-NULL
-
 #' @title hpp_rescale_M
 #' @name cpp_rescale_M
 #' @description
@@ -47,16 +36,15 @@ NULL
 #' @keywords internal
 NULL
 
-#' @title Haralick Co-Occurrence Matrix
+#' @title Haralick Co-occurrence Matrix
 #' @name cpp_cooc
 #' @description
 #' This function is designed to compute Haralick co-occurrence matrix
 #' @param img a Rcpp::IntegerMatrix of class `IFCip_rescale`, containing image intensity values.
-#' @param msk a LogicalMatrix, containing mask.
-#' @param delta uint8_t offset from which co-occurence has to be computed to. Default is 1.
+#' @param delta a Rcpp::IntegerVector of column and row shifts. If only one value is provided only row will be shifted.
 #' @details See 'Textural Features for Image Classification', Haralick et. al (1979),
 #' available at: \url{https://haralick.org/journals/TexturalFeatures.pdf}
-#' @return a list whose members are normalized Gray-Level Co-occurrence Matrices at angles 0, 45, 90 and 315.
+#' @return a Rcpp::IntegerMatrix Gray-Level Co-occurrence Matrices.
 #' @keywords internal
 NULL
 
@@ -64,7 +52,7 @@ NULL
 #' @name cpp_h_features
 #' @description
 #' This function is designed to compute Haralick's features
-#' @param cooc a Rcpp::NumericMatrix of class `IFCip_cooc`, normalized co-occurrence matrix to compute Haralick's features from.
+#' @param cooc a Rcpp::NumericMatrix of class `IFCip_cooc`, co-occurrence matrix to compute Haralick's features from.
 #' @param invariant a bool, whether to compute invariant Haralick's texture features. Default is false.
 #' Not yet supported.
 #' @details Haralick's invariant texture features are described in Löfstedt T, Brynolfsson P, Asklund T, Nyholm T, Garpebring A (2019) Gray-level invariant Haralick texture features.
@@ -1033,16 +1021,12 @@ cpp_bbox <- function(pts, scale = 1.0) {
     .Call(`_IFCip_cpp_bbox`, pts, scale)
 }
 
-cpp_R_shift_M <- function(mat, bits = 4L) {
-    .Call(`_IFCip_cpp_R_shift_M`, mat, bits)
-}
-
 cpp_rescale_M <- function(img, msk_ = NULL, bits = 4L) {
     .Call(`_IFCip_cpp_rescale_M`, img, msk_, bits)
 }
 
-cpp_cooc <- function(img, msk, delta = 1L) {
-    .Call(`_IFCip_cpp_cooc`, img, msk, delta)
+cpp_cooc <- function(img, delta) {
+    .Call(`_IFCip_cpp_cooc`, img, delta)
 }
 
 cpp_h_features <- function(cooc, invariant = FALSE) {

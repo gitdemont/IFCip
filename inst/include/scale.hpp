@@ -120,7 +120,10 @@ Rcpp::NumericVector hpp_i_scale(Rcpp::IntegerMatrix img,
     }
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
       for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
-        if(msk(i_row, i_col) != NA_INTEGER) {
+        if((msk(i_row, i_col) != NA_REAL) &&
+           (msk(i_row, i_col) != R_NaN) &&
+           (msk(i_row, i_col) != R_PosInf) &&
+           (msk(i_row, i_col) != R_NegInf)) {
           if(msk(i_row, i_col)) {
             if(img(i_row, i_col) != NA_INTEGER) {
               if(img(i_row, i_col) < mat_min) {

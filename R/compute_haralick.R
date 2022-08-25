@@ -62,9 +62,11 @@ compute_haralick = function(img, msk, granularity = 3, bits = 4) {
   # rescale masked image to bin ranging [0, 2^bits -1]
   rescaled = cpp_rescale_M(attr(img, "raw"), msk, bits = bits)
   
-  # compute 0, 45, 90 and 315 degree GLCM and then Haralick's features for each granularity
+  # compute 0, 45, 90 and 135 degree GLCM and then Haralick's features for each granularity
   ans = lapply(granularity, FUN = function(i) {
-    apply(sapply(cpp_cooc(img = rescaled, msk = msk, delta = i), cpp_h_features), 1, FUN = function(x) c(mean(x), sd(x)))
+    apply(sapply(list(c(0, i), c(i, 0), c(i, i), c(-i, i)),
+                 FUN = function(delta) cpp_h_features(cpp_cooc(img = rescaled, delta = delta))),
+          MARGIN = 1, FUN = function(x) c(mean(x), sd(x)))
   })
   N = dimnames(ans[[1]])[[2]]
   return(array(unlist(ans), dim = c(2, length(N), length(granularity)), dimnames = list(value = c("Mean","Std"), features = N,  granularity = granularity)))

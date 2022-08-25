@@ -47,18 +47,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_R_shift_M
-Rcpp::IntegerMatrix cpp_R_shift_M(const Rcpp::IntegerMatrix mat, const uint8_t bits);
-RcppExport SEXP _IFCip_cpp_R_shift_M(SEXP matSEXP, SEXP bitsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const uint8_t >::type bits(bitsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_R_shift_M(mat, bits));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cpp_rescale_M
 Rcpp::IntegerMatrix cpp_rescale_M(const Rcpp::IntegerMatrix img, const Rcpp::Nullable<Rcpp::NumericMatrix> msk_, const uint8_t bits);
 RcppExport SEXP _IFCip_cpp_rescale_M(SEXP imgSEXP, SEXP msk_SEXP, SEXP bitsSEXP) {
@@ -73,25 +61,24 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_cooc
-Rcpp::List cpp_cooc(const Rcpp::IntegerMatrix img, const Rcpp::LogicalMatrix msk, const uint8_t delta);
-RcppExport SEXP _IFCip_cpp_cooc(SEXP imgSEXP, SEXP mskSEXP, SEXP deltaSEXP) {
+Rcpp::IntegerMatrix cpp_cooc(const Rcpp::IntegerMatrix img, const Rcpp::IntegerVector delta);
+RcppExport SEXP _IFCip_cpp_cooc(SEXP imgSEXP, SEXP deltaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix >::type img(imgSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::LogicalMatrix >::type msk(mskSEXP);
-    Rcpp::traits::input_parameter< const uint8_t >::type delta(deltaSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_cooc(img, msk, delta));
+    Rcpp::traits::input_parameter< const Rcpp::IntegerVector >::type delta(deltaSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_cooc(img, delta));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_h_features
-Rcpp::NumericVector cpp_h_features(const Rcpp::NumericMatrix cooc, const bool invariant);
+Rcpp::NumericVector cpp_h_features(const Rcpp::IntegerMatrix cooc, const bool invariant);
 RcppExport SEXP _IFCip_cpp_h_features(SEXP coocSEXP, SEXP invariantSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type cooc(coocSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix >::type cooc(coocSEXP);
     Rcpp::traits::input_parameter< const bool >::type invariant(invariantSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_h_features(cooc, invariant));
     return rcpp_result_gen;
@@ -994,9 +981,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_background", (DL_FUNC) &_IFCip_cpp_background, 4},
     {"_IFCip_cpp_antipodalpairs", (DL_FUNC) &_IFCip_cpp_antipodalpairs, 1},
     {"_IFCip_cpp_bbox", (DL_FUNC) &_IFCip_cpp_bbox, 2},
-    {"_IFCip_cpp_R_shift_M", (DL_FUNC) &_IFCip_cpp_R_shift_M, 2},
     {"_IFCip_cpp_rescale_M", (DL_FUNC) &_IFCip_cpp_rescale_M, 3},
-    {"_IFCip_cpp_cooc", (DL_FUNC) &_IFCip_cpp_cooc, 3},
+    {"_IFCip_cpp_cooc", (DL_FUNC) &_IFCip_cpp_cooc, 2},
     {"_IFCip_cpp_h_features", (DL_FUNC) &_IFCip_cpp_h_features, 2},
     {"_IFCip_cpp_centroid", (DL_FUNC) &_IFCip_cpp_centroid, 1},
     {"_IFCip_cpp_rmoment", (DL_FUNC) &_IFCip_cpp_rmoment, 3},

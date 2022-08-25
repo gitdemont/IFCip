@@ -2,16 +2,14 @@
 % Please edit documentation in R/RcppExports.R
 \name{cpp_cooc}
 \alias{cpp_cooc}
-\title{Haralick Co-Occurrence Matrix}
+\title{Haralick Co-occurrence Matrix}
 \arguments{
 \item{img}{a Rcpp::IntegerMatrix of class `IFCip_rescale`, containing image intensity values.}
 
-\item{msk}{a LogicalMatrix, containing mask.}
-
-\item{delta}{uint8_t offset from which co-occurence has to be computed to. Default is 1.}
+\item{delta}{a Rcpp::IntegerVector of column and row shifts. If only one value is provided only row will be shifted.}
 }
 \value{
-a list whose members are normalized Gray-Level Co-occurrence Matrices at angles 0, 45, 90 and 315.
+a Rcpp::IntegerMatrix Gray-Level Co-occurrence Matrices.
 }
 \description{
 This function is designed to compute Haralick co-occurrence matrix
