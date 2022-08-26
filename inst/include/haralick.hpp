@@ -102,8 +102,8 @@ Rcpp::IntegerMatrix hpp_cooc(const Rcpp::IntegerMatrix img,
   R_len_t mat_r = img.nrow();
   R_len_t mat_c = img.ncol();
   
-  int dy = delta[0];
-  int dx = delta.size() > 1 ? delta[1] : 0;
+  R_len_t dy = delta[0];
+  R_len_t dx = delta.size() > 1 ? delta[1] : 0;
   
   if(std::abs(dx) >= mat_c) {
     Rcpp::warning("hpp_cooc: 'dx'[%i] should be smaller than 'img' ncol [%i,%i]", dx, mat_r, mat_c);
@@ -130,7 +130,7 @@ Rcpp::IntegerMatrix hpp_cooc(const Rcpp::IntegerMatrix img,
   out.attr("delta") = delta;
   
   // Initialize count
-  int K = 0;
+  R_len_t K = 0;
   
   // Compute co-occurence
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
@@ -143,14 +143,14 @@ Rcpp::IntegerMatrix hpp_cooc(const Rcpp::IntegerMatrix img,
           if(M(t_row, t_col)) {
             out(img(i_row, i_col), img(t_row, t_col))++;
             out(img(t_row, t_col), img(i_row, i_col))++;
-            K += 2;
+            K++;
           }
         }
       }
     }
   }
   
-  out.attr("total") = K;
+  out.attr("count") = K;
   return out;
 }
 
@@ -180,7 +180,7 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
   if(N != cooc.nrow() || (N % 2)) {
     Rcpp::stop("hpp_h_features: 'cooc' should be a square matrix");
   }
-  double S = cooc.attr("total");
+  double S = cooc.attr("count"); S *= 2;
   double mu_x, mu_y, sig_x, sig_y, sig_xy, mu_xpy, mu_xmy,
          HX, HY, HXY, HXY1, HXY2;
   double a_cor, con, cor, d_ent, d_var, dis, nrj, ent, hom,
@@ -231,14 +231,14 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
   HX   = 0.0;
   for(R_len_t i_row1 = 1; i_row1 <= N; i_row1++) {
     mu_x += (i_row1 - 1) * d * p_x[i_row1];
-    HX -= p_x[i_row1] ? p_x[i_row1] * std::log2(p_x[i_row1]) : 0.0;
+    if(p_x[i_row1]) HX -= p_x[i_row1] * std::log2(p_x[i_row1]);
   }
   
   mu_y = 0.0;
   HY   = 0.0;
   for(R_len_t i_col1 = 1; i_col1 <= N; i_col1++) {
     mu_y += (i_col1 - 1) * d * p_y[i_col1];
-    HY -= p_y[i_col1] ? p_y[i_col1] * std::log2(p_y[i_col1]) : 0.0;
+    if(p_y[i_col1]) HY -= p_y[i_col1] * std::log2(p_y[i_col1]);
   }
   
   sig_x = 0.0;
@@ -265,13 +265,13 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
       // 11
       mu_xpy += 2 * (k - 1) * d_xpy * p_xpy[k];
       // 12
-      s_ent -= p_xpy[k] ? p_xpy[k] * std::log2(p_xpy[k]) : 0.0;
+      if(p_xpy[k]) s_ent -= p_xpy[k] * std::log2(p_xpy[k]);
     }
     for(double k = 0; k < N; k++) {
       // 20
       mu_xmy += (k + 1) * d * p_xmy[k];
       // 09
-      d_ent -= p_xmy[k] ? p_xmy[k] * std::log2(p_xmy[k]) : 0.0;
+      if(p_xmy[k]) d_ent -= p_xmy[k] * std::log2(p_xmy[k]);
     }
     // 10
     for(double k = 0; k < N; k++) d_var += std::pow((k + 1) * d - mu_xmy, 2.0) * p_xmy[k];
@@ -282,13 +282,13 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
       // 11
       mu_xpy += k * p_xpy[k];
       // 12
-      s_ent -= p_xpy[k] ? p_xpy[k] * std::log2(p_xpy[k]) : 0.0;
+      if(p_xpy[k]) s_ent -= p_xpy[k] * std::log2(p_xpy[k]);
     }
     for(double k = 0; k < N; k++) {
       // 20
       mu_xmy += k * p_xmy[k];
       // 09
-      d_ent -= p_xmy[k] ? p_xmy[k] * std::log2(p_xmy[k]) : 0.0;
+      if(p_xmy[k]) d_ent -= p_xmy[k] * std::log2(p_xmy[k]);
     }
     // 10
     for(double k = 0; k < N; k++) d_var += std::pow(k - mu_xmy, 2.0) * p_xmy(k);
@@ -318,7 +318,7 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
   }
   
   imc1 = (HXY - HXY1) / std::max(HX, HY);
-  imc2 = std::sqrt(1 - std::exp(-2*(HXY2 - HXY)));
+  imc2 = std::sqrt(1 - std::exp(2*(HXY2 - HXY))); //should be std::sqrt(1 - std::exp(-2*(HXY2 - HXY)))
   // mcc = std::sqrt(lambda(Q(i_col1, i_row1)))
   
   c_pro = 0.0;
@@ -354,7 +354,7 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
       // 04: ANGULAR SECOND MOMENT
       nrj += std::pow(pij, 2.0); 
       // 05: ENTROPY
-      ent -= pij ? pij * std::log2(pij) : 0.0;
+      if(pij) ent -= pij * std::log2(pij);
       // 06: HOMOGENEITY (it is INVERSE DIFFERENCE MOMENT in Haralick paper)
       hom += pij / (1 + b);
       // 07: MAXIMUM PROBABILITY
