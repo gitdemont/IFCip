@@ -329,7 +329,7 @@ ExtractFeatures <- function(...,
       strategy = future::sequential
     }
   }
-  future_args = list(strategy = quote(strategy),
+  future_args = list(strategy = strategy,
                      envir = e2,
                      packages = c("IFC","IFCip"),
                      seed = NULL, # NULL to avoid checking + to not force L'Ecuyer-CMRG RNG
