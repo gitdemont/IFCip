@@ -36,7 +36,7 @@ Allowed are "masked" or "MC". Default is "masked". Please note that it will over
 When NULL, execution will not be wrapped inside \link[progressr]{with_progress} nor \link[progressr]{withProgressShiny}. This allow user to call the function with \link[progressr]{with_progress} nor \link[progressr]{withProgressShiny} or to use global handler see \link[progressr]{handlers}.\cr
 When FALSE, execution will be performed inside \link[progressr]{without_progress}.\cr
 When TRUE, execution will be wrapped inside \link[progressr]{with_progress} or \link[progressr]{withProgressShiny}
-and \link[progressr]{handlers} will be automatically selected (the last available will be chosen beween either):\cr
+and \link[progressr]{handlers} will be automatically selected (the last available will be chosen between either):\cr
 - \link[progressr]{handler_txtprogressbar},\cr
 - a customized version of \link[progressr]{handler_winprogressbar}, (if on windows OS),\cr
 - \link[progressr]{handler_shiny} (if shiny is detected).}

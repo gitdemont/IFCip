@@ -45,7 +45,7 @@
 #' When NULL, execution will not be wrapped inside \link[progressr]{with_progress} nor \link[progressr]{withProgressShiny}. This allow user to call the function with \link[progressr]{with_progress} nor \link[progressr]{withProgressShiny} or to use global handler see \link[progressr]{handlers}.\cr
 #' When FALSE, execution will be performed inside \link[progressr]{without_progress}.\cr
 #' When TRUE, execution will be wrapped inside \link[progressr]{with_progress} or \link[progressr]{withProgressShiny}
-#' and \link[progressr]{handlers} will be automatically selected (the last available will be chosen beween either):\cr
+#' and \link[progressr]{handlers} will be automatically selected (the last available will be chosen between either):\cr
 #' - \link[progressr]{handler_txtprogressbar},\cr
 #' - a customized version of \link[progressr]{handler_winprogressbar}, (if on windows OS),\cr
 #' - \link[progressr]{handler_shiny} (if shiny is detected).
@@ -336,8 +336,8 @@ ExtractFeatures <- function(...,
                      lazy = FALSE,
                      globals = c("cpp_background","cpp_ctl","cpp_k_equal_M","mask_identify2","cpp_features_hu3","cpp_getTAGS"))
   dots=dots[!(names(dots) %in% names(future_args))]
-  if(!is.null(strategy)) dots=dots[names(dots) %in% setdiff(names(formals(strategy)), "...")]
-  oplan=do.call(what = future::plan, args = c(future_args, dots))
+  if(!is.null(strategy)) dots=dots[names(dots) %in% setdiff(names(formals(strategy, envir = asNamespace("future"))), "...")]
+  oplan=do.call(what = future::plan, args = c(future_args[1], dots))
   on.exit(future::plan(oplan), add = TRUE)
   
   # compute features
