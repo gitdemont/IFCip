@@ -312,7 +312,7 @@ ExtractBasic <- function(...,
           # future.globals = FALSE,
           future.packages = c("IFC","IFCip"),
           future.seed = NULL, # NULL to avoid checking + to not force L'Ecuyer-CMRG RNG
-          future.lazy = FALSE,
+          # future.lazy = FALSE,
           future.scheduling = +Inf,
           future.chunk.size = NULL,
           future.globals = c("cpp_basic","cpp_background","cpp_k_equal_M","mask_identify2","cpp_getTAGS"),
