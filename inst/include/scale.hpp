@@ -208,7 +208,7 @@ void hpp_i_scalerev(Rcpp::IntegerMatrix img,
 //' /!\ in addition 'img' will be modified (scaled) in-place.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector hpp_scale(SEXP img,
                               const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                               const double value = NA_REAL,
@@ -236,7 +236,7 @@ Rcpp::NumericVector hpp_scale(SEXP img,
 //' @return Nothing, but 'img' will be modified (scale reversion) in-place.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 void hpp_scalerev(SEXP img,
                   const Rcpp::NumericVector sca) {
   switch( TYPEOF(img) ) {

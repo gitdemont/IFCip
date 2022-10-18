@@ -72,7 +72,7 @@ R_len_t VIND(uint8_t n, uint8_t l, uint8_t m, uint8_t N1) {
 //' @source Adaptation from \url{https://github.com/aoles/EBImage} in v3.12.0, authored by Andrzej Oles, Gregoire Pau, Mike Smith, Oleg Sklyar, Wolfgang Huber, with contributions from Joseph Barry and Philip A. Marais \email{andrzej.oles@embl.de}.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::List hpp_zernike1(const Rcpp::NumericMatrix img,
                         const double cx,
                         const double cy,
@@ -162,7 +162,7 @@ Rcpp::List hpp_zernike1(const Rcpp::NumericMatrix img,
 //' @source Adaptation from \url{https://github.com/aoles/EBImage} in v3.12.0, authored by Andrzej Oles, Gregoire Pau, Mike Smith, Oleg Sklyar, Wolfgang Huber, with contributions from Joseph Barry and Philip A. Marais \email{andrzej.oles@embl.de}.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::List hpp_zernike2(const Rcpp::NumericMatrix img, 
                         const double cx, 
                         const double cy, 

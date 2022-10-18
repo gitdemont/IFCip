@@ -44,7 +44,7 @@ using namespace Rcpp;
 //' @return a logical matrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_k_equal_M(const Rcpp::NumericMatrix mat, const double k = 3.0 ) {
   R_len_t mat_r = mat.nrow();
   Rcpp::LogicalMatrix OUT_M(mat_r, mat.ncol());
@@ -63,7 +63,7 @@ Rcpp::LogicalMatrix hpp_k_equal_M(const Rcpp::NumericMatrix mat, const double k 
 //' @return a logical matrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_k_sup_equal_M(const Rcpp::NumericMatrix mat, const double k = 3.0) {
   R_len_t mat_r = mat.nrow();
   Rcpp::LogicalMatrix OUT_M(mat_r, mat.ncol());
@@ -82,7 +82,7 @@ Rcpp::LogicalMatrix hpp_k_sup_equal_M(const Rcpp::NumericMatrix mat, const doubl
 //' @return a logical matrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_k_inf_equal_M(const Rcpp::NumericMatrix mat, const double k = 3.0) {
   R_len_t mat_r = mat.nrow();
   Rcpp::LogicalMatrix OUT_M(mat_r, mat.ncol());

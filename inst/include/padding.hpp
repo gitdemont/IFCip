@@ -55,7 +55,7 @@ using namespace Rcpp;
 //' -ori_r, a R_len_t with y coordinate of the 1st non extra element.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::List hpp_padding(const Rcpp::NumericMatrix mat,
                        const Rcpp::NumericMatrix kernel,
                        const uint8_t method = 1,

@@ -60,7 +60,7 @@ double get_area(const R_len_t idx1,
 //' @return an IntegerVector of antipodal pairs of the convex input polygon. Note that this vector of indices is in C sort 1st start at 0; add 1 to use it in R.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix hpp_antipodalpairs(const Rcpp::NumericMatrix pts) {
   if(!Rf_inherits(pts, "IFCip_convexhull")) {
     Rcpp::stop("hpp_antipodalpairs: 'pts' should be of class `IFCip_convexhull`");
@@ -115,7 +115,7 @@ Rcpp::IntegerMatrix hpp_antipodalpairs(const Rcpp::NumericMatrix pts) {
   return out;
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_antipodalpairs_width(const Rcpp::IntegerMatrix pairs,
                                              const Rcpp::NumericMatrix pts,
                                              const double scale = 1.0) {
@@ -153,7 +153,7 @@ Rcpp::NumericMatrix hpp_antipodalpairs_width(const Rcpp::IntegerMatrix pairs,
   return out;
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector hpp_antipodalpairs_feat(const Rcpp::IntegerMatrix pairs,
                                             const Rcpp::NumericMatrix pts,
                                             const double scale = 1.0) {
@@ -206,7 +206,7 @@ Rcpp::NumericVector hpp_antipodalpairs_feat(const Rcpp::IntegerMatrix pairs,
 //' @param scale a double used to scale the returned values.
 //' @return a NumericVector of features from convex hull.
 //' @keywords internal
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector hpp_bbox(const Rcpp::NumericMatrix pts,
                              const double scale = 1.0) {
   return hpp_antipodalpairs_feat(hpp_antipodalpairs(pts), pts, scale);

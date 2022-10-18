@@ -41,7 +41,7 @@ using namespace Rcpp;
 //' @return a flipped matrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_hflip(const Rcpp::NumericMatrix mat) {
   // R_len_t img_r = mat.nrow();
   R_len_t img_c = mat.ncol();
@@ -60,7 +60,7 @@ Rcpp::NumericMatrix hpp_hflip(const Rcpp::NumericMatrix mat) {
 //' @return a flipped matrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_vflip(const Rcpp::NumericMatrix mat) {
   R_len_t img_r = mat.nrow();
   // R_len_t img_c = mat.ncol();

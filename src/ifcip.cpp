@@ -63,7 +63,7 @@ using namespace Rcpp;
 //' @return a NumericVector of background mean and sd
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector cpp_background(const Rcpp::NumericMatrix img,
                                    const R_len_t margin = 4,
                                    const R_len_t extra = 0,
@@ -83,7 +83,7 @@ Rcpp::NumericVector cpp_background(const Rcpp::NumericMatrix img,
 //' @return an IntegerVector of antipodal pairs of the convex input polygon. Note that this vector of indices is in C sort 1st start at 0; add 1 to use it in R.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix cpp_antipodalpairs(const Rcpp::NumericMatrix pts) {
   return hpp_antipodalpairs(pts);
 }
@@ -97,7 +97,7 @@ Rcpp::IntegerMatrix cpp_antipodalpairs(const Rcpp::NumericMatrix pts) {
 //' @param scale a double used to scale the returned values.
 //' @return a NumericVector of features from convex hull.
 //' @keywords internal
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector cpp_bbox(const Rcpp::NumericMatrix pts,
                              const double scale = 1.0) {
   return hpp_bbox(pts, scale);
@@ -116,7 +116,7 @@ Rcpp::NumericVector cpp_bbox(const Rcpp::NumericMatrix pts,
 //' @return a Rcpp::IntegerMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix cpp_rescale_M(const Rcpp::IntegerMatrix img,
                                   const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                   const uint8_t bits = 4) {
@@ -134,7 +134,7 @@ Rcpp::IntegerMatrix cpp_rescale_M(const Rcpp::IntegerMatrix img,
 //' @return a Rcpp::IntegerMatrix Gray-Level Co-occurrence Matrices.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix cpp_cooc(const Rcpp::IntegerMatrix img,
                              const Rcpp::IntegerVector delta) {
   return hpp_cooc(img, delta);
@@ -152,7 +152,7 @@ Rcpp::IntegerMatrix cpp_cooc(const Rcpp::IntegerMatrix img,
 //' @return a Rcpp::NumericVector of Haralick's texture features
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector cpp_h_features(const Rcpp::IntegerMatrix cooc,
                                    const bool invariant = false) {
   return hpp_h_features(cooc, invariant);
@@ -167,7 +167,7 @@ Rcpp::NumericVector cpp_h_features(const Rcpp::IntegerMatrix cooc,
 //' @param img a NumericMatrix, containing image intensity values.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector cpp_centroid(const Rcpp::NumericMatrix img) {
   return hpp_centroid(img);
 }
@@ -181,7 +181,7 @@ Rcpp::NumericVector cpp_centroid(const Rcpp::NumericMatrix img) {
 //' @param q uint8_t: q order. Default is 0.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector cpp_rmoment(const Rcpp::NumericMatrix img, 
                                 const uint8_t p = 0, 
                                 const uint8_t q = 0) {
@@ -199,7 +199,7 @@ Rcpp::NumericVector cpp_rmoment(const Rcpp::NumericMatrix img,
 //' @param q uint8_t: q order. Default is 0.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector cpp_cmoment(const Rcpp::NumericMatrix img, 
                                 const double cx = 0.0, 
                                 const double cy = 0.0, 
@@ -233,7 +233,7 @@ Rcpp::NumericVector cpp_cmoment(const Rcpp::NumericMatrix img,
 //' -pix count: img's area in pixels.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector cpp_features_hu1(const Rcpp::NumericMatrix img,
                                     const double mag = 1.0) {
   return hpp_features_hu1(img, mag);
@@ -265,7 +265,7 @@ Rcpp::NumericVector cpp_features_hu1(const Rcpp::NumericMatrix img,
 //' -inv[1-7]: image invariant moments.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector cpp_features_hu2(const Rcpp::NumericMatrix img,
                                      const double mag = 1.0) {
   return hpp_features_hu2(img, mag);
@@ -299,7 +299,7 @@ Rcpp::NumericVector cpp_features_hu2(const Rcpp::NumericMatrix img,
 //' -Raw Max Pixel: img's maximal pixel intensity.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector cpp_basic(const Rcpp::NumericMatrix img,
                               const Rcpp::NumericMatrix msk,
                               const double mag = 1.0) {
@@ -348,7 +348,7 @@ Rcpp::NumericVector cpp_basic(const Rcpp::NumericMatrix img,
 //' -kurtosis, component's kurtosis.  
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_features_hu3(const Rcpp::NumericMatrix img,
                                      const Rcpp::IntegerMatrix msk,
                                      const unsigned int components = 0,
@@ -376,7 +376,7 @@ Rcpp::NumericMatrix cpp_features_hu3(const Rcpp::NumericMatrix img,
 //' @return an NumericVector of threshold(s).
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector cpp_multi_otsu (const Rcpp::NumericMatrix img,
                                     const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                     const uint8_t n_comp = 2,
@@ -394,7 +394,7 @@ Rcpp::NumericVector cpp_multi_otsu (const Rcpp::NumericMatrix img,
 //' @return an NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_distance_eucl(const Rcpp::IntegerMatrix msk) {
   return hpp_distance_eucl(msk);
 }
@@ -407,7 +407,7 @@ Rcpp::NumericMatrix cpp_distance_eucl(const Rcpp::IntegerMatrix msk) {
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_distance_eucl_norm(const Rcpp::IntegerMatrix msk) {
   return hpp_distance_eucl_norm(msk);
 }
@@ -420,7 +420,7 @@ Rcpp::NumericMatrix cpp_distance_eucl_norm(const Rcpp::IntegerMatrix msk) {
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_distance_manh(const Rcpp::IntegerMatrix msk) {
   return hpp_distance_manh(msk);
 }
@@ -433,7 +433,7 @@ Rcpp::NumericMatrix cpp_distance_manh(const Rcpp::IntegerMatrix msk) {
 //' @return an NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_distance_manh_norm(const Rcpp::IntegerMatrix msk) {
   return hpp_distance_manh_norm(msk);
 }
@@ -449,7 +449,7 @@ Rcpp::NumericMatrix cpp_distance_manh_norm(const Rcpp::IntegerMatrix msk) {
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_disttrans_manh (const Rcpp::NumericMatrix img) {
   return hpp_disttrans_manh(img);
 }
@@ -465,7 +465,7 @@ Rcpp::NumericMatrix cpp_disttrans_manh (const Rcpp::NumericMatrix img) {
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_disttrans_eucl (const Rcpp::NumericMatrix img) {
   return hpp_disttrans_eucl(img);
 }
@@ -479,7 +479,7 @@ Rcpp::NumericMatrix cpp_disttrans_eucl (const Rcpp::NumericMatrix img) {
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix cpp_voronoi_eucl (const Rcpp::IntegerMatrix img) {
   return hpp_voronoi_eucl(img);
 }
@@ -493,7 +493,7 @@ Rcpp::IntegerMatrix cpp_voronoi_eucl (const Rcpp::IntegerMatrix img) {
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix cpp_voronoi_manh (const Rcpp::IntegerMatrix img) {
   return hpp_voronoi_manh(img);
 }
@@ -514,7 +514,7 @@ Rcpp::IntegerMatrix cpp_voronoi_manh (const Rcpp::IntegerMatrix img) {
 //' @source Adaptation from \url{https://github.com/aoles/EBImage} in v3.12.0, authored by Andrzej Oles, Gregoire Pau, Mike Smith, Oleg Sklyar, Wolfgang Huber, with contributions from Joseph Barry and Philip A. Marais \email{andrzej.oles@embl.de}.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::List cpp_zernike1(const Rcpp::NumericMatrix img,
                         const double cx,
                         const double cy,
@@ -537,7 +537,7 @@ Rcpp::List cpp_zernike1(const Rcpp::NumericMatrix img,
 //' @source Adaptation from \url{https://github.com/aoles/EBImage} in v3.12.0, authored by Andrzej Oles, Gregoire Pau, Mike Smith, Oleg Sklyar, Wolfgang Huber, with contributions from Joseph Barry and Philip A. Marais \email{andrzej.oles@embl.de}.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::List cpp_zernike2(const Rcpp::NumericMatrix img, 
                         const double cx, 
                         const double cy, 
@@ -557,7 +557,7 @@ Rcpp::List cpp_zernike2(const Rcpp::NumericMatrix img,
 //' @return a logical matrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix cpp_AND_M(const Rcpp::List list) {
   return hpp_AND_M(list);
 }
@@ -570,7 +570,7 @@ Rcpp::LogicalMatrix cpp_AND_M(const Rcpp::List list) {
 //' @return a logical matrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix cpp_OR_M(const Rcpp::List list) {
   return hpp_OR_M(list);
 }
@@ -583,7 +583,7 @@ Rcpp::LogicalMatrix cpp_OR_M(const Rcpp::List list) {
 //' @return a logical matrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix cpp_NEG_M(const Rcpp::LogicalMatrix mat) {
   return hpp_NEG_M(mat);
 }
@@ -597,7 +597,7 @@ Rcpp::LogicalMatrix cpp_NEG_M(const Rcpp::LogicalMatrix mat) {
 //' @return a logical matrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix cpp_k_equal_M(const Rcpp::NumericMatrix mat, const double k = 3.0) {
   return hpp_k_equal_M(mat, k);
 }
@@ -611,7 +611,7 @@ Rcpp::LogicalMatrix cpp_k_equal_M(const Rcpp::NumericMatrix mat, const double k 
 //' @return a logical matrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix cpp_k_sup_equal_M(const Rcpp::NumericMatrix mat, const double k = 3.0) {
   return hpp_k_sup_equal_M(mat, k);
 }
@@ -625,7 +625,7 @@ Rcpp::LogicalMatrix cpp_k_sup_equal_M(const Rcpp::NumericMatrix mat, const doubl
 //' @return a logical matrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix cpp_k_inf_equal_M(const Rcpp::NumericMatrix mat, const double k = 3.0) {
   return hpp_k_inf_equal_M(mat, k);
 }
@@ -671,7 +671,7 @@ Rcpp::NumericMatrix cpp_shift( const Rcpp::NumericMatrix mat,
 //' @return a flipped matrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_flip(const Rcpp::NumericMatrix mat, const bool which = true) {
   if(which) return hpp_hflip(mat);
   return hpp_vflip(mat);
@@ -701,7 +701,7 @@ Rcpp::NumericMatrix cpp_flip(const Rcpp::NumericMatrix mat, const bool which = t
 //' -ori_r, a R_len_t with y coordinate of the 1st non extra element.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::List cpp_padding(const Rcpp::NumericMatrix mat,
                        const Rcpp::NumericMatrix kernel,
                        const uint8_t method = 1,
@@ -721,7 +721,7 @@ Rcpp::List cpp_padding(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_sd(const Rcpp::NumericMatrix mat,
                            const Rcpp::NumericMatrix kernel) {
   return hpp_sd(mat, kernel);
@@ -736,7 +736,7 @@ Rcpp::NumericMatrix cpp_sd(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_mean(const Rcpp::NumericMatrix mat,
                              const Rcpp::NumericMatrix kernel) {
   return hpp_mean(mat, kernel);
@@ -751,7 +751,7 @@ Rcpp::NumericMatrix cpp_mean(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_median(const Rcpp::NumericMatrix mat,
                                const Rcpp::NumericMatrix kernel) {
   return hpp_median(mat, kernel);
@@ -766,7 +766,7 @@ Rcpp::NumericMatrix cpp_median(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_mode(const Rcpp::NumericMatrix mat,
                              const Rcpp::NumericMatrix kernel) {
   return hpp_mode(mat, kernel);
@@ -781,7 +781,7 @@ Rcpp::NumericMatrix cpp_mode(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_mid(const Rcpp::NumericMatrix mat,
                             const Rcpp::NumericMatrix kernel) {
   return hpp_mid(mat, kernel);
@@ -796,7 +796,7 @@ Rcpp::NumericMatrix cpp_mid(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_convolve2d(const Rcpp::NumericMatrix mat,
                                    const Rcpp::NumericMatrix kernel) {
   return hpp_convolve2d(mat, kernel);
@@ -811,7 +811,7 @@ Rcpp::NumericMatrix cpp_convolve2d(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_correlate2d(const Rcpp::NumericMatrix mat,
                                     const Rcpp::NumericMatrix kernel) {
   return hpp_correlate2d(mat, kernel);
@@ -829,7 +829,7 @@ Rcpp::NumericMatrix cpp_correlate2d(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_erode(const Rcpp::NumericMatrix mat,
                               const Rcpp::NumericMatrix kernel,
                               const uint8_t iter = 0,
@@ -847,7 +847,7 @@ Rcpp::NumericMatrix cpp_erode(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_dilate(const Rcpp::NumericMatrix mat,
                                const Rcpp::NumericMatrix kernel,
                                const uint8_t iter = 0,
@@ -865,7 +865,7 @@ Rcpp::NumericMatrix cpp_dilate(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_opening(const Rcpp::NumericMatrix mat,
                                 const Rcpp::NumericMatrix kernel,
                                 const uint8_t iter = 0,
@@ -883,7 +883,7 @@ Rcpp::NumericMatrix cpp_opening(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_closing(const Rcpp::NumericMatrix mat,
                                 const Rcpp::NumericMatrix kernel,
                                 const uint8_t iter = 0,
@@ -901,7 +901,7 @@ Rcpp::NumericMatrix cpp_closing(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_gradient(const Rcpp::NumericMatrix mat,
                                  const Rcpp::NumericMatrix kernel,
                                  const uint8_t iter = 0,
@@ -919,7 +919,7 @@ Rcpp::NumericMatrix cpp_gradient(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_tophat_white(const Rcpp::NumericMatrix mat,
                                      const Rcpp::NumericMatrix kernel,
                                      const uint8_t iter = 0,
@@ -937,7 +937,7 @@ Rcpp::NumericMatrix cpp_tophat_white(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_tophat_black(const Rcpp::NumericMatrix mat,
                                      const Rcpp::NumericMatrix kernel,
                                      const uint8_t iter = 0,
@@ -955,7 +955,7 @@ Rcpp::NumericMatrix cpp_tophat_black(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_tophat_self(const Rcpp::NumericMatrix mat,
                                     const Rcpp::NumericMatrix kernel,
                                     const uint8_t iter = 0,
@@ -973,7 +973,7 @@ Rcpp::NumericMatrix cpp_tophat_self(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_cont(const Rcpp::NumericMatrix mat,
                              const Rcpp::NumericMatrix kernel,
                              const uint8_t iter = 0,
@@ -991,7 +991,7 @@ Rcpp::NumericMatrix cpp_cont(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_laplacian(const Rcpp::NumericMatrix mat,
                                   const Rcpp::NumericMatrix kernel,
                                   const uint8_t iter = 0,
@@ -1019,7 +1019,7 @@ Rcpp::NumericMatrix cpp_laplacian(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix of H-Minima transformation of 'img'.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_HMIN (const Rcpp::NumericMatrix img,
                               const double h = 0.0,
                               const double img_min = 0.0,
@@ -1046,7 +1046,7 @@ Rcpp::NumericMatrix cpp_HMIN (const Rcpp::NumericMatrix img,
 //' @return a NumericMatrix of H-Maxima transformation of 'img'.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_HMAX (const Rcpp::NumericMatrix img,
                               const double h = 0.0,
                               const double img_min = 0.0,
@@ -1072,7 +1072,7 @@ Rcpp::NumericMatrix cpp_HMAX (const Rcpp::NumericMatrix img,
 //' @return a NumericMatrix of regional minima of 'img'.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_RMIN (const Rcpp::NumericMatrix img,
                               const double img_min = 0.0,
                               const double img_max = 1.0,
@@ -1097,7 +1097,7 @@ Rcpp::NumericMatrix cpp_RMIN (const Rcpp::NumericMatrix img,
 //' @return a NumericMatrix of regional maxima of 'img'.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_RMAX (const Rcpp::NumericMatrix img,
                               const double img_min = 0.0,
                               const double img_max = 1.0,
@@ -1122,7 +1122,7 @@ Rcpp::NumericMatrix cpp_RMAX (const Rcpp::NumericMatrix img,
 //' @return a NumericMatrix of extended minima of 'img'.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_EMIN (const Rcpp::NumericMatrix img,
                               const double h = 0.0,
                               const double img_min = 0.0,
@@ -1148,7 +1148,7 @@ Rcpp::NumericMatrix cpp_EMIN (const Rcpp::NumericMatrix img,
 //' @return a NumericMatrix of extended maxima of 'img'.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_EMAX (const Rcpp::NumericMatrix img,
                               const double h = 0.0,
                               const double img_min = 0.0,
@@ -1170,7 +1170,7 @@ Rcpp::NumericMatrix cpp_EMAX (const Rcpp::NumericMatrix img,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_geo_tophat_white (const Rcpp::NumericMatrix img,
                                           const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue) {
   return hpp_geo_tophat_white(img, kernel);
@@ -1189,7 +1189,7 @@ Rcpp::NumericMatrix cpp_geo_tophat_white (const Rcpp::NumericMatrix img,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_geo_tophat_black (const Rcpp::NumericMatrix img,
                                           const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue) {
   return hpp_geo_tophat_black(img, kernel);
@@ -1217,7 +1217,7 @@ Rcpp::NumericMatrix cpp_geo_tophat_black (const Rcpp::NumericMatrix img,
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat,
                                       const unsigned short n_lev = 256,
                                       const bool draw_lines = true,
@@ -1248,7 +1248,7 @@ Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerVector cpp_watershed_sv2(const Rcpp::NumericMatrix mat,
                                       const unsigned short n_lev = 256,
                                       const bool draw_lines = true,
@@ -1276,7 +1276,7 @@ Rcpp::IntegerVector cpp_watershed_sv2(const Rcpp::NumericMatrix mat,
 //' -perimeter: the number of pixels outside contours.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::List cpp_ctl(const Rcpp::LogicalMatrix mat,
                    const bool global = false) {
   return hpp_ctl(mat, global);
@@ -1294,7 +1294,7 @@ Rcpp::List cpp_ctl(const Rcpp::LogicalMatrix mat,
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix cpp_fill(const List ctl,
                              const uint32_t label = 0,
                              const bool inner = true,
@@ -1310,7 +1310,7 @@ Rcpp::IntegerMatrix cpp_fill(const List ctl,
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix cpp_fill_out(const List ctl) {
   return hpp_fill_out(ctl);
 }
@@ -1325,7 +1325,7 @@ Rcpp::IntegerMatrix cpp_fill_out(const List ctl) {
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_dilate_ctl(const List ctl,
                                    const Rcpp::NumericMatrix kernel,
                                    const uint8_t iter = 0) {
@@ -1342,7 +1342,7 @@ Rcpp::NumericMatrix cpp_dilate_ctl(const List ctl,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_erode_ctl(const List ctl,
                                   const Rcpp::NumericMatrix kernel,
                                   const uint8_t iter = 0) {
@@ -1368,7 +1368,7 @@ Rcpp::NumericMatrix cpp_erode_ctl(const List ctl,
 //' @return a logical matrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix cpp_threshold(const Rcpp::NumericMatrix img,
                                   const Rcpp::NumericMatrix msk,
                                   const double k = 0.0,
@@ -1388,7 +1388,7 @@ Rcpp::LogicalMatrix cpp_threshold(const Rcpp::NumericMatrix img,
 //' @return a LogicalMatrix with the mask thinned.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix cpp_thinning_zs(const Rcpp::LogicalMatrix mat) {
   return hpp_thinning_zs(mat);
 }
@@ -1402,7 +1402,7 @@ Rcpp::LogicalMatrix cpp_thinning_zs(const Rcpp::LogicalMatrix mat) {
 //' @return a LogicalMatrix with the mask thinned.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix cpp_thinning_bst(const Rcpp::LogicalMatrix mat) {
   return hpp_thinning_bst(mat);
 }
@@ -1423,7 +1423,7 @@ Rcpp::LogicalMatrix cpp_thinning_bst(const Rcpp::LogicalMatrix mat) {
 //' @return a double, the similarity.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double cpp_similarity(const Rcpp::NumericMatrix img1,
                       const Rcpp::NumericMatrix img2,
                       const Rcpp::LogicalMatrix msk) {
@@ -1444,7 +1444,7 @@ double cpp_similarity(const Rcpp::NumericMatrix img1,
 //' @return a double, the similarity.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double cpp_bright_similarity(const Rcpp::NumericMatrix img1,
                              const Rcpp::NumericMatrix img2,
                              const Rcpp::LogicalMatrix msk) {
@@ -1461,7 +1461,7 @@ double cpp_bright_similarity(const Rcpp::NumericMatrix img1,
 //' @return a LogicalMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix cpp_make_disc(const uint8_t size = 3) {
   return hpp_make_disc(size);
 }
@@ -1473,7 +1473,7 @@ Rcpp::LogicalMatrix cpp_make_disc(const uint8_t size = 3) {
 //' @return a LogicalMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix cpp_make_box(const uint8_t size = 3) {
   return hpp_make_box(size);
 }
@@ -1485,7 +1485,7 @@ Rcpp::LogicalMatrix cpp_make_box(const uint8_t size = 3) {
 //' @return a LogicalMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix cpp_make_plus(const uint8_t size = 3) {
   return hpp_make_plus(size);
 }
@@ -1497,7 +1497,7 @@ Rcpp::LogicalMatrix cpp_make_plus(const uint8_t size = 3) {
 //' @return a LogicalMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix cpp_make_cross(const uint8_t size = 3) {
   return hpp_make_cross(size);
 }
@@ -1509,7 +1509,7 @@ Rcpp::LogicalMatrix cpp_make_cross(const uint8_t size = 3) {
 //' @return a LogicalMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix cpp_make_diamond(const uint8_t size = 3) {
   return hpp_make_diamond(size);
 }
@@ -1529,7 +1529,7 @@ Rcpp::LogicalMatrix cpp_make_diamond(const uint8_t size = 3) {
 //' American Journal of Intelligent Systems, Vol. 6 No. 2, 2016, pp. 48-58.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_convexhull(const Rcpp::NumericMatrix pts) {
   return hpp_convexhull(pts);
 }

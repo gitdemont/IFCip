@@ -44,7 +44,7 @@ using namespace Rcpp;
 //' @return a NumericVector of background mean and sd
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector hpp_background(const Rcpp::NumericMatrix img,
                                    const R_len_t margin = 4,
                                    const R_len_t extra = 0,

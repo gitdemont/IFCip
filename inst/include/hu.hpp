@@ -40,7 +40,7 @@ using namespace Rcpp;
 //' @param img a NumericMatrix, containing image intensity values.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector hpp_centroid (const Rcpp::NumericMatrix img) {
   R_len_t mat_r = img.nrow(), mat_c = img.ncol();
   R_len_t i_row, i_col, i_col_1;
@@ -67,7 +67,7 @@ Rcpp::NumericVector hpp_centroid (const Rcpp::NumericMatrix img) {
 //' @param q uint8_t: q order. Default is 0.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector hpp_rmoment(const Rcpp::NumericMatrix img, 
                           const uint8_t p = 0, 
                           const uint8_t q = 0) {
@@ -101,7 +101,7 @@ Rcpp::NumericVector hpp_rmoment(const Rcpp::NumericMatrix img,
 //' @param q uint8_t: q order. Default is 0.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector hpp_cmoment(const Rcpp::NumericMatrix img, 
                           const double cx = 0.0, 
                           const double cy = 0.0, 
@@ -151,7 +151,7 @@ Rcpp::NumericVector hpp_cmoment(const Rcpp::NumericMatrix img,
 //' -pix count: img's area in pixels.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector hpp_features_hu1(const Rcpp::NumericMatrix img,
                               const double mag = 1.0) {
   R_len_t mat_r = img.nrow(), mat_c = img.ncol();
@@ -251,7 +251,7 @@ Rcpp::NumericVector hpp_features_hu1(const Rcpp::NumericMatrix img,
 //' -inv[1-7]: image invariant moments.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector hpp_features_hu2(const Rcpp::NumericMatrix img,
                                const double mag = 1.0) {
   R_len_t mat_r = img.nrow(), mat_c = img.ncol();
@@ -403,7 +403,7 @@ Rcpp::NumericVector hpp_features_hu2(const Rcpp::NumericMatrix img,
 //' -Raw Max Pixel: img's maximal pixel intensity.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector hpp_basic(const Rcpp::NumericMatrix img,
                               const Rcpp::NumericMatrix msk,
                               const double mag = 1.0) {
@@ -530,7 +530,7 @@ Rcpp::NumericVector hpp_basic(const Rcpp::NumericMatrix img,
 //' -kurtosis, component's kurtosis.  
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
                                      const Rcpp::IntegerMatrix msk,
                                      const unsigned int components = 0,

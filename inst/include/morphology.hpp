@@ -44,7 +44,7 @@ using namespace Rcpp;
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_erode(const Rcpp::NumericMatrix mat,
                               const Rcpp::NumericMatrix kernel,
                               const uint8_t iter = 0,
@@ -110,7 +110,7 @@ Rcpp::NumericMatrix hpp_erode(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_dilate(const Rcpp::NumericMatrix mat,
                                const Rcpp::NumericMatrix kernel,
                                const uint8_t iter = 0,
@@ -176,7 +176,7 @@ Rcpp::NumericMatrix hpp_dilate(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_opening(const Rcpp::NumericMatrix mat,
                                 const Rcpp::NumericMatrix kernel,
                                 const uint8_t iter = 0,
@@ -298,7 +298,7 @@ Rcpp::NumericMatrix hpp_opening(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_closing(const Rcpp::NumericMatrix mat,
                                 const Rcpp::NumericMatrix kernel,
                                 const uint8_t iter = 0,
@@ -421,7 +421,7 @@ Rcpp::NumericMatrix hpp_closing(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_gradient(const Rcpp::NumericMatrix mat,
                                  const Rcpp::NumericMatrix kernel,
                                  const uint8_t iter = 0,
@@ -445,7 +445,7 @@ Rcpp::NumericMatrix hpp_gradient(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_tophat_white(const Rcpp::NumericMatrix mat,
                                      const Rcpp::NumericMatrix kernel,
                                      const uint8_t iter = 0,
@@ -468,7 +468,7 @@ Rcpp::NumericMatrix hpp_tophat_white(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_tophat_black(const Rcpp::NumericMatrix mat,
                                      const Rcpp::NumericMatrix kernel,
                                      const uint8_t iter = 0,
@@ -491,7 +491,7 @@ Rcpp::NumericMatrix hpp_tophat_black(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_tophat_self(const Rcpp::NumericMatrix mat,
                                     const Rcpp::NumericMatrix kernel,
                                     const uint8_t iter = 0,
@@ -515,7 +515,7 @@ Rcpp::NumericMatrix hpp_tophat_self(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_cont(const Rcpp::NumericMatrix mat,
                              const Rcpp::NumericMatrix kernel,
                              const uint8_t iter = 0,
@@ -539,7 +539,7 @@ Rcpp::NumericMatrix hpp_cont(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_laplacian(const Rcpp::NumericMatrix mat,
                                   const Rcpp::NumericMatrix kernel,
                                   const uint8_t iter = 0,

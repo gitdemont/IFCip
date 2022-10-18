@@ -198,7 +198,7 @@ void rec_erode (Rcpp::NumericMatrix r,
 //' @return a NumericMatrix of H-Minima transformation of 'img'.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_HMIN (const Rcpp::NumericMatrix img,
                               const double h = 0.0,
                               const double img_min = 0.0,
@@ -231,7 +231,7 @@ Rcpp::NumericMatrix hpp_HMIN (const Rcpp::NumericMatrix img,
 //' @return a NumericMatrix of H-Maxima transformation of 'img'.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_HMAX (const Rcpp::NumericMatrix img,
                               const double h = 0.0,
                               const double img_min = 0.0,
@@ -263,7 +263,7 @@ Rcpp::NumericMatrix hpp_HMAX (const Rcpp::NumericMatrix img,
 //' @return a NumericMatrix of regional minima of 'img'.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_RMIN (const Rcpp::NumericMatrix img,
                               const double img_min = 0.0,
                               const double img_max = 1.0,
@@ -290,7 +290,7 @@ Rcpp::NumericMatrix hpp_RMIN (const Rcpp::NumericMatrix img,
 //' @return a NumericMatrix of regional maxima of 'img'.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_RMAX (const Rcpp::NumericMatrix img,
                               const double img_min = 0.0,
                               const double img_max = 1.0,
@@ -317,7 +317,7 @@ Rcpp::NumericMatrix hpp_RMAX (const Rcpp::NumericMatrix img,
 //' @return a NumericMatrix of extended minima of 'img'.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_EMIN (const Rcpp::NumericMatrix img,
                               const double h = 0.0,
                               const double img_min = 0.0,
@@ -344,7 +344,7 @@ Rcpp::NumericMatrix hpp_EMIN (const Rcpp::NumericMatrix img,
 //' @return a NumericMatrix of extended maxima of 'img'.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_EMAX (const Rcpp::NumericMatrix img,
                               const double h = 0.0,
                               const double img_min = 0.0,
@@ -367,7 +367,7 @@ Rcpp::NumericMatrix hpp_EMAX (const Rcpp::NumericMatrix img,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_geo_tophat_white (const Rcpp::NumericMatrix img,
                                           const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue) {
   Rcpp::NumericMatrix kk = get_kernel(kernel);
@@ -390,7 +390,7 @@ Rcpp::NumericMatrix hpp_geo_tophat_white (const Rcpp::NumericMatrix img,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_geo_tophat_black (const Rcpp::NumericMatrix img,
                                           const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue) {
   Rcpp::NumericMatrix kk = get_kernel(kernel);

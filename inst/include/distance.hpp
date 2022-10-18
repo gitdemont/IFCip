@@ -144,7 +144,7 @@ Rcpp::NumericMatrix hpp_dist_int(const Rcpp::NumericMatrix img,
 //' @return an NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_distance_eucl(const Rcpp::IntegerMatrix msk) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(msk);
   R_len_t cen_r = cen.nrow(), mat_r = msk.nrow(), mat_c = msk.ncol();
@@ -170,7 +170,7 @@ Rcpp::NumericMatrix hpp_distance_eucl(const Rcpp::IntegerMatrix msk) {
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_distance_eucl_norm(const Rcpp::IntegerMatrix msk) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(msk);
   R_len_t cen_r = cen.nrow(), mat_r = msk.nrow(), mat_c = msk.ncol();
@@ -205,7 +205,7 @@ Rcpp::NumericMatrix hpp_distance_eucl_norm(const Rcpp::IntegerMatrix msk) {
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_distance_manh(const Rcpp::IntegerMatrix msk) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(msk);
   R_len_t cen_r = cen.nrow(), mat_r = msk.nrow(), mat_c = msk.ncol();
@@ -230,7 +230,7 @@ Rcpp::NumericMatrix hpp_distance_manh(const Rcpp::IntegerMatrix msk) {
 //' @return an NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_distance_manh_norm(const Rcpp::IntegerMatrix msk) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(msk);
   R_len_t cen_r = cen.nrow(), mat_r = msk.nrow(), mat_c = msk.ncol();
@@ -318,7 +318,7 @@ double manh_sep (R_len_t i, R_len_t u, R_len_t Gi, R_len_t Gu) {
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_disttrans_manh (const Rcpp::NumericMatrix img) {
   R_len_t n = img.nrow();
   R_len_t m = img.ncol();
@@ -365,7 +365,7 @@ Rcpp::NumericMatrix hpp_disttrans_manh (const Rcpp::NumericMatrix img) {
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_disttrans_eucl (const Rcpp::NumericMatrix img) {
   R_len_t n = img.nrow();
   R_len_t m = img.ncol();
@@ -410,7 +410,7 @@ Rcpp::NumericMatrix hpp_disttrans_eucl (const Rcpp::NumericMatrix img) {
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix hpp_voronoi_eucl (const Rcpp::IntegerMatrix img) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(img);
   R_len_t cen_r = cen.nrow(), mat_r = img.nrow(), mat_c = img.ncol();
@@ -444,7 +444,7 @@ Rcpp::IntegerMatrix hpp_voronoi_eucl (const Rcpp::IntegerMatrix img) {
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix hpp_voronoi_manh (const Rcpp::IntegerMatrix img) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(img);
   R_len_t cen_r = cen.nrow(), mat_r = img.nrow(), mat_c = img.ncol();

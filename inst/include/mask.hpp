@@ -51,7 +51,7 @@ using namespace Rcpp;
 //' @return a logical matrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_threshold(const Rcpp::NumericMatrix img,
                                   const Rcpp::NumericMatrix msk,
                                   const double k = 0.0,

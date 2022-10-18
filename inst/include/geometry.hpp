@@ -37,7 +37,7 @@ using namespace Rcpp;
 // -element 0 is x
 // -element 1 is y
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector pt_translate(const Rcpp::NumericVector pt1,
                                  const double x = 0.0,
                                  const double y = 0.0) {
@@ -45,12 +45,12 @@ Rcpp::NumericVector pt_translate(const Rcpp::NumericVector pt1,
                                       _["y"] = pt1[1] + y);
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double to_radians(const double angle = 0.0) {
   return angle * M_PI / 180;
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector pt_rotate_ori(const Rcpp::NumericVector pt1,
                                   const double theta = 0.0) {
   double s = std::sin(theta);
@@ -59,7 +59,7 @@ Rcpp::NumericVector pt_rotate_ori(const Rcpp::NumericVector pt1,
                                       _["y"] = pt1[1] * c + pt1[0] * s);
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector pt_rotate(const Rcpp::NumericVector pt1,
                               const Rcpp::NumericVector pt2 = Rcpp::NumericVector::create(0,0),
                               const double theta = 0.0) {
@@ -67,7 +67,7 @@ Rcpp::NumericVector pt_rotate(const Rcpp::NumericVector pt1,
 }
 
 // helper to determine pt_slope of a line given 2 points 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double pt_slope(const Rcpp::NumericVector pt1,
                 const Rcpp::NumericVector pt2) {
   // parallel to axes
@@ -78,7 +78,7 @@ double pt_slope(const Rcpp::NumericVector pt1,
 }
 
 // helper to determine pt_angle of a line given 2 points
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double pt_angle(const Rcpp::NumericVector pt1,
                 const Rcpp::NumericVector pt2) {
   return 180 * std::atan(pt_slope(pt1, pt2[1])) / M_PI;
@@ -86,7 +86,7 @@ double pt_angle(const Rcpp::NumericVector pt1,
 
 // helper to determine x coordinate of a line passing from
 // points pt1 and pt2 and intersecting with line y
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double pt_projection_x(const Rcpp::NumericVector pt1,
                        const Rcpp::NumericVector pt2,
                        const double y = 0.0) { // cross with y
@@ -98,7 +98,7 @@ double pt_projection_x(const Rcpp::NumericVector pt1,
 
 // helper to determine y coordinate of a line passing from
 // points pt1 and pt2 and intersecting with line x
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double pt_projection_y(const Rcpp::NumericVector pt1,
                        const Rcpp::NumericVector pt2,
                        const double x = 0.0) { // cross with x
@@ -111,7 +111,7 @@ double pt_projection_y(const Rcpp::NumericVector pt1,
 // helper to determine point central symmetry of pt1 against pt2.
 // It returns pt' x and y coordinates of pt1 reflected against pt2.
 // As a result pt2 will be in the middle of the segment formed by pt' and pt1.
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector pt_inversion(const Rcpp::NumericVector pt1,
                                  const Rcpp::NumericVector pt2) {
   double xo = pt2[0], yo = pt2[1], xx = pt1[0], yy = pt1[1];
@@ -125,7 +125,7 @@ Rcpp::NumericVector pt_inversion(const Rcpp::NumericVector pt1,
 }
 
 // pt_inversion is faster than pt_inversion2
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector pt_inversion2(const Rcpp::NumericVector pt1,
                                   const Rcpp::NumericVector pt2) {
   return pt_translate(pt_rotate_ori(pt_translate(pt1, -pt2[0], -pt2[1]), M_PI), pt2[0], pt2[1]);
@@ -134,7 +134,7 @@ Rcpp::NumericVector pt_inversion2(const Rcpp::NumericVector pt1,
 // helper to determine reflection of point pt1 by the line defined by pt2 and pt3.
 // It returns pt' x and y coordinates of pt1 pt_reflection accross line pt2 - pt3.
 // As a result pt'- pt1 and pt2 - pt3 segments will be perpendicular.
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector pt_reflection(const Rcpp::NumericVector pt1,  // pt of interest
                                   const Rcpp::NumericVector pt2,  // 1st coord of the segment
                                   const Rcpp::NumericVector pt3) {// 2nd coord of the segment
@@ -149,7 +149,7 @@ Rcpp::NumericVector pt_reflection(const Rcpp::NumericVector pt1,  // pt of inter
 // helper to determine orthogonal projection of point pt1 on the line defined by pt2 and pt3.
 // It returns pt' x and y coordinates of pt1 projected on the line pt2 - pt3.
 // As a result pt'- pt1 and pt2 - pt3 segments will be perpendicular.
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector pt_projection(const Rcpp::NumericVector pt1,  // pt of interest
                                   const Rcpp::NumericVector pt2,  // 1st coord of the segment
                                   const Rcpp::NumericVector pt3) {// 2nd coord of the segment
@@ -161,14 +161,14 @@ Rcpp::NumericVector pt_projection(const Rcpp::NumericVector pt1,  // pt of inter
                                      _["y"] = pt1[1] + d);
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double pt_distance_fast(const Rcpp::NumericVector pt1,
                         const Rcpp::NumericVector pt2,
                         const double scale = 1.0) {
   return std::pow(pt2[0] - pt1[0], 2.0) + std::pow(pt2[1] - pt1[1], 2.0);
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double pt_distance_accu(const Rcpp::NumericVector pt1,
                         const Rcpp::NumericVector pt2,
                         const double scale = 1.0) {
@@ -177,7 +177,7 @@ double pt_distance_accu(const Rcpp::NumericVector pt1,
 
 // Helper to determine shortest distance of a point pt1 to a segment formed by points pt2 and pt3.
 // It returns R_PosInf if it projects outside of the segment
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double pt_shortest(const Rcpp::NumericVector pt1,  // pt of interest
                    const Rcpp::NumericVector pt2,  // 1st coord of the segment
                    const Rcpp::NumericVector pt3,  // 2nd coord of the segment
@@ -194,7 +194,7 @@ double pt_shortest(const Rcpp::NumericVector pt1,  // pt of interest
 // pt_shortest is faster than pt_shortest2
 // /!\ Note that if pt_shortest returns R_PosInf when pt1 projects outside of the segment formed by pt2 - pt3
 // pt_shortest2 returns the distance of pt1 to the line, no matter if projection is outside of this segment
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double pt_shortest2(const Rcpp::NumericVector pt1,  // pt of interest
                     const Rcpp::NumericVector pt2,  // 1st coord of the segment
                     const Rcpp::NumericVector pt3,  // 2nd coord of the segment
@@ -203,14 +203,14 @@ double pt_shortest2(const Rcpp::NumericVector pt1,  // pt of interest
 }
 
 // area returns the area of a parallelogram defined by pt1, pt2 and pt3
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double area(const Rcpp::NumericVector pt1,
             const Rcpp::NumericVector pt2,
             const Rcpp::NumericVector pt3) {
   return std::abs(pt2[0] * (pt3[1] - pt1[1]) + pt3[0] * (pt1[1] - pt2[1]) + pt1[0] * (pt2[1] - pt3[1]));
 }
 
-// // [[Rcpp::export]]
+// // [[Rcpp::export(rng = false)]]
 // double area2(const R_len_t idx1,
 //              const R_len_t idx2,
 //              const R_len_t idx3,
@@ -221,7 +221,7 @@ double area(const Rcpp::NumericVector pt1,
 //                 + pt2[0]*pt3[1] - pt3[0]*pt2[1]);
 // }
 
-// // [[Rcpp::export]]
+// // [[Rcpp::export(rng = false)]]
 // double area3(const R_len_t idx1,
 //              const R_len_t idx2,
 //              const R_len_t idx3,

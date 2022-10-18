@@ -43,7 +43,7 @@ using namespace Rcpp;
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_sd(const Rcpp::NumericMatrix mat,
                            const Rcpp::NumericMatrix kernel) {
   R_len_t mat_r = mat.nrow();
@@ -83,7 +83,7 @@ Rcpp::NumericMatrix hpp_sd(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_mean(const Rcpp::NumericMatrix mat,
                              const Rcpp::NumericMatrix kernel) {
   R_len_t mat_r = mat.nrow();
@@ -123,7 +123,7 @@ Rcpp::NumericMatrix hpp_mean(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_median(const Rcpp::NumericMatrix mat,
                                const Rcpp::NumericMatrix kernel) {
   R_len_t mat_r = mat.nrow();
@@ -163,7 +163,7 @@ Rcpp::NumericMatrix hpp_median(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_mode(const Rcpp::NumericMatrix mat,
                              const Rcpp::NumericMatrix kernel) {
   R_len_t mat_r = mat.nrow();
@@ -203,7 +203,7 @@ Rcpp::NumericMatrix hpp_mode(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_mid(const Rcpp::NumericMatrix mat,
                             const Rcpp::NumericMatrix kernel) {
   R_len_t mat_r = mat.nrow();
@@ -241,7 +241,7 @@ Rcpp::NumericMatrix hpp_mid(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_convolve2d(const Rcpp::NumericMatrix mat,
                                    const Rcpp::NumericMatrix kernel) {
   R_len_t mat_r = mat.nrow();
@@ -278,7 +278,7 @@ Rcpp::NumericMatrix hpp_convolve2d(const Rcpp::NumericMatrix mat,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_correlate2d(const Rcpp::NumericMatrix mat,
                                     const Rcpp::NumericMatrix kernel) {
   R_len_t mat_r = mat.nrow();

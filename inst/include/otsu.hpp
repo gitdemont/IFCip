@@ -52,7 +52,7 @@ using namespace Rcpp;
 //' @return an NumericVector of threshold(s).
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector hpp_multi_otsu (const Rcpp::NumericMatrix img,
                                     const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                     const uint8_t n_comp = 2,

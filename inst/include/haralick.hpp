@@ -64,7 +64,7 @@ Rcpp::LogicalMatrix get_mask(const Rcpp::Nullable<Rcpp::LogicalMatrix> msk_ = R_
 //' @return a Rcpp::IntegerMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix hpp_rescale_M(const Rcpp::IntegerMatrix img,
                                   const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
                                   const uint8_t bits = 4) {
@@ -91,7 +91,7 @@ Rcpp::IntegerMatrix hpp_rescale_M(const Rcpp::IntegerMatrix img,
 //' @return a Rcpp::IntegerMatrix Gray-Level Co-occurrence Matrices.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix hpp_cooc(const Rcpp::IntegerMatrix img,
                              const Rcpp::IntegerVector delta) {
   if(!Rf_inherits(img, "IFCip_rescale")) {
@@ -166,7 +166,7 @@ Rcpp::IntegerMatrix hpp_cooc(const Rcpp::IntegerMatrix img,
 //' @return a Rcpp::NumericVector of Haralick's texture features
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
                                    const bool invariant = false) {
   if(!Rf_inherits(cooc, "IFCip_cooc")) {

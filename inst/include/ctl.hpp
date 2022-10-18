@@ -55,7 +55,7 @@ static int ifcip_ctl_bk [8]={ 7, 7, 1, 1, 3, 3, 5, 5};
 //' -perimeter: the number of pixels outside contours.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
                    const bool global = false) {
   R_len_t mat_r = mat.nrow(), mat_c = mat.ncol();
@@ -299,7 +299,7 @@ bool ray_pnt_in_poly(const Rcpp::NumericVector pnt,
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix hpp_fill(const List ctl,
                              const int label = 0,
                              const bool inner = true,
@@ -430,7 +430,7 @@ Rcpp::IntegerMatrix hpp_fill(const List ctl,
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix hpp_fill_out(const List ctl) {
   if(!Rf_inherits(ctl, "IFCip_ctl")) {
     Rcpp::stop("hpp_fill: 'ctl' should be of class `IFCip_ctl`");
@@ -502,7 +502,7 @@ Rcpp::IntegerMatrix hpp_fill_out(const List ctl) {
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_dilate_ctl(const List ctl,
                                    const Rcpp::NumericMatrix kernel,
                                    const uint8_t iter = 0) {
@@ -549,7 +549,7 @@ Rcpp::NumericMatrix hpp_dilate_ctl(const List ctl,
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_erode_ctl(const List ctl,
                                   const Rcpp::NumericMatrix kernel,
                                   const uint8_t iter = 0) {

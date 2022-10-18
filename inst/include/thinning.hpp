@@ -46,7 +46,7 @@ static int ifcip_thinning_dy[8]={-1,-1, 0, 1, 1, 1, 0,-1};
 //' @return a LogicalMatrix with the mask thinned.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_thinning_zs(const Rcpp::LogicalMatrix mat) {
   R_len_t mat_r = mat.nrow();
   R_len_t mat_c = mat.ncol();
@@ -161,7 +161,7 @@ Rcpp::LogicalMatrix hpp_thinning_zs(const Rcpp::LogicalMatrix mat) {
 //' @return a LogicalMatrix with the mask thinned.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_thinning_bst(const Rcpp::LogicalMatrix mat) {
   R_len_t mat_r = mat.nrow();
   R_len_t mat_c = mat.ncol();

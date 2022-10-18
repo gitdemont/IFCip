@@ -47,7 +47,7 @@ using namespace Rcpp;
 //' @return a double, the similarity.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double hpp_similarity(const Rcpp::NumericMatrix img1,
                       const Rcpp::NumericMatrix img2,
                       const Rcpp::LogicalMatrix msk) {
@@ -100,7 +100,7 @@ double hpp_similarity(const Rcpp::NumericMatrix img1,
 //' @return a double, the similarity.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double hpp_bright_similarity(const Rcpp::NumericMatrix img1,
                              const Rcpp::NumericMatrix img2,
                              const Rcpp::LogicalMatrix msk) {

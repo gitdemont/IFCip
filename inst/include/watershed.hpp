@@ -56,7 +56,7 @@ using namespace Rcpp;
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
                                       const unsigned short n_lev = 256,
                                       const bool draw_lines = true,
@@ -242,7 +242,7 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
                                       const unsigned short n_lev = 256,
                                       const bool draw_lines = true,

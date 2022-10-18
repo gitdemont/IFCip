@@ -67,7 +67,7 @@ bool cross (const Rcpp::NumericVector pt1,
 //' American Journal of Intelligent Systems, Vol. 6 No. 2, 2016, pp. 48-58.
 //' @keywords internal
 ////' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_convexhull(const Rcpp::NumericMatrix pts) {
   Rcpp::NumericVector x = pts(Rcpp::_, 0);
   Rcpp::NumericVector y = pts(Rcpp::_, 1);

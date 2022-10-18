@@ -132,7 +132,7 @@ void offset_nbr(const R_len_t idx,
   nbr[0] = n;
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_make_disc(const uint8_t size = 3) {
   Rcpp::LogicalMatrix out(size, size);
   if(size == 0) return out;
@@ -149,14 +149,14 @@ Rcpp::LogicalMatrix hpp_make_disc(const uint8_t size = 3) {
   return out;
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_make_box(const uint8_t size = 3) {
   Rcpp::LogicalMatrix out(size, size);
   out.fill(true);
   return out;
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_make_plus(const uint8_t size = 3) {
   Rcpp::LogicalMatrix out(size, size);
   double half = size % 2 ? size / 2 : size / 2 - 0.5;
@@ -165,7 +165,7 @@ Rcpp::LogicalMatrix hpp_make_plus(const uint8_t size = 3) {
   return out;
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_make_cross(const uint8_t size = 3) {
   Rcpp::LogicalMatrix out(size, size);
   for(R_len_t i_col = 0; i_col < size; i_col++) {
@@ -176,7 +176,7 @@ Rcpp::LogicalMatrix hpp_make_cross(const uint8_t size = 3) {
   return out;
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_make_diamond(uint8_t size = 3) {
   Rcpp::LogicalMatrix out(size, size);
   double half = size >> 1;
