@@ -54,7 +54,6 @@
 #' @param granularity an integer vector. Controls the grain of the Haralick texture.
 #' Default is -1L for no computation. Allowed are [1-20].
 #' For very fine textures, this value is small (1-3 pixels), while for very coarse textures, it is large (>10).
-#' @param batch number of objects to process at the same time. Default is 20.
 #' @param parallel whether to use parallelization. Default is NULL.\cr
 #' When NULL, current \pkg{future}'s plan 'strategy' will be used.\cr
 #' When FALSE, \link[future]{plan} will be called with "sequential" 'strategy'.
@@ -85,7 +84,6 @@ ExtractFeatures <- function(...,
                             display_progress = TRUE,
                             zmax = -1L,
                             granularity = -1L,
-                            batch = 20,
                             parallel = NULL)  {
   dots=list(...)
   
@@ -123,7 +121,6 @@ ExtractFeatures <- function(...,
   fast = as.logical(fast); assert(fast, len = 1, alw = c(TRUE, FALSE))
   verbose = as.logical(verbose); assert(verbose, len = 1, alw = c(TRUE, FALSE))
   verbosity = as.integer(verbosity); assert(verbosity, len = 1, alw = c(1, 2))
-  batch = na.omit(as.integer(batch)); assert(verbosity, len = 1, typ = "integer")
   assert(removal, len=1, alw = c("masked", "MC"))
   param_extra = names(dots) %in% c("ifd","param","mode","export","size","force_width","removal","bypass","verbose")
   dots = dots[!param_extra] # remove not allowed param
@@ -260,7 +257,7 @@ ExtractFeatures <- function(...,
   
   # extract objects
   sel = subsetOffsets(offsets = offsets, objects = objects, image_type = "img")
-  sel = split(sel, ceiling(seq_along(sel)/batch))
+  sel = split(sel, ceiling(seq_along(sel)/20))
   L=length(sel)
   if(L == 0) {
     warning("ExtractFeatures: No objects to extract, check the objects you provided.", immediate. = TRUE, call. = FALSE)

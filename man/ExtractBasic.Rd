@@ -10,7 +10,6 @@ ExtractBasic(
   offsets,
   removal = "masked",
   display_progress = TRUE,
-  batch = 20,
   parallel = NULL
 )
 }
@@ -38,8 +37,6 @@ and \link[progressr]{handlers} will be automatically selected (the last availabl
 - \link[progressr]{handler_txtprogressbar},\cr
 - a customized version of \link[progressr]{handler_winprogressbar}, (if on windows OS),\cr
 - \link[progressr]{handler_shiny} (if shiny is detected).}
-
-\item{batch}{number of objects to process at the same time. Default is 20.}
 
 \item{parallel}{whether to use parallelization. Default is NULL.\cr
 When NULL, current \pkg{future}'s plan 'strategy' will be used.\cr
