@@ -231,8 +231,7 @@ ExtractBasic <- function(...,
     lab="computing features from images"
     hand = ifcip_handler_winprogressbar(title = title_progress)
   }
-  if(length(dots$session) != 0 &&
-     requireNamespace("shiny", quietly = TRUE) &&
+  if(requireNamespace("shiny", quietly = TRUE) &&
      length(shiny::getDefaultReactiveDomain()) != 0) {
     lab="computing features from images"
     fun = function(expr, handlers, ...) { progressr::withProgressShiny(expr = expr, handlers = handlers) }
@@ -255,7 +254,7 @@ ExtractBasic <- function(...,
   
   # use minimum required variables from environement
   e1 = environment()
-  e2 = new.env()
+  e2 = new.env(parent = emptyenv())
   for(x in c("sel","param","L",
              "title_progress","lab","verbose",
              "is_cif","compute_mask","msk","removal","mag")) assign(x, get(x, envir = e1), envir = e2)
@@ -285,7 +284,7 @@ ExtractBasic <- function(...,
                      seed = NULL, # NULL to avoid checking + to not force L'Ecuyer-CMRG RNG
                      lazy = FALSE,
                      globals = c("cpp_basic","cpp_background","cpp_k_equal_M","mask_identify2","cpp_getTAGS"))
-  dots=dots[!(names(dots) %in% names(future_args))]
+  dots=dots[!(names(dots) %in% c(names(future_args),"session"))]
   if(!is.null(strategy)) dots=dots[names(dots) %in% setdiff(names(formals(strategy, envir = asNamespace("future"))), "...")]
   oplan=do.call(what = future::plan, args = c(future_args[1], dots))
   on.exit(future::plan(oplan), add = TRUE)
@@ -305,11 +304,9 @@ ExtractBasic <- function(...,
                         collapse = "|")),
           class = ifelse(lab == "" || is.null(display_progress), "sticky", "non_sticky"), amount = 0)
         ans <- future.apply::future_lapply(
-          X = 1:L,
-          # future.globals = FALSE,
+          X = seq_along(integer(L)),
           future.packages = c("IFC","IFCip"),
           future.seed = NULL, # NULL to avoid checking + to not force L'Ecuyer-CMRG RNG
-          # future.lazy = FALSE,
           future.scheduling = +Inf,
           future.chunk.size = NULL,
           future.globals = c("cpp_basic","cpp_background","cpp_k_equal_M","mask_identify2","cpp_getTAGS"),
