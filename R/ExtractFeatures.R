@@ -226,6 +226,8 @@ ExtractFeatures <- function(...,
   if(do_haralick) {
     granularity = na.omit(as.integer(granularity)); granularity = granularity[(granularity>=1) & (granularity<=20)]; assert(granularity, alw = 1:20)
   }
+  no_zernike = numeric()
+  names_zernike = character()
   if(do_zernike) {
     zmax = na.omit(as.integer(zmax)); zmax = zmax[(zmax>=0) & (zmax<=99)]; assert(zmax, len = 1, alw = 0:99)
     names_zernike = unlist(lapply(0:(zmax+1), FUN = function(a) { 
@@ -305,6 +307,12 @@ ExtractFeatures <- function(...,
              # "do_haralick","do_zernike","granularity","zmax","k",
              # "names_hu","names_shape","no_hu","no_shape",
              # "is_cif","compute_mask","msk","removal","mag")) assign(x, get(x, envir = e1), envir = e2)
+  gbl = c("sel","param","L",
+          "title_progress","lab","verbose",
+          "do_haralick","do_zernike","granularity","zmax","k",
+          "names_hu","names_shape","names_zernike","no_hu","no_shape","no_zernike",
+          "is_cif","compute_mask","msk","removal","mag",
+          "cpp_background","cpp_ctl","cpp_k_equal_M","mask_identify2","cpp_features_hu3","cpp_getTAGS")
   
   # force future to use all mem
   old_opt <- options(future.globals.maxSize = Inf)
@@ -330,7 +338,7 @@ ExtractFeatures <- function(...,
                      packages = c("IFC","IFCip"),
                      seed = NULL, # NULL to avoid checking + to not force L'Ecuyer-CMRG RNG
                      lazy = FALSE,
-                     globals = c("cpp_background","cpp_ctl","cpp_k_equal_M","mask_identify2","cpp_features_hu3","cpp_getTAGS"))
+                     globals = gbl)
   dots=dots[!(names(dots) %in% names(future_args))]
   if(!is.null(strategy)) dots=dots[names(dots) %in% setdiff(names(formals(strategy, envir = asNamespace("future"))), "...")]
   oplan=do.call(what = future::plan, args = c(future_args[1], dots))
@@ -357,7 +365,7 @@ ExtractFeatures <- function(...,
           future.scheduling = +Inf,
           future.chunk.size = NULL,
           # future.envir = e2,
-          future.globals = c("cpp_background","cpp_ctl","cpp_k_equal_M","mask_identify2","cpp_features_hu3","cpp_getTAGS"),
+          future.globals = gbl,
           FUN = function(ifcip_iter) { 
             img = do.call(args = c(list(ifd = lapply(sel[[ifcip_iter]],
                                                      FUN = function(off) cpp_getTAGS(fname = param$fileName_image,
