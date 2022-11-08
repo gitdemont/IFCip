@@ -298,13 +298,13 @@ ExtractFeatures <- function(...,
   }
   
   # use minimum required variables from environement
-  e1 = environment()
-  e2 = new.env(parent = emptyenv())
-  for(x in c("sel","param","L",
-             "title_progress","lab","verbose",
-             "do_haralick","do_zernike","granularity","zmax","k",
-             "names_hu","names_shape","no_hu","no_shape",
-             "is_cif","compute_mask","msk","removal","mag")) assign(x, get(x, envir = e1), envir = e2)
+  # e1 = environment()
+  # e2 = new.env(parent = emptyenv())
+  # for(x in c("sel","param","L",
+             # "title_progress","lab","verbose",
+             # "do_haralick","do_zernike","granularity","zmax","k",
+             # "names_hu","names_shape","no_hu","no_shape",
+             # "is_cif","compute_mask","msk","removal","mag")) assign(x, get(x, envir = e1), envir = e2)
   
   # force future to use all mem
   old_opt <- options(future.globals.maxSize = Inf)
@@ -326,12 +326,12 @@ ExtractFeatures <- function(...,
     }
   }
   future_args = list(strategy = strategy,
-                     envir = e2,
+                     # envir = e2,
                      packages = c("IFC","IFCip"),
                      seed = NULL, # NULL to avoid checking + to not force L'Ecuyer-CMRG RNG
                      lazy = FALSE,
                      globals = c("cpp_background","cpp_ctl","cpp_k_equal_M","mask_identify2","cpp_features_hu3","cpp_getTAGS"))
-  dots=dots[!(names(dots) %in% c(names(future_args)))]
+  dots=dots[!(names(dots) %in% names(future_args))]
   if(!is.null(strategy)) dots=dots[names(dots) %in% setdiff(names(formals(strategy, envir = asNamespace("future"))), "...")]
   oplan=do.call(what = future::plan, args = c(future_args[1], dots))
   on.exit(future::plan(oplan), add = TRUE)
@@ -356,7 +356,7 @@ ExtractFeatures <- function(...,
           future.seed = NULL, # NULL to avoid checking + to not force L'Ecuyer-CMRG RNG
           future.scheduling = +Inf,
           future.chunk.size = NULL,
-          future.envir = e2,
+          # future.envir = e2,
           future.globals = c("cpp_background","cpp_ctl","cpp_k_equal_M","mask_identify2","cpp_features_hu3","cpp_getTAGS"),
           FUN = function(ifcip_iter) { 
             img = do.call(args = c(list(ifd = lapply(sel[[ifcip_iter]],
