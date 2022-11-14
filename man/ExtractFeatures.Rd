@@ -12,6 +12,7 @@ ExtractFeatures(
   display_progress = TRUE,
   zmax = -1L,
   granularity = -1L,
+  batch = 20L,
   parallel = NULL
 )
 }
@@ -46,6 +47,8 @@ Values outside [0,99] will be clipped. Be aware that computation of Zernike's Mo
 \item{granularity}{an integer vector. Controls the grain of the Haralick texture.
 Default is -1L for no computation. Allowed are [1-20].
 For very fine textures, this value is small (1-3 pixels), while for very coarse textures, it is large (>10).}
+
+\item{batch}{positive integer, number of objects to process at the same time. Default is 20L.}
 
 \item{parallel}{whether to use parallelization. Default is NULL.\cr
 When NULL, current \pkg{future}'s plan 'strategy' will be used.\cr

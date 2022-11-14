@@ -49,6 +49,7 @@
 #' - \link[progressr]{handler_txtprogressbar},\cr
 #' - a customized version of \link[progressr]{handler_winprogressbar}, (if on windows OS),\cr
 #' - \link[progressr]{handler_shiny} (if shiny is detected).
+#' @param batch positive integer, number of objects to process at the same time. Default is 20L.
 #' @param parallel whether to use parallelization. Default is NULL.\cr
 #' When NULL, current \pkg{future}'s plan 'strategy' will be used.\cr
 #' When FALSE, \link[future]{plan} will be called with "sequential" 'strategy'.
@@ -77,6 +78,7 @@ ExtractBasic <- function(...,
                          offsets,
                          removal = "masked",
                          display_progress = TRUE,
+                         batch = 20L,
                          parallel = NULL)  {
   dots=list(...)
   
@@ -114,6 +116,7 @@ ExtractBasic <- function(...,
   fast = as.logical(fast); assert(fast, len = 1, alw = c(TRUE, FALSE))
   verbose = as.logical(verbose); assert(verbose, len = 1, alw = c(TRUE, FALSE))
   verbosity = as.integer(verbosity); assert(verbosity, len = 1, alw = c(1, 2))
+  batch = na.omit(as.integer(batch[batch > 0])); assert(batch, len = 1)
   assert(removal, len=1, alw = c("masked", "MC"))
   param_extra = names(dots) %in% c("ifd","param","mode","export","size","force_width","removal","bypass","verbose")
   dots = dots[!param_extra] # remove not allowed param
@@ -212,7 +215,7 @@ ExtractBasic <- function(...,
 
   # extract objects
   sel = subsetOffsets(offsets = offsets, objects = objects, image_type = "img")
-  sel = split(sel, ceiling(seq_along(sel)/20))
+  sel = split(sel, ceiling(seq_along(sel)/batch))
   L=length(sel)
   if(L == 0) {
     warning("ExtractBasic: No objects to extract, check the objects you provided.", immediate. = TRUE, call. = FALSE)
