@@ -439,7 +439,7 @@ ExtractFeatures <- function(...,
                 # max_intensity -  min_intensity / max_intensity + min_intensity is not working
                 # modulation = (attr(img, "BG_MEAN") - (hu["Raw Max Pixel"] - hu["Raw Min Pixel"])) / ((hu["Raw Max Pixel"] + hu["Raw Min Pixel"])) 
                 if(do_zernike) {
-                  ze = try(moments_Zernike(img = i_chan, centroid = c(hu["pix cx"], hu["pix cy"]), radius = max(2, hu["pix maj axis"]/2+1), zmax = zmax, full = FALSE)$zmoment, silent = TRUE)
+                  ze = try(moments_Zernike(img = i_chan, msk = msk, centroid = c(hu["pix cx"], hu["pix cy"]), radius = max(2, hu["pix maj axis"]/2+1), zmax = zmax, full = FALSE)$zmoment, silent = TRUE)
                   if(inherits(x = ze, what = "try-error")) ze = no_zernike
                 } else {
                   ze = NULL

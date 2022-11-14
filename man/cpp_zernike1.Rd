@@ -9,9 +9,11 @@ Adaptation from \url{https://github.com/aoles/EBImage} in v3.12.0, authored by A
 \arguments{
 \item{img}{a NumericMatrix, containing image intensity values.}
 
-\item{cx}{a double. X centroid.}
+\item{msk_}{a Nullable LogicalMatrix. Default is R_NilValue.}
 
-\item{cy}{a double. Y centroid.}
+\item{cx}{a double. X centroid. Default is 0.0.}
+
+\item{cy}{a double. Y centroid. Default is 0.0.}
 
 \item{zmax}{a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
 Be aware that computation of Zernike's moments can be quite long when 'zmax' is high.}

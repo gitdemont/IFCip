@@ -7,10 +7,13 @@
 adapted from File src/features_zernike.c in EBImage R package in its version 3.12.0 available at \url{https://www.bioconductor.org/packages/2.10/bioc/html/EBImage.html}
 }
 \usage{
-moments_Zernike(img, centroid, zmax = 15, radius = 30, full = FALSE)
+moments_Zernike(img, msk, centroid, zmax = 15, radius = 30, full = FALSE)
 }
 \arguments{
 \item{img}{an object of class `IFC_img` or `IFC_msk`.}
+
+\item{msk}{an object of class `IFC_msk`, the mask matrix. If missing, the default mask information will be extracted from 'img'.
+Otherwise, only elements superior to zero will be considered.}
 
 \item{centroid}{a length 2 numeric vector of img centroids.
 When missing, the default, it will be computed from img.}

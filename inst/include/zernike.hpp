@@ -64,8 +64,9 @@ R_len_t VIND(uint8_t n, uint8_t l, uint8_t m, uint8_t N1) {
 //' This function is designed to compute Zernike's moments from image.
 //' It will compute Zernike's moments but will not return image projection.
 //' @param img a NumericMatrix, containing image intensity values.
-//' @param cx a double. X centroid.
-//' @param cy a double. Y centroid.
+//' @param msk_ a Nullable LogicalMatrix. Default is R_NilValue.
+//' @param cx a double. X centroid. Default is 0.0.
+//' @param cy a double. Y centroid. Default is 0.0.
 //' @param zmax a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
 //' Be aware that computation of Zernike's moments can be quite long when 'zmax' is high.
 //' @param radius a numeric, radius of the circle in pixels around object centers from which the features are calculated. Default is 15.
@@ -74,8 +75,9 @@ R_len_t VIND(uint8_t n, uint8_t l, uint8_t m, uint8_t N1) {
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::List hpp_zernike1(const Rcpp::NumericMatrix img,
-                        const double cx,
-                        const double cy,
+                        const Rcpp::Nullable<Rcpp::LogicalMatrix> msk_ = R_NilValue,
+                        const double cx = 0.0,
+                        const double cy = 0.0,
                         const uint8_t zmax = 15,
                         const double radius = 15.0) {
   R_len_t nx, ny, x, y;
@@ -115,6 +117,8 @@ Rcpp::List hpp_zernike1(const Rcpp::NumericMatrix img,
       }
     }
   }
+  
+  Rcpp::LogicalMatrix msk = get_mask(msk_, nx, ny);
   Rcpp::NumericVector zmoment(msize, 0.0);
   Rcpp::NumericVector mRe(msize, 0.0);
   Rcpp::NumericVector mIm(msize, 0.0);
@@ -124,7 +128,7 @@ Rcpp::List hpp_zernike1(const Rcpp::NumericMatrix img,
     for ( y = 0; y < ny; y++ ) {
       newy = (y - cy) / radius;
       d2 = newx * newx + newy * newy;
-      if ( d2 > 1.0 ) continue; // only use pixels within normalized unit circle
+      if ( !msk(x, y) || (d2 > 1.0) ) continue; // only use pixels within normalized unit circle
       theta = std::atan2(newy, newx);
       
       for ( n = 0; n <= Nmax; n++ ) {
@@ -154,8 +158,9 @@ Rcpp::List hpp_zernike1(const Rcpp::NumericMatrix img,
 //' This function is designed to compute Zernike's moments from image.
 //' It will compute Zernike's moments but also return image projection.
 //' @param img a NumericMatrix, containing image intensity values.
-//' @param cx a double. X centroid.
-//' @param cy a double. Y centroid.
+//' @param msk_ a Nullable LogicalMatrix. Default is R_NilValue.
+//' @param cx a double. X centroid. Default is 0.0.
+//' @param cy a double. Y centroid. Default is 0.0.
 //' @param zmax a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
 //' Be aware that computation of Zernike's moments can be quite long when 'zmax' is high.
 //' @param radius a numeric, radius of the circle in pixels around object centers from which the features are calculated. Default is 15.
@@ -163,9 +168,10 @@ Rcpp::List hpp_zernike1(const Rcpp::NumericMatrix img,
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::List hpp_zernike2(const Rcpp::NumericMatrix img, 
-                        const double cx, 
-                        const double cy, 
+Rcpp::List hpp_zernike2(const Rcpp::NumericMatrix img,
+                        const Rcpp::Nullable<Rcpp::LogicalMatrix> msk_ = R_NilValue,
+                        const double cx = 0.0, 
+                        const double cy = 0.0, 
                         const uint8_t zmax = 15, 
                         const double radius = 15.0) {
   R_len_t nx, ny, x, y;
@@ -202,6 +208,7 @@ Rcpp::List hpp_zernike2(const Rcpp::NumericMatrix img,
     }
   }
   
+  Rcpp::LogicalMatrix msk = get_mask(msk_, nx, ny);
   Rcpp::NumericVector zmoment(msize, 0.0);
   Rcpp::NumericVector mRe(msize, 0.0);
   Rcpp::NumericVector mIm(msize, 0.0);
@@ -214,7 +221,7 @@ Rcpp::List hpp_zernike2(const Rcpp::NumericMatrix img,
     for ( y = 0; y < ny; y++ ) {
       newy = (y - cy) / radius;
       d2 = newx * newx + newy * newy;
-      if ( d2 > 1.0 ) continue;
+      if ( !msk(x, y) || (d2 > 1.0) ) continue;
       theta = std::atan2(newy, newx);
       
       for ( n = 0; n <= Nmax; n++ ) {

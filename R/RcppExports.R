@@ -320,8 +320,9 @@ NULL
 #' This function is designed to compute Zernike's moments from image.
 #' It will compute Zernike's moments but will not return image projection.
 #' @param img a NumericMatrix, containing image intensity values.
-#' @param cx a double. X centroid.
-#' @param cy a double. Y centroid.
+#' @param msk_ a Nullable LogicalMatrix. Default is R_NilValue.
+#' @param cx a double. X centroid. Default is 0.0.
+#' @param cy a double. Y centroid. Default is 0.0.
 #' @param zmax a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
 #' Be aware that computation of Zernike's moments can be quite long when 'zmax' is high.
 #' @param radius a numeric, radius of the circle in pixels around object centers from which the features are calculated. Default is 15.
@@ -335,8 +336,9 @@ NULL
 #' This function is designed to compute Zernike's moments from image.
 #' It will compute Zernike's moments but also return image projection.
 #' @param img a NumericMatrix, containing image intensity values.
-#' @param cx a double. X centroid.
-#' @param cy a double. Y centroid.
+#' @param msk_ a Nullable LogicalMatrix. Default is R_NilValue.
+#' @param cx a double. X centroid. Default is 0.0.
+#' @param cy a double. Y centroid. Default is 0.0.
 #' @param zmax a uint8_t, maximal order of Zernike polynomials to be computed. Default is 15. Values outside [0,99] will be clipped.
 #' Be aware that computation of Zernike's moments can be quite long when 'zmax' is high.
 #' @param radius a numeric, radius of the circle in pixels around object centers from which the features are calculated. Default is 15.
@@ -1097,12 +1099,12 @@ cpp_voronoi_manh <- function(img) {
     .Call(`_IFCip_cpp_voronoi_manh`, img)
 }
 
-cpp_zernike1 <- function(img, cx, cy, zmax = 15L, radius = 15.0) {
-    .Call(`_IFCip_cpp_zernike1`, img, cx, cy, zmax, radius)
+cpp_zernike1 <- function(img, msk_ = NULL, cx = 0.0, cy = 0.0, zmax = 15L, radius = 15.0) {
+    .Call(`_IFCip_cpp_zernike1`, img, msk_, cx, cy, zmax, radius)
 }
 
-cpp_zernike2 <- function(img, cx, cy, zmax = 15L, radius = 15.0) {
-    .Call(`_IFCip_cpp_zernike2`, img, cx, cy, zmax, radius)
+cpp_zernike2 <- function(img, msk_ = NULL, cx = 0.0, cy = 0.0, zmax = 15L, radius = 15.0) {
+    .Call(`_IFCip_cpp_zernike2`, img, msk_, cx, cy, zmax, radius)
 }
 
 cpp_AND_M <- function(list) {

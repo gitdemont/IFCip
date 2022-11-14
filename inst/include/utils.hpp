@@ -33,6 +33,24 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
+// retrieve mask matrix or set new one filled with true
+Rcpp::LogicalMatrix get_mask(const Rcpp::Nullable<Rcpp::LogicalMatrix> msk_ = R_NilValue,
+                             const R_len_t mat_r = 0,
+                             const R_len_t mat_c = 0) {
+  if(msk_.isNotNull()) {
+    Rcpp::LogicalMatrix msk(msk_.get());
+    if(mat_r != msk.nrow() || mat_c != msk.ncol()) {
+      Rcpp::LogicalMatrix mskk = Rcpp::no_init(mat_r, mat_c);
+      mskk.fill(true);
+      return mskk;
+    }
+    return msk;
+  }
+  Rcpp::LogicalMatrix msk(mat_r, mat_c);
+  msk.fill(true);
+  return msk;
+}
+
 //' @title Image Background
 //' @name cpp_background
 //' @description
