@@ -41,6 +41,12 @@
 #' This argument is not mandatory but it may allow to save time for repeated image export on same file.
 #' @param removal whether to compute features on "masked" object fo each individual channels or on the globally detected object "MC".
 #' Allowed are "masked" or "MC". Default is "masked". Please note that it will overwrite 'param' value if provided.
+#' @param zmax maximal order of Zernike polynomials to be computed. Default is -1L for no computation.
+#' Values outside [0,99] will be clipped. Be aware that computation of Zernike's Moments can be quite long when 'zmax' is high.
+#' @param granularity an integer vector. Controls the grain of the Haralick texture.
+#' Default is -1L for no computation. Allowed are [1-20].
+#' For very fine textures, this value is small (1-3 pixels), while for very coarse textures, it is large (>10).
+#' @param batch positive integer, number of objects to process at the same time. Default is 20L.
 #' @param display_progress whether to display a progress bar. Default is TRUE.\cr
 #' When NULL, execution will not be wrapped inside \link[progressr]{with_progress} nor \link[progressr]{withProgressShiny}. This allow user to call the function with \link[progressr]{with_progress} nor \link[progressr]{withProgressShiny} or to use global handler see \link[progressr]{handlers}.\cr
 #' When FALSE, execution will be performed inside \link[progressr]{without_progress}.\cr
@@ -49,16 +55,10 @@
 #' - \link[progressr]{handler_txtprogressbar},\cr
 #' - a customized version of \link[progressr]{handler_winprogressbar}, (if on windows OS),\cr
 #' - \link[progressr]{handler_shiny} (if shiny is detected).
-#' @param zmax maximal order of Zernike polynomials to be computed. Default is -1L for no computation.
-#' Values outside [0,99] will be clipped. Be aware that computation of Zernike's Moments can be quite long when 'zmax' is high.
-#' @param granularity an integer vector. Controls the grain of the Haralick texture.
-#' Default is -1L for no computation. Allowed are [1-20].
-#' For very fine textures, this value is small (1-3 pixels), while for very coarse textures, it is large (>10).
-#' @param batch positive integer, number of objects to process at the same time. Default is 20L.
-#' @param parallel whether to use parallelization. Default is NULL.\cr
+#' @param parallel whether to use parallelization. Default is FALSE.\cr
 #' When NULL, current \pkg{future}'s plan 'strategy' will be used.\cr
-#' When FALSE, \link[future]{plan} will be called with "sequential" 'strategy'.
-#' When TRUE, \link[future]{plan} will be called with either "multisession" 'strategy' on Windows or "multicore" otherwise.
+#' When FALSE, \link[future]{plan} will be called with \link[future]{sequential} 'strategy'.
+#' When TRUE, \link[future]{plan} will be called with \link[future.callr]{callr} 'strategy'.
 #' @examples
 #' if(!requireNamespace("IFCdata", quietly = TRUE)) {
 #'   ## use a cif file
@@ -82,11 +82,11 @@ ExtractFeatures <- function(...,
                             objects,
                             offsets,
                             removal = "masked",
-                            display_progress = TRUE,
                             zmax = -1L,
                             granularity = -1L,
                             batch = 20L,
-                            parallel = NULL)  {
+                            display_progress = TRUE,
+                            parallel = FALSE)  {
   dots=list(...)
   
   # check input
@@ -327,11 +327,7 @@ ExtractFeatures <- function(...,
   } else {
     assert(parallel, alw = c(TRUE, FALSE))
     if(parallel) {
-      if(.Platform$OS.type == "windows") {
-        strategy = future::multisession
-      } else {
-        strategy = future::multicore
-      }
+      strategy = future.callr::callr
     } else {
       strategy = future::sequential
     }
