@@ -272,7 +272,7 @@ ExtractFeatures <- function(...,
   # define handler used to monitor progress
   lab = ""
   p = progressr::progressor
-  fun = progressr::with_progress
+  fun = function(expr, handlers, ...) { progressr::with_progress(expr = expr, handlers = handlers) }
   hand = progressr::handler_txtprogressbar(title = title_progress)
   # if(.Platform$GUI == "RStudio") {
   #   hand = progressr::handler_rstudio(title = title_progress)
@@ -289,14 +289,14 @@ ExtractFeatures <- function(...,
                                               style = shiny::getShinyOption("progress.style", default = "notification")))
   }
   if(is.null(display_progress)) {
-    fun = function(expr, ...) { expr }
+    fun = function(expr, handlers, ...) { expr }
   } else {
     display_progress = as.logical(display_progress); assert(display_progress, len = 1, alw = c(TRUE, FALSE))
     old_hand_h <- getOption("progress.handlers", list())
     on.exit(progressr::handlers(old_hand_h, append = FALSE), add = TRUE)
     progressr::handlers(progressr::handler_void, append = FALSE)
     if(!display_progress) {
-      fun = function(expr, ...) { progressr::without_progress(expr) }
+      fun = function(expr, handlers, ...) { progressr::without_progress(expr) }
       hand = progressr::handler_void
       p = function(...) { return(p) }
     }
