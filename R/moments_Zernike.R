@@ -67,7 +67,7 @@ moments_Zernike <- function(img, msk, centroid, zmax = 15, radius = 30, full = F
   radius = na.omit(as.integer(radius)); assert(radius, len = 1, typ = "integer")
   full = na.omit(as.logical(full)); assert(full, len = 1, alw = c(TRUE, FALSE))
   if(full) {
-    foo = cpp_zernike2(img = img, msk = msk, cx = centroid[1], cy = centroid[2], zmax = zmax, radius = radius)
+    foo = cpp_zernike2(img = img, msk_ = msk, cx = centroid[1], cy = centroid[2], zmax = zmax, radius = radius)
     L = length(foo$zmoment)
     even = array(foo[["even"]], dim = c(dim(img), L))
     odd = array(foo[["odd"]], dim = c(dim(img), L))
@@ -78,7 +78,7 @@ moments_Zernike <- function(img, msk, centroid, zmax = 15, radius = 30, full = F
     foo[["even"]] = even
     foo[["odd"]] = odd
   }  else{
-    foo = cpp_zernike1(img = img, msk = msk, cx = centroid[1], cy = centroid[2], zmax = zmax, radius = radius)
+    foo = cpp_zernike1(img = img, msk_ = msk, cx = centroid[1], cy = centroid[2], zmax = zmax, radius = radius)
   }
   class(foo) = "IFCip_zernike"
   return(foo)
