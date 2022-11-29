@@ -90,6 +90,8 @@ On top of all the tools in IFCip, **ExtractFeatures()** is certainly the most us
   - image invariant moments
   - skewness
   - kurtosis
+  - Centroid X: scaled x centroïd
+  - Centroid Y: scaled y centroïd
   - and intensity weighted values
   
   
@@ -114,7 +116,6 @@ On top of all the tools in IFCip, **ExtractFeatures()** is certainly the most us
   
   
 - **compute_haralick()** to extract `Haralick textural features` [see Haralick's original paper](https://haralick.org/journals/TexturalFeatures.pdf) and [Löfstedt T. _et_ al.](https://doi.org/10.1371/journal.pone.0212110) used for the computation:
-  - autocorrelation
   - H Contrast
   - H Correlation
   - dissimilarity
