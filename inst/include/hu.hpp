@@ -527,7 +527,11 @@ Rcpp::NumericVector hpp_basic(const Rcpp::NumericMatrix img,
 //' -Raw Max Pixel, pixels intensity maximum of the component\cr
 //' -Std Dev, pixels intensity standard variation of the component\cr
 //' -skewness, component's skewness\cr
-//' -kurtosis, component's kurtosis.  
+//' -kurtosis, component's kurtosis\cr
+//' -Centroid Y, scaled Y centroid\cr
+//' -Centroid X, scaled X centroid\cr
+//' -Centroid Y Intensity, intensity weighted scaled Y centroid\cr
+//' -Centroid X Intensity. intensity weighted scaled X centroid.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
@@ -563,26 +567,21 @@ Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
   // initialize matrix
   Rcpp::NumericMatrix foo(nC, 56);
   
-  // create colnames
-  Rcpp::StringVector N = Rcpp::StringVector::create("Area","circularity",
-                                                    "Minor Axis", "Major Axis", "Aspect Ratio",
-                                                    "Angle", "theta", "eccentricity",
-                                                    "Minor Axis Intensity", "Major Axis Intensity", "Aspect Ratio Intensity",
-                                                    "Angle Intensity", "theta intensity", "eccentricity intensity",
-                                                    "pix cx", "pix cy",
-                                                    "pix min axis", "pix maj axis", "pix count");
-  for(int i = 1; i < 8; i++) {
-    std::ostringstream ss;
-    ss << "inv" << i;
-    std::string str = ss.str();
-    N.push_back(str);
-  }
-  N.push_back("Raw Mean Pixel");
-  N.push_back("Raw Min Pixel");
-  N.push_back("Raw Max Pixel");
-  N.push_back("Std Dev");
-  N.push_back("skewness");
-  N.push_back("kurtosis");
+  // // create colnames
+  Rcpp::StringVector N = Rcpp::StringVector({
+    "Area",
+    "circularity",
+    "Minor Axis","Major Axis","Aspect Ratio",
+    "Angle","theta","eccentricity",
+    "Minor Axis Intensity","Major Axis Intensity","Aspect Ratio Intensity",
+    "Angle Intensity","theta intensity","eccentricity intensity",
+    "pix cx","pix cy","pix min axis","pix maj axis",
+    "pix count",
+    "inv1","inv2","inv3","inv4","inv5","inv6","inv7",
+    "Raw Mean Pixel",
+    "Raw Min Pixel","Raw Max Pixel",
+    "Std Dev","skewness","kurtosis",
+    "Centroid Y","Centroid X","Centroid Y Intensity","Centroid X Intensity"});
   
   if(nC == 0) {
     Rcpp::NumericMatrix out(nC, 32);
@@ -795,6 +794,10 @@ Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
     // foo(i_comp, 26) is Mean int;
     // foo(i_comp, 27) is Min int;
     // foo(i_comp, 28) is Max int;
+    foo(i_comp, 32) = (cx - 1) / std::sqrt(mag);
+    foo(i_comp, 33) = (cy - 1) / std::sqrt(mag);
+    foo(i_comp, 34) = (cx_int - 1) / std::sqrt(mag);
+    foo(i_comp, 35) = (cy_int - 1) / std::sqrt(mag);
   }
   
   // FIXME: should kurtosis and skewness be intensity weighted ?
@@ -815,7 +818,7 @@ Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
   } 
   
   // return results
-  Rcpp::NumericMatrix out = foo(Rcpp::_, Rcpp::Range(0,31));
+  Rcpp::NumericMatrix out = foo(Rcpp::_, Rcpp::Range(0,35));
   Rcpp::colnames(out) = N;
   return out;
 }

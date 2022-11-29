@@ -345,7 +345,11 @@ Rcpp::NumericVector cpp_basic(const Rcpp::NumericMatrix img,
 //' -Raw Max Pixel, pixels intensity maximum of the component\cr
 //' -Std Dev, pixels intensity standard variation of the component\cr
 //' -skewness, component's skewness\cr
-//' -kurtosis, component's kurtosis.  
+//' -kurtosis, component's kurtosis
+//' -Centroid Y, scaled Y centroid\cr
+//' -Centroid X, scaled X centroid\cr
+//' -Centroid Y Intensity, intensity weighted scaled Y centroid\cr
+//' -Centroid X Intensity. intensity weighted scaled X centroid.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]

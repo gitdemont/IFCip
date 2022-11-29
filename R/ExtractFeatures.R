@@ -258,8 +258,9 @@ ExtractFeatures <- function(...,
                "inv1","inv2","inv3","inv4","inv5","inv6","inv7",
                "Raw Mean Pixel",
                "Raw Min Pixel","Raw Max Pixel", #+Inf,-Inf
-               "Std Dev","skewness","kurtosis")
-  no_hu = structure(c(0.000, rep(NaN, 17), 0.000, rep(NaN, 8), +Inf, -Inf, NaN, NaN, NaN), names = names_hu)
+               "Std Dev","skewness","kurtosis",
+               "Centroid Y","Centroid X","Centroid Y Intensity","Centroid X Intensity")
+  no_hu = structure(c(0.000, rep(NaN, 17), 0.000, rep(NaN, 8), +Inf, -Inf, NaN, NaN, NaN, 0.000, 0.000, 0.000, 0.000), names = names_hu)
   
   # extract objects
   sel = subsetOffsets(offsets = offsets, objects = objects, image_type = "img")
