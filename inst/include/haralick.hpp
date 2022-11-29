@@ -165,7 +165,7 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
   double S = cooc.attr("count"); S *= 2;
   double mu_x, mu_y, sig_x, sig_y, sig_xy, mu_xpy, mu_xmy,
          HX, HY, HXY, HXY1, HXY2;
-  double a_cor, con, cor, d_ent, d_var, dis, nrj, ent, hom,
+  double con, cor, d_ent, d_var, dis, nrj, ent, hom,
          imc1, imc2, i_dif, p_max, s_ent, s_var;
   double mu, c_pro, c_sha, s_sqr;
   double eps = 0.0000001; // to prevent log2(0)
@@ -212,26 +212,26 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
   mu_x = 0.0;
   HX   = 0.0;
   for(R_len_t i_row1 = 1; i_row1 <= N; i_row1++) {
-    mu_x += (i_row1 - 1) * d * p_x[i_row1];
+    mu_x += (i_row1) * d * p_x[i_row1];
     if(p_x[i_row1]) HX -= p_x[i_row1] * std::log2(p_x[i_row1]);
   }
   
   mu_y = 0.0;
   HY   = 0.0;
   for(R_len_t i_col1 = 1; i_col1 <= N; i_col1++) {
-    mu_y += (i_col1 - 1) * d * p_y[i_col1];
+    mu_y += (i_col1) * d * p_y[i_col1];
     if(p_y[i_col1]) HY -= p_y[i_col1] * std::log2(p_y[i_col1]);
   }
   
   sig_x = 0.0;
-  for(R_len_t i_row = 0; i_row < N; i_row++) {
-    sig_x += std::pow(i_row * d - mu_x, 2.0) * p_x[i_row + 1];
+  for(R_len_t i_row1 = 1; i_row1 <= N; i_row1++) {
+    sig_x += std::pow((i_row1) * d - mu_x, 2.0) * p_x[i_row1];
   }
   sig_x = std::sqrt(sig_x);
   
   sig_y = 0.0;
-  for(R_len_t i_col = 0; i_col < N; i_col++) {
-    sig_y += std::pow(i_col * d - mu_y, 2.0) * p_y[i_col + 1];
+  for(R_len_t i_col1 = 1; i_col1 <= N; i_col1++) {
+    sig_y += std::pow((i_col1) * d - mu_y, 2.0) * p_y[i_col1];
   }
   sig_y = std::sqrt(sig_y);
   sig_xy = sig_x * sig_y;
@@ -305,7 +305,6 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
   
   c_pro = 0.0;
   c_sha = 0.0;
-  a_cor = 0.0;
   con   = 0.0;
   cor   = 0.0;
   dis   = 0.0;
@@ -317,16 +316,14 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
   mu = (mu_x + mu_y) / 2;
   p_max = p(0, 0);
   
-  for(R_len_t i_col = 0; i_col < N; i_col++) {
-    double i_cold = i_col * d;
-    for(R_len_t i_row = 0; i_row < N; i_row++) {
-      double i_rowd = i_row * d;
-      double pij = p(i_row + 1, i_col + 1);
+  for(R_len_t i_col1 = 1; i_col1 <= N; i_col1++) {
+    double i_cold = (i_col1) * d;
+    for(R_len_t i_row1 = 1; i_row1 <= N; i_row1++) {
+      double i_rowd = (i_row1) * d;
+      double pij = p(i_row1, i_col1);
       double m = i_rowd - i_cold;
       double a = std::abs(m);
       double b = std::pow(m, 2.0);
-      // 00: AUTOCORRELATION
-      a_cor += i_rowd * i_cold * pij;
       // 01: H Contrast
       con += b * pij;
       // 02: CORRELATION
@@ -360,8 +357,7 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
   if(imc2 == R_NaN) imc2 = 0.0;
   if((sig_x == 0.0) || (sig_y == 0.0)) cor = 0.0;
   
-  return Rcpp::NumericVector::create(_["autocorrelation"] = a_cor,
-                                     _["H Contrast"] = con / N / N, // IDEAS H_Contrast con is divided by probability since IDEAS claims contrast is [0,1]
+  return Rcpp::NumericVector::create(_["H Contrast"] = con / N / N, // IDEAS H_Contrast con is divided by probability since IDEAS claims contrast is [0,1]
                                      _["H Correlation"] = cor, // IDEAS H_Correlation;
                                      _["dissimilarity"] = dis,
                                      _["H Energy"] = nrj, // IDEAS H_Energy
