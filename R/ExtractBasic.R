@@ -157,6 +157,7 @@ ExtractBasic <- function(...,
     param$size = c(0,0)
     param$removal = rep(removal, length(param$chan_to_keep))
     param$channels$removal = rep(ifelse(removal == "masked", 3, 4), length(param$channels$removal))
+    param$channels$string_removal = rep(removal, length(param$channels$removal))
     param$extract_msk = ifelse(removal == "masked", 3, 4)
   }
   fileName = param$fileName
@@ -255,16 +256,11 @@ ExtractBasic <- function(...,
     }
   }
   
-  # use minimum required variables from environement
-  # e1 = environment()
-  # e2 = new.env(parent = emptyenv())
-  # for(x in c("sel","param","L",
-             # "title_progress","lab","verbose",
-             # "is_cif","compute_mask","msk","removal","mag")) assign(x, get(x, envir = e1), envir = e2)
-  gbl = c("sel","param","L",
-          "title_progress","lab","verbose",
-          "is_cif","compute_mask","msk","removal","mag",
-          "cpp_basic","cpp_background","cpp_k_equal_M","mask_identify2","cpp_getTAGS")
+  cpp_background = getFromNamespace("cpp_background", "IFCip")
+  cpp_basic = getFromNamespace("cpp_basic", "IFCip")
+  cpp_k_equal_M = getFromNamespace("cpp_k_equal_M", "IFCip")
+  mask_identify2 = getFromNamespace("mask_identify2", "IFCip")
+  cpp_getTAGS = getFromNamespace("cpp_getTAGS", "IFC")
   
   # force future to use all mem
   old_opt <- options(future.globals.maxSize = Inf)
@@ -282,11 +278,9 @@ ExtractBasic <- function(...,
     }
   }
   future_args = list(strategy = strategy,
-                     # envir = e2,
                      packages = c("IFC","IFCip"),
                      seed = NULL, # NULL to avoid checking + to not force L'Ecuyer-CMRG RNG
-                     lazy = FALSE,
-                     globals = gbl)
+                     lazy = FALSE)
   dots=dots[!(names(dots) %in% names(future_args))]
   if(!is.null(strategy)) dots=dots[names(dots) %in% setdiff(names(formals(strategy, envir = asNamespace("future"))), "...")]
   oplan=do.call(what = future::plan, args = c(future_args[1], dots))
@@ -312,8 +306,6 @@ ExtractBasic <- function(...,
           future.seed = NULL, # NULL to avoid checking + to not force L'Ecuyer-CMRG RNG
           future.scheduling = +Inf,
           future.chunk.size = NULL,
-          # future.envir = e2,
-          future.globals = gbl,
           FUN = function(ifcip_iter) { 
             img = do.call(what = "objectExtract", args = c(list(ifd = lapply(sel[[ifcip_iter]],
                                                                              FUN = function(off) cpp_getTAGS(fname = param$fileName_image,
