@@ -168,7 +168,6 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
   double con, cor, d_ent, d_var, dis, nrj, ent, hom,
          imc1, imc2, i_dif, p_max, s_ent, s_var;
   double mu, c_pro, c_sha, s_sqr;
-  double eps = 0.0000001; // to prevent log2(0)
   
   // unknown lambda dependent + computationally instable Q
   // lambda, Q, mcc
@@ -286,10 +285,7 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
   for(R_len_t i_col1 = 1; i_col1 <= N; i_col1++) {
     for(R_len_t i_row1 = 1; i_row1 <= N; i_row1++) {
       if(p(i_row1, i_col1)) HXY += p(i_row1, i_col1) * std::log2(p(i_row1, i_col1));
-      if(p_x[i_row1] * p_y[i_col1] == 0.0) {
-        HXY1 += p(i_row1, i_col1) * std::log2(p_x[i_row1] * p_y[i_col1] + eps);
-        // HXY2 += p_x[i_row1] * p_y[i_col1] * std::log2(p_x[i_row1] * p_y[i_col1] + eps);
-      } else {
+      if(p_x[i_row1] * p_y[i_col1] != 0.0) {
         HXY1 += p(i_row1, i_col1) * std::log2(p_x[i_row1] * p_y[i_col1]);
         HXY2 += p_x[i_row1] * p_y[i_col1] * std::log2(p_x[i_row1] * p_y[i_col1]);
       }
