@@ -35,10 +35,10 @@ install.packages("devtools")
 ```
 
 - install R dependencies required for IFCip package
-"Rcpp", "IFC"
+"Rcpp", "IFC", "methods", "future", "future.apply", "future.callr", "progressr"
 
 ```R
-install.packages(c("Rcpp", "IFC"))
+install.packages(c("Rcpp", "IFC", "methods", "future", "future.apply", "future.callr", "progressr"))
 ```
 
 - install "remotes", to install IFCip package from github remotes is needed.
