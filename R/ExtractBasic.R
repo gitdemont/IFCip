@@ -235,7 +235,8 @@ ExtractBasic <- function(...,
     lab="computing features from images"
     hand = ifcip_handler_winprogressbar(title = title_progress)
   }
-  if(requireNamespace("shiny", quietly = TRUE) &&
+  with_seed = getFromNamespace("with_seed", "IFC")
+  if(with_seed(requireNamespace("shiny", quietly = TRUE), NULL) &&
      length(shiny::getDefaultReactiveDomain()) != 0) {
     lab="computing features from images"
     fun = function(expr, handlers, ...) { progressr::withProgressShiny(expr = expr, handlers = handlers) }
