@@ -162,6 +162,8 @@ ExtractFeatures <- function(...,
     param$mode = "raw"
     param$export = "matrix"
     param$size = c(0,0)
+    param$force_width = FALSE
+    param$warn = FALSE
     param$removal = rep(removal, length(param$chan_to_keep))
     param$channels$removal = rep(ifelse(removal == "masked", 3, 4), length(param$channels$removal))
     param$channels$string_removal = rep(removal, length(param$channels$removal))
@@ -197,6 +199,7 @@ ExtractFeatures <- function(...,
   }
   if(compute_mask) {
     param$removal = rep("none", length(param$chan_to_keep))
+    param$channels$string_removal = rep("none", length(param$channels$removal))
     param$channels$removal = rep(0, length(param$channels$removal))
     param$extract_msk = 0
     message("ExtractFeatures: can't find masks within file. They will be computed.")
@@ -382,6 +385,8 @@ ExtractFeatures <- function(...,
                     msk = msk
                   }
                 } else {
+                  bg_mean = attr(i_chan, "BG_MEAN")
+                  bg_sd = attr(i_chan, "BG_STD")
                   msk = !attr(i_chan, "mask")
                 }
                 class(msk) = "IFC_msk"
@@ -419,10 +424,10 @@ ExtractFeatures <- function(...,
                   }
                 }
                 
-                avg_intensity = hu["Raw Mean Pixel"] - attr(i_chan, "BG_MEAN")
-                min_intensity = hu["Raw Min Pixel"] - attr(i_chan, "BG_MEAN")
-                max_intensity = hu["Raw Max Pixel"] - attr(i_chan, "BG_MEAN")
-                intensities = structure(c(attr(i_chan, "BG_MEAN"), attr(i_chan, "BG_STD"),
+                avg_intensity = hu["Raw Mean Pixel"] - bg_mean
+                min_intensity = hu["Raw Min Pixel"] - bg_mean
+                max_intensity = hu["Raw Max Pixel"] - bg_mean
+                intensities = structure(c(bg_mean, bg_sd,
                                           min_intensity, max_intensity, avg_intensity, avg_intensity * hu["pix count"]), 
                                         names = c("Bkgd Mean", "Bkgd StdDev", "Min Pixel", "Max Pixel", "Mean Pixel", "Intensity"))
                 # modulation TODO ask Amnis

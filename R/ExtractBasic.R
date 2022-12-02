@@ -155,6 +155,8 @@ ExtractBasic <- function(...,
     param$mode = "raw"
     param$export = "matrix"
     param$size = c(0,0)
+    param$force_width = FALSE
+    param$warn = FALSE
     param$removal = rep(removal, length(param$chan_to_keep))
     param$channels$removal = rep(ifelse(removal == "masked", 3, 4), length(param$channels$removal))
     param$channels$string_removal = rep(removal, length(param$channels$removal))
@@ -190,6 +192,7 @@ ExtractBasic <- function(...,
   }
   if(compute_mask) {
     param$removal = rep("none", length(param$chan_to_keep))
+    param$channels$string_removal = rep("none", length(param$channels$removal))
     param$channels$removal = rep(0, length(param$channels$removal))
     param$extract_msk = 0
     message("ExtractBasic: can't find masks within file. They will be computed.")
@@ -334,9 +337,9 @@ ExtractBasic <- function(...,
                   }
                   hu = cpp_basic(img = i_chan, msk = msk, mag = mag)
                 } else {
-                  hu = cpp_basic(img = i_chan, msk = attr(i_chan, "mask"), mag = mag)
                   bg_mean = attr(i_chan, "BG_MEAN")
                   bg_sd = attr(i_chan, "BG_STD")
+                  hu = cpp_basic(img = i_chan, msk = attr(i_chan, "mask"), mag = mag)
                 }
                 avg_intensity = hu["Raw Mean Pixel"] - bg_mean
                 min_intensity = hu["Raw Min Pixel"] - bg_mean
