@@ -1,17 +1,17 @@
 citHeader("To cite 'IFCip' in publications, please use:")
 
 
-citEntry(entry = "manual",
+bibentry(bibtype = "Manual",
          title = "{IFCip}: {A}n {R} {P}ackage for {I}maging {F}low {C}ytometry {I}mage {P}rocessing",
-         author = personList(person(given="Yohann", family="Demont"),
-                             person(given="Jean-Pierre", family="Marolleau"),
-                             person(given="Loïc", family = "Garçon")),
+         author = c(person(given="Yohann", family="Demont"),
+                    person(given="Jean-Pierre", family="Marolleau"),
+                    person(given="Loïc", family = "Garçon")),
 organization = "CHU Amiens",
 address = "Amiens, France",
-note = "version 0.0.7.130",
-year = "2022",
+note = "version 0.0.7.131",
+year = "2023",
 url = "https://github.com/gitdemont/IFCip",
-textVersion = paste("Demont Y., Marolleau JP., Garçon L. (2022).",
+textVersion = paste("Demont Y., Marolleau JP., Garçon L. (2023).",
                     "IFCip: An R Package for Imaging Flow Cytometry Image Processing.",
                     "CHU Amiens.",
                     "https://github.com/gitdemont/IFCip"))
