@@ -32,6 +32,7 @@
 
 #include <Rcpp.h>
 #include "padding.hpp"
+#include "kernel.hpp"
 using namespace Rcpp;
 
 //' @title Image Erosion
@@ -51,53 +52,64 @@ Rcpp::NumericMatrix hpp_erode(const Rcpp::NumericMatrix mat,
                               const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
   R_len_t mat_r = mat.nrow();
   R_len_t mat_c = mat.ncol();
-  Rcpp::List pad = hpp_padding(mat, kernel, 5, R_PosInf);
-  Rcpp::NumericMatrix out = pad["out"];
-  R_len_t pad_r = pad["ori_r"];
-  R_len_t pad_c = pad["ori_c"];
-  
-  Rcpp::NumericMatrix msk;
+  // get kernel dimension
+  R_len_t pad_c = kernel.ncol() >> 1;
+  R_len_t pad_r = kernel.nrow() >> 1;
+  R_len_t kc = kernel.ncol() % 2;
+  R_len_t kr = kernel.nrow() % 2;
+  R_len_t pad_c_1 = pad_c + kc;
+  R_len_t pad_r_1 = pad_r + kr;
+  if(kr == kc) kr = kc = !kc;                                                     //APPLY OFFSET CORRECTION
+  // create out padded with P_PosInf, P_PosInf is important to allow removal of extra values from final result (we will keep minimum)
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, R_PosInf);//APPLY OFFSET CORRECTION
+
+  // check msk_ is provided and its dimension
   if(msk_.isNotNull()) {
     Rcpp::NumericMatrix m(msk_.get());
     if(m.size() != 0) {
       if((m.nrow() != mat_r) || (m.ncol() != mat_c)) {
         Rcpp::stop("hpp_erode: when 'msk' is provided 'img' and 'msk' should have same dimensions");
       }
-      Rcpp::List mm = hpp_padding(m, kernel, 5, 0.0);
-      msk = as<Rcpp::NumericMatrix>(mm["out"]);
+      Rcpp::NumericMatrix msk = hpp_padding(m, pad_r + kc, pad_c + kr, 5, 1.0);
+      uint8_t i_iter = 0;
+      while(i_iter <= iter) {
+        i_iter++;
+        Rcpp::NumericMatrix foo = Rcpp::clone(out);
+        for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
+          for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
+            if(msk(i_row, i_col)) {
+              double K = R_PosInf;
+              for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col < i_col + pad_c_1; f_col++) {
+                for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
+                  if(kernel[i_ker++] && (foo(f_row, f_col) < K)) K = foo(f_row, f_col);
+                }
+              }
+              out(i_row, i_col) = K;
+            }
+          }
+        }
+      }
+      return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
     }
   }
-  if(msk.size() == 0) {
-    msk = Rcpp::NumericMatrix(out.nrow(), out.ncol());
-    msk.fill(1.0);
-  }
   
-  // unsigned short count = 1;
   uint8_t i_iter = 0;
   while(i_iter <= iter) {
     i_iter++;
-    NumericMatrix foo = clone(out);
-    for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
-      for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
-        if(msk(i_row, i_col)) {
-          double K = R_PosInf;
-          for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col <= i_col + pad_c; f_col++) {
-            for(R_len_t f_row = i_row - pad_r; f_row <= i_row + pad_r; f_row++) {
-              // if((count++ % 10000) == 0) {
-              //   count = 1;
-              //   Rcpp::checkUserInterrupt();
-              // }
-              if(kernel[i_ker++]) {
-                if(foo(f_row, f_col) < K) K = foo(f_row, f_col);
-              }
-            }
+    Rcpp::NumericMatrix foo = Rcpp::clone(out);
+    for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
+      for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
+        double K = R_PosInf;
+        for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col < i_col + pad_c_1; f_col++) {
+          for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
+            if(kernel[i_ker++] && (foo(f_row, f_col) < K)) K = foo(f_row, f_col);
           }
-          out(i_row, i_col) = K;
         }
+        out(i_row, i_col) = K;
       }
     }
   }
-  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+  return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
 }
 
 //' @title Image Dilatation
@@ -117,53 +129,63 @@ Rcpp::NumericMatrix hpp_dilate(const Rcpp::NumericMatrix mat,
                                const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
   R_len_t mat_r = mat.nrow();
   R_len_t mat_c = mat.ncol();
-  Rcpp::List pad = hpp_padding(mat, kernel, 5, R_NegInf);
-  Rcpp::NumericMatrix out = pad["out"];
-  R_len_t pad_r = pad["ori_r"];
-  R_len_t pad_c = pad["ori_c"];
+  // get kernel dimension
+  R_len_t pad_c = kernel.ncol() >> 1;
+  R_len_t pad_r = kernel.nrow() >> 1;
+  R_len_t kc = kernel.ncol() % 2;
+  R_len_t kr = kernel.nrow() % 2;
+  R_len_t pad_c_1 = pad_c + kc;
+  R_len_t pad_r_1 = pad_r + kr;
+  if(kr == kc) kr = kc = !kc;                                                     //APPLY OFFSET CORRECTION
+  // create out padded with R_NegInf, R_NegInf is important to allow removal of extra values from final result (we will keep maximum)
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, R_NegInf);//APPLY OFFSET CORRECTION
   
-  Rcpp::NumericMatrix msk;
+  // check msk_ is provided and its dimension
   if(msk_.isNotNull()) {
     Rcpp::NumericMatrix m(msk_.get());
     if(m.size() != 0) {
       if((m.nrow() != mat_r) || (m.ncol() != mat_c)) {
-        Rcpp::stop("hpp_erode: when 'msk' is provided 'img' and 'msk' should have same dimensions");
+        Rcpp::stop("hpp_dilate: when 'msk' is provided 'img' and 'msk' should have same dimensions");
       }
-      Rcpp::List mm = hpp_padding(m, kernel, 5, 0.0);
-      msk = as<Rcpp::NumericMatrix>(mm["out"]);
+      Rcpp::NumericMatrix msk = hpp_padding(m, pad_r + kc, pad_c + kr, 5, 1.0);
+      uint8_t i_iter = 0;
+      while(i_iter <= iter) {
+        i_iter++;
+        Rcpp::NumericMatrix foo = Rcpp::clone(out);
+        for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
+          for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
+            if(msk(i_row, i_col)) {
+              double K = R_NegInf;
+              for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col < i_col + pad_c_1; f_col++) {
+                for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
+                  if(kernel[i_ker++]) if(foo(f_row, f_col) > K) K = foo(f_row, f_col);
+                }
+              }
+              out(i_row, i_col) = K;
+            }
+          }
+        }
+      }
+      return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
     }
   }
-  if(msk.size() == 0) {
-    msk = Rcpp::NumericMatrix(out.nrow(), out.ncol());
-    msk.fill(1.0);
-  }
-  
-  // unsigned short count = 1;
   uint8_t i_iter = 0;
   while(i_iter <= iter) {
     i_iter++;
-    NumericMatrix foo = clone(out);
-    for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
-      for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
-        if(msk(i_row, i_col)) {
-          double K = R_NegInf;
-          for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col <= i_col + pad_c; f_col++) {
-            for(R_len_t f_row = i_row - pad_r; f_row <= i_row + pad_r; f_row++) {
-              // if((count++ % 10000) == 0) {
-              //   count = 1;
-              //   Rcpp::checkUserInterrupt();
-              // }
-              if(kernel[i_ker++]) {
-                if(foo(f_row, f_col) > K) K = foo(f_row, f_col);
-              }
-            }
+    Rcpp::NumericMatrix foo = Rcpp::clone(out);
+    for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
+      for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
+        double K = R_NegInf;
+        for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col < i_col + pad_c_1; f_col++) {
+          for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
+            if(kernel[i_ker++]) if(foo(f_row, f_col) > K) K = foo(f_row, f_col);
           }
-          out(i_row, i_col) = K;
         }
+        out(i_row, i_col) = K;
       }
     }
   }
-  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+  return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
 }
 
 //' @title Image Opening
@@ -181,111 +203,7 @@ Rcpp::NumericMatrix hpp_opening(const Rcpp::NumericMatrix mat,
                                 const Rcpp::NumericMatrix kernel,
                                 const uint8_t iter = 0,
                                 const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
-  // return hpp_dilate(hpp_erode(mat, kernel, iter), kernel, iter);
-  uint8_t i_iter;
-  R_len_t mat_r = mat.nrow();
-  R_len_t mat_c = mat.ncol();
-  Rcpp::List pad = hpp_padding(mat, kernel, 5, R_PosInf);
-  Rcpp::NumericMatrix out = pad["out"];
-  R_len_t pad_r = pad["ori_r"];
-  R_len_t pad_c = pad["ori_c"];
-  
-  Rcpp::NumericMatrix msk;
-  if(msk_.isNotNull()) {
-    Rcpp::NumericMatrix m(msk_.get());
-    if(m.size() != 0) {
-      if((m.nrow() != mat_r) || (m.ncol() != mat_c)) {
-        Rcpp::stop("hpp_erode: when 'msk' is provided 'img' and 'msk' should have same dimensions");
-      }
-      Rcpp::List mm = hpp_padding(m, kernel, 5, 0.0);
-      msk = as<Rcpp::NumericMatrix>(mm["out"]);
-    }
-  }
-  if(msk.size() == 0) {
-    msk = Rcpp::NumericMatrix(out.nrow(), out.ncol());
-    msk.fill(1.0);
-  }
-  
-  // erode
-  // unsigned short count = 1;
-  i_iter = 0;
-  while(i_iter <= iter) {
-    i_iter++;
-    NumericMatrix foo = clone(out);
-    for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
-      for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
-        if(msk(i_row, i_col)) {
-          double K = R_PosInf;
-          for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col <= i_col + pad_c; f_col++) {
-            for(R_len_t f_row = i_row - pad_r; f_row <= i_row + pad_r; f_row++) {
-              // if((count++ % 10000) == 0) {
-              //   count = 1;
-              //   Rcpp::checkUserInterrupt();
-              // }
-              if(kernel[i_ker++]) {
-                if(foo(f_row, f_col) < K) K = foo(f_row, f_col);
-              }
-            }
-          }
-          out(i_row, i_col) = K;
-        }
-      }
-    }
-  }
-  // change border value
-  // 1st cols
-  for(R_len_t i_col = 0; i_col < pad_c; i_col++) {
-    for(R_len_t i_row = 0; i_row < out.nrow(); i_row++) {
-      out(i_row, i_col) = R_NegInf;
-    }
-  }
-  // last cols
-  for(R_len_t i_col = pad_c + mat_c; i_col < out.ncol(); i_col++) {
-    for(R_len_t i_row = 0; i_row < out.nrow(); i_row++) {
-      out(i_row, i_col) = R_NegInf;
-    }
-  }
-  
-  // 1st rows
-  for(R_len_t i_col = 0; i_col < out.ncol(); i_col++) {
-    for(R_len_t i_row = 0; i_row < pad_r; i_row++) {
-      out(i_row, i_col) = R_NegInf; 
-    }
-  }
-  
-  // last rows
-  for(R_len_t i_col = 0; i_col < out.ncol(); i_col++) {
-    for(R_len_t i_row = pad_r + mat_r; i_row < out.nrow(); i_row++) {
-      out(i_row, i_col) = R_NegInf; 
-    }
-  }
-  
-  // dilate
-  i_iter = 0;
-  while(i_iter <= iter) {
-    i_iter++;
-    NumericMatrix foo = clone(out);
-    for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
-      for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
-        if(msk(i_row, i_col)) {
-          double K = R_NegInf;
-          for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col <= i_col + pad_c; f_col++) {
-            for(R_len_t f_row = i_row - pad_r; f_row <= i_row + pad_r; f_row++) {
-              // if((count++ % 10000) == 0) {
-              //   count = 1;
-              //   Rcpp::checkUserInterrupt();
-              // }
-              if(kernel[i_ker++]) {
-                if(foo(f_row, f_col) > K) K = foo(f_row, f_col);
-              }
-            }
-          }
-          out(i_row, i_col) = K;
-        }
-      }
-    }
-  }
-  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+  return hpp_dilate(hpp_erode(mat, kernel, iter), kernel, iter);
 }
 
 //' @title Image Closing
@@ -303,112 +221,7 @@ Rcpp::NumericMatrix hpp_closing(const Rcpp::NumericMatrix mat,
                                 const Rcpp::NumericMatrix kernel,
                                 const uint8_t iter = 0,
                                 const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
-  // return hpp_erode(hpp_dilate(mat, kernel, iter), kernel, iter); 
-  uint8_t i_iter;
-  R_len_t mat_r = mat.nrow();
-  R_len_t mat_c = mat.ncol();
-  Rcpp::List pad = hpp_padding(mat, kernel, 5, R_NegInf);
-  Rcpp::NumericMatrix out = pad["out"];
-  R_len_t pad_r = pad["ori_r"];
-  R_len_t pad_c = pad["ori_c"];
-  
-  Rcpp::NumericMatrix msk;
-  if(msk_.isNotNull()) {
-    Rcpp::NumericMatrix m(msk_.get());
-    if(m.size() != 0) {
-      if((m.nrow() != mat_r) || (m.ncol() != mat_c)) {
-        Rcpp::stop("hpp_erode: when 'msk' is provided 'img' and 'msk' should have same dimensions");
-      }
-      Rcpp::List mm = hpp_padding(m, kernel, 5, 0.0);
-      msk = as<Rcpp::NumericMatrix>(mm["out"]);
-    }
-  }
-  if(msk.size() == 0) {
-    msk = Rcpp::NumericMatrix(out.nrow(), out.ncol());
-    msk.fill(1.0);
-  }
-  
-  // dilate
-  // unsigned short count = 1;
-  i_iter = 0;
-  while(i_iter <= iter) {
-    i_iter++;
-    NumericMatrix foo = clone(out);
-    for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
-      for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
-        if(msk(i_row, i_col)) {
-          double K = R_NegInf;
-          for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col <= i_col + pad_c; f_col++) {
-            for(R_len_t f_row = i_row - pad_r; f_row <= i_row + pad_r; f_row++) {
-              // if((count++ % 10000) == 0) {
-              //   count = 1;
-              //   Rcpp::checkUserInterrupt();
-              // }
-              if(kernel[i_ker++]) {
-                if(foo(f_row, f_col) > K) K = foo(f_row, f_col);
-              }
-            }
-          }
-          out(i_row, i_col) = K;
-        }
-      }
-    }
-  }
-  
-  // change border value
-  // 1st cols
-  for(R_len_t i_col = 0; i_col < pad_c; i_col++) {
-    for(R_len_t i_row = 0; i_row < out.nrow(); i_row++) {
-      out(i_row, i_col) = R_PosInf;
-    }
-  }
-  // last cols
-  for(R_len_t i_col = pad_c + mat_c; i_col < out.ncol(); i_col++) {
-    for(R_len_t i_row = 0; i_row < out.nrow(); i_row ++) {
-      out(i_row, i_col) = R_PosInf;
-    }
-  }
-  
-  // 1st rows
-  for(R_len_t i_col = 0; i_col < out.ncol(); i_col++) {
-    for(R_len_t i_row = 0; i_row < pad_r; i_row++) {
-      out(i_row, i_col) = R_PosInf; 
-    }
-  }
-  
-  // last rows
-  for(R_len_t i_col = 0; i_col < out.ncol(); i_col++) {
-    for(R_len_t i_row = pad_r + mat_r; i_row < out.nrow(); i_row++) {
-      out(i_row, i_col) = R_PosInf; 
-    }
-  }
-  
-  // erode
-  i_iter = 0;
-  while(i_iter <= iter) {
-    i_iter++;
-    NumericMatrix foo = clone(out);
-    for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
-      for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
-        if(msk(i_row, i_col)) {
-          double K = R_PosInf;
-          for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col <= i_col + pad_c; f_col++) {
-            for(R_len_t f_row = i_row - pad_r; f_row <= i_row + pad_r; f_row++) {
-              // if((count++ % 10000) == 0) {
-              //   count = 1;
-              //   Rcpp::checkUserInterrupt();
-              // }
-              if(kernel[i_ker++]) {
-                if(foo(f_row, f_col) < K) K = foo(f_row, f_col);
-              }
-            }
-          }
-          out(i_row, i_col) = K;
-        }
-      }
-    }
-  }
-  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+  return hpp_erode(hpp_dilate(mat, kernel, iter), kernel, iter);
 }
 
 //' @title Image Morphological Gradient

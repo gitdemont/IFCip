@@ -43,6 +43,7 @@
 #include "../inst/include/geodesic.hpp"
 #include "../inst/include/watershed.hpp"
 #include "../inst/include/ctl.hpp"
+#include "../inst/include/fill.hpp"
 #include "../inst/include/mask.hpp"
 #include "../inst/include/thinning.hpp"
 #include "../inst/include/similarity.hpp"
@@ -193,8 +194,8 @@ Rcpp::NumericVector cpp_rmoment(const Rcpp::NumericMatrix img,
 //' @description
 //' This function is designed to compute Hu's image central moment.
 //' @param img a NumericMatrix, containing image intensity values.
-//' @param cx double, x centroid of the img\cr
-//' @param cy double, y centroid of the img\cr
+//' @param cx double, x centroid of the img.
+//' @param cy double, y centroid of the img.
 //' @param p uint8_t: p order. Default is 0.
 //' @param q uint8_t: q order. Default is 0.
 //' @keywords internal
@@ -692,7 +693,7 @@ Rcpp::NumericMatrix cpp_flip(const Rcpp::NumericMatrix mat, const bool which = t
 //' @description
 //' This function creates a new matrix with extra rows / cols according to input mat, kernel
 //' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
+//' @param extra_rows,extra_cols number of extra rows and/or columns to add. Default is 0.
 //' @param method, a uint8_t. Default is 1, allowed are [1-8].\cr
 //' -1, extra cols / rows will be filled with 'k', returned 'out' will not be filled.\cr
 //' -2, extra cols / rows will be filled with the closest col / row, returned 'out' will not be filled.\cr
@@ -703,18 +704,16 @@ Rcpp::NumericMatrix cpp_flip(const Rcpp::NumericMatrix mat, const bool which = t
 //' -7, extra cols / rows will be filled mirroring neighbor cols / rows, returned 'out' will be filled with mat.\cr
 //' -8, extra cols / rows will be filled repeating neighbor cols / rows, returned 'out' will be filled with mat.
 //' @param k, a double, constant used when method is 1 or 4. Default is 0.0.
-//' @return a List whose elements are:\cr
-//' -out, a NumericMatrix, with extra cols / rows\cr
-//' -ori_c, a R_len_t with x coordinate of the 1st non extra element,\cr
-//' -ori_r, a R_len_t with y coordinate of the 1st non extra element.
+//' @return a NumericMatrix, with extra cols / rows
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::List cpp_padding(const Rcpp::NumericMatrix mat,
-                       const Rcpp::NumericMatrix kernel,
-                       const uint8_t method = 1,
-                       const double k = 0.0) {
-  return hpp_padding(mat, kernel, method, k);
+Rcpp::NumericMatrix cpp_padding(const Rcpp::NumericMatrix mat,
+                                const R_len_t extra_rows = 0,
+                                const R_len_t extra_cols = 0,
+                                const uint8_t method = 1,
+                                const double k = 0.0) {
+  return hpp_padding(mat, extra_rows, extra_cols, method, k);
 }
 // END padding
 
@@ -1289,40 +1288,6 @@ Rcpp::List cpp_ctl(const Rcpp::LogicalMatrix mat,
                    const bool global = false) {
   return hpp_ctl(mat, global);
 }
-
-//' @title Contours Filling
-//' @name cpp_fill
-//' @description
-//' This function is designed to fill contours.
-//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-//' @param label an uint32_t corresponding to the label of desired set of contour to be filled.
-//' Default is 0 to fill all set of contours found.
-//' @param inner a bool, to whether or not fill hole(s) inside contours if some where identified
-//' @param outer a bool, to whether or not fill contours outside hole(s) if some where identified
-//' @return an IntegerMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::IntegerMatrix cpp_fill(const List ctl,
-                             const uint32_t label = 0,
-                             const bool inner = true,
-                             const bool outer = true) {
-  return hpp_fill(ctl, label, inner, outer);
-}
-
-//' @title Contours Filling Outer Only
-//' @name cpp_fill_out
-//' @description
-//' This function is designed to fill the most external contours.
-//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-//' @return an IntegerMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::IntegerMatrix cpp_fill_out(const List ctl) {
-  return hpp_fill_out(ctl);
-}
-
 //' @title Contours Dilatation
 //' @name cpp_dilate_ctl
 //' @description
@@ -1357,6 +1322,66 @@ Rcpp::NumericMatrix cpp_erode_ctl(const List ctl,
   return hpp_erode_ctl(ctl, kernel, iter);
 }
 // END ctl
+
+// FROM fill
+//' @title Polygon Drawing
+//' @name cpp_polydraw
+//' @description
+//' This function is designed to trace and fill polygon inside a matrix.
+//' @param poly, a 2-column matrix defining the locations (x and y) of vertices of the polygon of interest.
+//' @param border, an int used to trace polygon border.
+//' @param fill, an int used to fill polygon.
+//' @param mat_, an IntegerMatrix to be filled.
+//' @return copy of mat_ with poly 
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+Rcpp::Nullable<Rcpp::IntegerMatrix> cpp_polydraw(const Rcpp::IntegerMatrix poly,
+                                                 const int border = 1,
+                                                 const int fill = 1,
+                                                 const Rcpp::Nullable<Rcpp::IntegerMatrix> mat_ = R_NilValue) {
+  if(mat_.isNotNull()) {
+    Rcpp::IntegerMatrix mat(mat_.get());
+    Rcpp::IntegerMatrix out = Rcpp::clone(mat); // it is important here to clone mat to avoid modifying it
+    polydraw(poly, out, border, fill);          // because polyfill is designed to modify out in place
+    return out;
+  }
+  return mat_;
+}
+
+//' @title Contours Filling
+//' @name cpp_fill
+//' @description
+//' This function is designed to fill contours.
+//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
+//' @param label an int corresponding to the label of desired set of contour to be filled.
+//' Default is 0 to fill all set of contours found.
+//' @param inner a bool, to whether or not fill hole(s) inside contours if some where identified.
+//' @param outer a bool, to whether or not fill contours outside hole(s) if some where identified.
+//' @return an IntegerMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+Rcpp::IntegerMatrix cpp_fill(const List ctl,
+                             const uint32_t label = 0,
+                             const bool inner = true,
+                             const bool outer = true) {
+  return hpp_fill(ctl, label, inner, outer);
+}
+
+//' @title Contours Filling Outer Only
+//' @name cpp_fill_out
+//' @description
+//' This function is designed to fill the most external contours.
+//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`.
+//' @return an IntegerMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+Rcpp::IntegerMatrix cpp_fill_out(const List ctl) {
+  return hpp_fill_out(ctl);
+}
+// END fill
 
 // FROM mask
 //' @title Matrix Threshold

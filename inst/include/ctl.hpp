@@ -31,8 +31,8 @@
 #define IFCIP_CTL_HPP
 
 #include <Rcpp.h>
-// [[Rcpp::depends(IFC)]]
-#include <gate.hpp>
+#include "padding.hpp"
+#include "morphology.hpp"
 using namespace Rcpp;
 
 static int ifcip_ctl_dx [8]={ 1, 1, 0,-1,-1,-1, 0, 1};
@@ -238,7 +238,7 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
   }
   
   // return contours to user-friendly output
-  Rcpp::NumericMatrix foo(i_cont / 5, 5);
+  Rcpp::IntegerMatrix foo(i_cont / 5, 5);
   i_cont = 0;
   for(R_len_t i_row = 0; i_row < foo.nrow(); i_row++) {
     for(R_len_t i_col = 0; i_col < 5; i_col++) {
@@ -254,242 +254,6 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
                                         _["perimeter"] = perimeter);
   ret.attr("class") = "IFCip_ctl";
   return ret;
-}
-
-//' @title ray_pnt_in_poly
-//' @description
-//' This function checks if points lie within a polygonusing an adaptation of the Ray Casting algorithm.
-//' Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
-//' 1.Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimers. 
-//' 2.Redistributions in binary form must reproduce the above copyright notice in the documentation and/or other materials provided with the distribution. 
-//' 3.The name of W. Randolph Franklin may not be used to endorse or promote products derived from this Software without specific prior written permission. 
-//' THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-//' @source adaptation from W. Randolph Franklin code \url{https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html}
-//' @param pnt a NumericVector with x and y coordinates.
-//' @param poly a 2-column matrix defining the locations (x and y) of vertices of the polygon of interest.
-//' @param include whether to include vertices of the polygon or not
-//' @keywords internal
-bool ray_pnt_in_poly(const Rcpp::NumericVector pnt,
-                     const Rcpp::NumericMatrix poly,
-                     const bool include = true) { 
-  bool inside = false;
-  for(R_len_t i = 0, j = poly.nrow() - 1; i < poly.nrow(); j = i++) {
-    // start
-    // this part is the main adaptation. to include the vertice or not
-    // thanks to ctl every adjacent pixel of the contours are registered
-    // so they are contiguous and we can easily include them or not
-    if(include && (pnt[0] == poly(i, 0)) && (pnt[1] == poly(i, 1))) return true;
-    // end
-    if(((poly(i,1) > pnt[1]) != (poly(j,1) > pnt[1])) &&
-       (pnt[0] < (poly(j,0) - poly(i,0)) * (pnt[1] - poly(i,1)) / (poly(j,1) - poly(i,1)) + poly(i,0))) 
-      inside = !inside;
-  }
-  return inside;
-}
-
-//' @title Contours Filling
-//' @name cpp_fill
-//' @description
-//' This function is designed to fill contours.
-//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-//' @param label an uint32_t corresponding to the label of desired set of contour to be filled.
-//' Default is 0 to fill all set of contours found.
-//' @param inner a bool, to whether or not fill hole(s) inside contours if some where identified
-//' @param outer a bool, to whether or not fill contours outside hole(s) if some where identified
-//' @return an IntegerMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::IntegerMatrix hpp_fill(const List ctl,
-                             const int label = 0,
-                             const bool inner = true,
-                             const bool outer = true) {
-  if(!Rf_inherits(ctl, "IFCip_ctl")) {
-    Rcpp::stop("hpp_fill: 'ctl' should be of class `IFCip_ctl`");
-  }
-  // retrieve max number of sets of contours identified by ctl
-  int label_max = as<uint32_t>(ctl["nb_lab"]);
-  // check whether to fill only one set or every sets of contours
-  int label_cur = label <= 0 ? label_max : label;
-  label_max = label_cur == label ? label : 1;
-  
-  // set up the type of object to fill (i.e) inside contours, w or w/o hole(s)
-  Rcpp::LogicalVector type = Rcpp::LogicalVector::create(false, outer, inner); 
-  // if inside contours + hole(s) no need to compute for hole since they are 
-  // also inside contours by definition
-  if(inner && outer) type[2] = false;
-  // retrieve contours coordinates
-  Rcpp::IntegerMatrix contours = Rcpp::clone(as<Rcpp::IntegerMatrix>(ctl["contours"]));
-  // retrieve label and type from contours
-  Rcpp::IntegerVector V1 = Rcpp::no_init_vector(contours.nrow());
-  Rcpp::IntegerVector V2 = Rcpp::clone(V1);
-  for(R_len_t i = 0; i < V1.size(); i++) {
-    V1[i] = contours(i, 2); // 2 is label_cur calling contours(i, "label") is not working
-    V2[i] = contours(i, 4); // 4 is type
-  }
-  // retrieve dimension of original image used to determine contours
-  Rcpp::IntegerVector dim = Rcpp::clone(as<Rcpp::IntegerVector>(ctl["dim"]));
-  // create all possible combinations of x, y coordinates within original image
-  // we will check if theses pts coordinates are within contours or not
-  Rcpp::NumericMatrix pnts(dim[0] * dim[1], 2);
-  for(R_len_t i_col = 1, i = 0; i_col <= dim[1]; i_col++) {
-    for(R_len_t i_row = 1; i_row <= dim[0]; i_row++) {
-      pnts(i, 0) = i_col;
-      pnts(i++, 1) = i_row;
-    }
-  }
-  // create out 
-  Rcpp::IntegerMatrix out(dim[0] + 1, dim[1] + 1);
-  
-  while(label_cur >= label_max) {
-    for(short k = 2; k >= 1; k--) { // try internal contour 1st (k=2), then external
-      if(type[k]) {
-        // retrieve the contours for label and type (i.e. internal or external contour)
-        NumericVector V4;
-        double xmin = R_PosInf, xmax = R_NegInf, ymin = R_PosInf, ymax = R_NegInf;
-        for(R_len_t i = 0; i < V1.size(); i++) {
-          if((V1[i] == label_cur) && (V2[i] == k) && (contours(i, 0)) >= 0 && (contours(i, 1)) >= 0) {
-            V4.push_back(contours(i, 0) ); 
-            V4.push_back(contours(i, 1) );
-            if(contours(i, 0) < xmin) xmin = contours(i, 0);
-            if(contours(i, 1) < ymin) ymin = contours(i, 1);
-            if(contours(i, 0) > xmax) xmax = contours(i, 0);
-            if(contours(i, 1) > ymax) ymax = contours(i, 1);
-          }
-        }
-        
-        if(V4.size() > 0) { // check if a contour of current label and type was found
-          NumericMatrix gate = Rcpp::no_init_matrix(2, V4.size()/2);
-          std::copy(V4.begin(), V4.end(), gate.begin());
-          NumericMatrix poly = close_polygon(Rcpp::transpose(gate));
-          Rcpp::LogicalVector is_in(pnts.nrow());
-          if(k == 1) {
-            for(R_len_t i = 0; i < pnts.nrow(); i++) {
-              is_in[i] = (out(pnts(i, 1), pnts(i, 0)) == 0) &&
-                (pnts(i, 1) >= ymin) && (pnts(i, 1) <= ymax) &&
-                (pnts(i, 0) >= xmin) && (pnts(i, 0) <= xmax) &&
-                ray_pnt_in_poly(pnts(i, Rcpp::_), poly, true);
-            } 
-          } else {
-            for(R_len_t i = 0; i < pnts.nrow(); i++) {
-              is_in[i] = (out(pnts(i, 1), pnts(i, 0)) == 0) &&
-                (pnts(i, 1) > ymin) && (pnts(i, 1) < ymax) &&
-                (pnts(i, 0) > xmin) && (pnts(i, 0) < xmax) &&
-                ray_pnt_in_poly(pnts(i, Rcpp::_), poly, false);
-            }
-          }
-          
-          if(outer & !inner) {
-            NumericVector V5;
-            double in_xmin = R_PosInf, in_xmax = R_NegInf, in_ymin = R_PosInf, in_ymax = R_NegInf;
-            for(R_len_t i = 0; i < V1.size(); i++) {
-              if((V1[i] == label_cur) && (V2[i] == 2) && (contours(i, 0)) >= 0 && (contours(i, 1)) >= 0) {
-                V5.push_back(contours(i, 0) ); 
-                V5.push_back(contours(i, 1) ); 
-                if(contours(i, 0) < in_xmin) in_xmin = contours(i, 0);
-                if(contours(i, 1) < in_ymin) in_ymin = contours(i, 1);
-                if(contours(i, 0) > in_xmax) in_xmax = contours(i, 0);
-                if(contours(i, 1) > in_ymax) in_ymax = contours(i, 1);
-              }
-            }
-            if(V5.size() > 0) {  // check if a contour of current label and type 2 was found
-              NumericMatrix gate_out = Rcpp::no_init_matrix(2, V5.size()/2);
-              std::copy(V5.begin(), V5.end(), gate_out.begin());
-              NumericMatrix poly_out = close_polygon(Rcpp::transpose(gate_out));
-              
-              for(R_len_t i = 0; i < pnts.nrow(); i++) { // fill inside the external contour but not inside the internal hole
-                if(is_in[i] &&
-                   !((out(pnts(i, 1), pnts(i, 0)) < label_cur) &&
-                   (pnts(i, 1) > in_ymin) && (pnts(i, 1) < in_ymax) &&
-                   (pnts(i, 0) > in_xmin) && (pnts(i, 0) < in_xmax) &&
-                   ray_pnt_in_poly(pnts(i, Rcpp::_), poly, false))) out(pnts(i, 1), pnts(i, 0)) = label_cur;
-              }
-            } else { 
-              for(R_len_t i = 0; i < pnts.nrow(); i++) { // fill inside the contour 
-                if(is_in[i]) out(pnts(i, 1), pnts(i, 0)) = label_cur;
-              }
-            }
-          } else {
-            for(R_len_t i = 0; i < pnts.nrow(); i++) { // fill inside the contour 
-              if(is_in[i]) out(pnts(i, 1), pnts(i, 0)) = label_cur;
-            }
-          }
-        }
-      }
-    }
-    label_cur--;
-  }
-  return out(Rcpp::Range(1, dim[0]), Rcpp::Range(1, dim[1]));
-}
-
-//' @title Contours Filling Outer Only
-//' @name cpp_fill_out
-//' @description
-//' This function is designed to fill the most external contours.
-//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-//' @return an IntegerMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::IntegerMatrix hpp_fill_out(const List ctl) {
-  if(!Rf_inherits(ctl, "IFCip_ctl")) {
-    Rcpp::stop("hpp_fill: 'ctl' should be of class `IFCip_ctl`");
-  }
-  // retrieve max number of sets of contours identified by ctl
-  int label_max = as<uint32_t>(ctl["nb_lab"]);
-  
-  // retrieve contours coordinates
-  Rcpp::IntegerMatrix contours = Rcpp::clone(as<Rcpp::IntegerMatrix>(ctl["contours"]));
-  
-  // retrieve dimension of original image used to determine contours
-  Rcpp::IntegerVector dim = Rcpp::clone(as<Rcpp::IntegerVector>(ctl["dim"]));
-  
-  // create VV vector of external contours points length
-  Rcpp::IntegerVector VV(label_max);
-  for(R_len_t label_cur = 1; label_cur <= label_max; label_cur++) {
-    for(R_len_t k = Rcpp::sum(VV); k < contours.nrow(); k++) {
-      if((contours(k, 2) == label_cur) && (contours(k, 4) == 1)) VV[label_cur - 1]++;
-    }
-  }
-  
-  // create out 
-  Rcpp::IntegerMatrix out(dim[0] + 1, dim[1] + 1);
-  
-  // for each external contours
-  for(R_len_t i_V = 0; i_V < VV.size(); i_V++) {
-    // extract contours points coordinates
-    Rcpp::IntegerVector x = no_init_vector(VV[i_V]);
-    Rcpp::IntegerVector y = clone(x);
-    for(R_len_t i = 0, k = 0; k < contours.nrow(); k++) {
-      if((contours(k, 2) == i_V + 1) && (contours(k, 4) == 1)) {
-        x[i] = contours(k, 0);
-        y[i++] = contours(k, 1);
-      }
-    }
-    // extract all unique x (columns)
-    Rcpp::IntegerVector V1 = Rcpp::unique(x);
-    for(R_len_t i_V1 = 0; i_V1 < V1.size(); i_V1++) {
-      // for each unique x extract and sort all unique y (rows)
-      Rcpp::IntegerVector V2;
-      for(R_len_t i_x = 0; i_x < x.size(); i_x++) if(x[i_x] == V1[i_V1]) V2.push_back(y[i_x]);
-      Rcpp::IntegerVector V3 = sort_unique(V2);
-      // check if 1st contour point is background
-      // if not it means it belongs, i.e. it is inside, of another contour
-      // so we escape (do nothing)
-      if(!out(V3[0], V1[i_V1])) {
-        // fill contours
-        int color = i_V + 1;
-        out(V3[0], V1[i_V1]) = color;
-        for(R_len_t i_V3 = 1; i_V3 < V3.size(); i_V3++) {
-          for(R_len_t i_row = V3[i_V3 - 1]; i_row <= V3[i_V3]; i_row++) out(i_row, V1[i_V1]) = color;
-          // check if current i_row and former i_row are separated by at least one px
-          // in such case, we swap from foreground to background and reversely
-          if(V3[i_V3] - V3[i_V3 - 1] > 1) color = color ? 0 : i_V + 1;
-        }
-      }
-    }
-  }
-  return out(Rcpp::Range(1, dim[0]), Rcpp::Range(1, dim[1]));
 }
 
 //' @title Contours Dilatation
@@ -509,23 +273,24 @@ Rcpp::NumericMatrix hpp_dilate_ctl(const List ctl,
   if(!Rf_inherits(ctl, "IFCip_ctl")) {
     Rcpp::stop("hpp_fill: 'ctl' should be of class `IFCip_ctl`");
   }
-  Rcpp::IntegerVector dim = Rcpp::clone(as<Rcpp::IntegerVector>(ctl["dim"]));
-  R_len_t mat_r = dim[0];
-  R_len_t mat_c = dim[1];
-  Rcpp::List pad = hpp_padding(as<Rcpp::NumericMatrix>(ctl["matrix"]), kernel, 5, 0);
-  Rcpp::NumericMatrix out = pad["out"];
-  R_len_t pad_r = pad["ori_r"];
-  R_len_t pad_c = pad["ori_c"];
+  R_len_t pad_c = kernel.ncol() >> 1;
+  R_len_t pad_r = kernel.nrow() >> 1;
+  R_len_t kc = kernel.ncol() % 2;
+  R_len_t kr = kernel.nrow() % 2;
+  R_len_t pad_c_1 = pad_c + kc;
+  R_len_t pad_r_1 = pad_r + kr;
+  if(kr == kc) kr = kc = !kc;
+  Rcpp::NumericMatrix out = hpp_padding(as<Rcpp::NumericMatrix>(ctl["matrix"]), pad_r + kc, pad_c + kr, 5, 0.0);
   
   uint8_t i_iter = 0;
   while(i_iter <= iter) {
     i_iter++;
     Rcpp::NumericMatrix foo = clone(out);
-    for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
-      for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
+    for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
+      for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
         double K = foo(i_row, i_col);
-        for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col <= i_col + pad_c; f_col++) {
-          for(R_len_t f_row = i_row - pad_r; f_row <= i_row + pad_r; f_row++) {
+        for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col < i_col + pad_c_1; f_col++) {
+          for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
             if(kernel[i_ker++]) {
               if(foo(f_row, f_col) == 0) {
                 out(f_row, f_col) = K;
@@ -536,7 +301,7 @@ Rcpp::NumericMatrix hpp_dilate_ctl(const List ctl,
       }
     }
   }
-  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+  return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
 }
 
 //' @title Contours Erosion
@@ -556,25 +321,26 @@ Rcpp::NumericMatrix hpp_erode_ctl(const List ctl,
   if(!Rf_inherits(ctl, "IFCip_ctl")) {
     Rcpp::stop("hpp_fill: 'ctl' should be of class `IFCip_ctl`");
   }
-  Rcpp::IntegerVector dim = Rcpp::clone(as<Rcpp::IntegerVector>(ctl["dim"]));
-  R_len_t mat_r = dim[0];
-  R_len_t mat_c = dim[1];
-  Rcpp::List pad = hpp_padding(as<Rcpp::NumericMatrix>(ctl["matrix"]), kernel, 5, 0);
-  Rcpp::NumericMatrix out = pad["out"];
-  R_len_t pad_r = pad["ori_r"];
-  R_len_t pad_c = pad["ori_c"];
+  R_len_t pad_c = kernel.ncol() >> 1;
+  R_len_t pad_r = kernel.nrow() >> 1;
+  R_len_t kc = kernel.ncol() % 2;
+  R_len_t kr = kernel.nrow() % 2;
+  R_len_t pad_c_1 = pad_c + kc;
+  R_len_t pad_r_1 = pad_r + kr;
+  if(kr == kc) kr = kc = !kc;
+  Rcpp::NumericMatrix out = hpp_padding(as<Rcpp::NumericMatrix>(ctl["matrix"]), pad_r + kc, pad_c + kr, 5, 0.0);
   
   uint8_t i_iter = 0;
   while(i_iter <= iter) {
     i_iter++;
     Rcpp::NumericMatrix foo = clone(out);
-    for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
-      for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
+    for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
+      for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
         double K = foo(i_row, i_col);
-        for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col <= i_col + pad_c; f_col++) {
-          for(R_len_t f_row = i_row - pad_r; f_row <= i_row + pad_r; f_row++) {
+        for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col < i_col + pad_c_1; f_col++) {
+          for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
             if(kernel[i_ker++]) {
-              if(foo(f_row, f_col)) {
+              if(foo(f_row, f_col) != 0) {
                 out(f_row, f_col) = K;
               }
             }
@@ -583,7 +349,7 @@ Rcpp::NumericMatrix hpp_erode_ctl(const List ctl,
       }
     }
   }
-  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+  return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
 }
 
 #endif

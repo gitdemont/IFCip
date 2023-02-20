@@ -375,15 +375,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_padding
-Rcpp::List cpp_padding(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel, const uint8_t method, const double k);
-RcppExport SEXP _IFCip_cpp_padding(SEXP matSEXP, SEXP kernelSEXP, SEXP methodSEXP, SEXP kSEXP) {
+Rcpp::NumericMatrix cpp_padding(const Rcpp::NumericMatrix mat, const R_len_t extra_rows, const R_len_t extra_cols, const uint8_t method, const double k);
+RcppExport SEXP _IFCip_cpp_padding(SEXP matSEXP, SEXP extra_rowsSEXP, SEXP extra_colsSEXP, SEXP methodSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const R_len_t >::type extra_rows(extra_rowsSEXP);
+    Rcpp::traits::input_parameter< const R_len_t >::type extra_cols(extra_colsSEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type method(methodSEXP);
     Rcpp::traits::input_parameter< const double >::type k(kSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_padding(mat, kernel, method, k));
+    rcpp_result_gen = Rcpp::wrap(cpp_padding(mat, extra_rows, extra_cols, method, k));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -739,29 +740,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_fill
-Rcpp::IntegerMatrix cpp_fill(const List ctl, const uint32_t label, const bool inner, const bool outer);
-RcppExport SEXP _IFCip_cpp_fill(SEXP ctlSEXP, SEXP labelSEXP, SEXP innerSEXP, SEXP outerSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
-    Rcpp::traits::input_parameter< const uint32_t >::type label(labelSEXP);
-    Rcpp::traits::input_parameter< const bool >::type inner(innerSEXP);
-    Rcpp::traits::input_parameter< const bool >::type outer(outerSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_fill(ctl, label, inner, outer));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_fill_out
-Rcpp::IntegerMatrix cpp_fill_out(const List ctl);
-RcppExport SEXP _IFCip_cpp_fill_out(SEXP ctlSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_fill_out(ctl));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cpp_dilate_ctl
 Rcpp::NumericMatrix cpp_dilate_ctl(const List ctl, const Rcpp::NumericMatrix kernel, const uint8_t iter);
 RcppExport SEXP _IFCip_cpp_dilate_ctl(SEXP ctlSEXP, SEXP kernelSEXP, SEXP iterSEXP) {
@@ -783,6 +761,42 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type iter(iterSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_erode_ctl(ctl, kernel, iter));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_polydraw
+Rcpp::Nullable<Rcpp::IntegerMatrix> cpp_polydraw(const Rcpp::IntegerMatrix poly, const int border, const int fill, const Rcpp::Nullable<Rcpp::IntegerMatrix> mat_);
+RcppExport SEXP _IFCip_cpp_polydraw(SEXP polySEXP, SEXP borderSEXP, SEXP fillSEXP, SEXP mat_SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix >::type poly(polySEXP);
+    Rcpp::traits::input_parameter< const int >::type border(borderSEXP);
+    Rcpp::traits::input_parameter< const int >::type fill(fillSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::IntegerMatrix> >::type mat_(mat_SEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_polydraw(poly, border, fill, mat_));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_fill
+Rcpp::IntegerMatrix cpp_fill(const List ctl, const uint32_t label, const bool inner, const bool outer);
+RcppExport SEXP _IFCip_cpp_fill(SEXP ctlSEXP, SEXP labelSEXP, SEXP innerSEXP, SEXP outerSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
+    Rcpp::traits::input_parameter< const uint32_t >::type label(labelSEXP);
+    Rcpp::traits::input_parameter< const bool >::type inner(innerSEXP);
+    Rcpp::traits::input_parameter< const bool >::type outer(outerSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_fill(ctl, label, inner, outer));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_fill_out
+Rcpp::IntegerMatrix cpp_fill_out(const List ctl);
+RcppExport SEXP _IFCip_cpp_fill_out(SEXP ctlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_fill_out(ctl));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -937,7 +951,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_k_inf_equal_M", (DL_FUNC) &_IFCip_cpp_k_inf_equal_M, 2},
     {"_IFCip_cpp_shift", (DL_FUNC) &_IFCip_cpp_shift, 6},
     {"_IFCip_cpp_flip", (DL_FUNC) &_IFCip_cpp_flip, 2},
-    {"_IFCip_cpp_padding", (DL_FUNC) &_IFCip_cpp_padding, 4},
+    {"_IFCip_cpp_padding", (DL_FUNC) &_IFCip_cpp_padding, 5},
     {"_IFCip_cpp_sd", (DL_FUNC) &_IFCip_cpp_sd, 2},
     {"_IFCip_cpp_mean", (DL_FUNC) &_IFCip_cpp_mean, 2},
     {"_IFCip_cpp_median", (DL_FUNC) &_IFCip_cpp_median, 2},
@@ -966,10 +980,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_watershed_sv1", (DL_FUNC) &_IFCip_cpp_watershed_sv1, 6},
     {"_IFCip_cpp_watershed_sv2", (DL_FUNC) &_IFCip_cpp_watershed_sv2, 6},
     {"_IFCip_cpp_ctl", (DL_FUNC) &_IFCip_cpp_ctl, 2},
-    {"_IFCip_cpp_fill", (DL_FUNC) &_IFCip_cpp_fill, 4},
-    {"_IFCip_cpp_fill_out", (DL_FUNC) &_IFCip_cpp_fill_out, 1},
     {"_IFCip_cpp_dilate_ctl", (DL_FUNC) &_IFCip_cpp_dilate_ctl, 3},
     {"_IFCip_cpp_erode_ctl", (DL_FUNC) &_IFCip_cpp_erode_ctl, 3},
+    {"_IFCip_cpp_polydraw", (DL_FUNC) &_IFCip_cpp_polydraw, 4},
+    {"_IFCip_cpp_fill", (DL_FUNC) &_IFCip_cpp_fill, 4},
+    {"_IFCip_cpp_fill_out", (DL_FUNC) &_IFCip_cpp_fill_out, 1},
     {"_IFCip_cpp_threshold", (DL_FUNC) &_IFCip_cpp_threshold, 4},
     {"_IFCip_cpp_thinning_zs", (DL_FUNC) &_IFCip_cpp_thinning_zs, 1},
     {"_IFCip_cpp_thinning_bst", (DL_FUNC) &_IFCip_cpp_thinning_bst, 1},

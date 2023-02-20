@@ -32,6 +32,7 @@
 
 #include <Rcpp.h>
 #include "padding.hpp"
+#include "kernel.hpp"
 using namespace Rcpp;
 
 //' @title Image Standard Deviation Filtering
@@ -46,32 +47,35 @@ using namespace Rcpp;
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_sd(const Rcpp::NumericMatrix mat,
                            const Rcpp::NumericMatrix kernel) {
-  R_len_t mat_r = mat.nrow();
-  R_len_t mat_c = mat.ncol();
-  // R_len_t i_row, i_col, f_row, f_col, k = 0;
-  Rcpp::List pad = hpp_padding(mat, kernel, 6, 0.0);
-  NumericMatrix out = pad["out"];
-  NumericMatrix foo = clone(out);
-  R_len_t pad_r = pad["ori_r"];
-  R_len_t pad_c = pad["ori_c"];
-  R_len_t k = 0;
-  for(R_len_t i = 0; i < kernel.size(); i++) if(kernel[i]) k++;
-  NumericVector K(k);
+  // get kernel dimension 
+  R_len_t pad_c = kernel.ncol() >> 1;
+  R_len_t pad_r = kernel.nrow() >> 1;
+  R_len_t kc = kernel.ncol() % 2;
+  R_len_t kr = kernel.nrow() % 2;
+  R_len_t pad_c_1 = pad_c + kc;
+  R_len_t pad_r_1 = pad_r + kr;
+  if(kr == kc) kr = kc = !kc;                                                    // APPLY OFFSET CORRECTION
+  kr = kc = 0;                                                                   // APPLY OFFSET CORRECTION
+  // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);// APPLY OFFSET CORRECTION
+  // create vector for storage of matrix value at kernel position
+  Rcpp::NumericVector K(kernel.size(), NA_REAL);
   
-  for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
-    for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
-      k = 0;
-      for(R_len_t f_col = -pad_c; f_col <= pad_c; f_col++) {
-        for(R_len_t f_row = -pad_r; f_row <= pad_r; f_row++) {
-          if(kernel(pad_r + f_row, pad_c + f_col)) {
-            K[k++] = foo(i_row + f_row, i_col + f_col);
-          }
+  Rcpp::NumericMatrix foo = clone(out);
+  for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
+    for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
+      R_len_t i_ker = -1;
+      for(R_len_t f_col = i_col - pad_c; f_col < i_col + pad_c_1; f_col++) {
+        for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
+          i_ker += 1;
+          K[i_ker] = kernel[i_ker] ? foo(f_row, f_col) : NA_REAL;
         }
       }
-      out(i_row, i_col) = Rcpp::sd(K);
+      Rcpp::NumericVector KK = Rcpp::na_omit(K);
+      out(i_row, i_col) = KK.size() == 0 ? NA_REAL : Rcpp::sd(KK);
     }
   }
-  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+  return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
 }
 
 //' @title Image Mean Filtering
@@ -86,32 +90,35 @@ Rcpp::NumericMatrix hpp_sd(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_mean(const Rcpp::NumericMatrix mat,
                              const Rcpp::NumericMatrix kernel) {
-  R_len_t mat_r = mat.nrow();
-  R_len_t mat_c = mat.ncol();
-  // R_len_t i_row, i_col, f_row, f_col, k = 0;
-  Rcpp::List pad = hpp_padding(mat, kernel, 6, 0.0);
-  NumericMatrix out = pad["out"];
-  NumericMatrix foo = clone(out);
-  R_len_t pad_r = pad["ori_r"];
-  R_len_t pad_c = pad["ori_c"];
-  R_len_t k = 0;
-  for(R_len_t i = 0; i < kernel.size(); i++) if(kernel[i]) k++;
-  NumericVector K(k);
+  // get kernel dimension
+  R_len_t pad_c = kernel.ncol() >> 1;
+  R_len_t pad_r = kernel.nrow() >> 1;
+  R_len_t kc = kernel.ncol() % 2;
+  R_len_t kr = kernel.nrow() % 2;
+  R_len_t pad_c_1 = pad_c + kc;
+  R_len_t pad_r_1 = pad_r + kr;
+  if(kr == kc) kr = kc = !kc;                                                    //APPLY OFFSET CORRECTION
+  kr = kc = 0;                                                                   //APPLY OFFSET CORRECTION
+  // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);//APPLY OFFSET CORRECTION
+  // create vector for storage of matrix value at kernel position
+  Rcpp::NumericVector K(kernel.size(), NA_REAL);
   
-  for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
-    for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
-      k = 0;
-      for(R_len_t f_col = -pad_c; f_col <= pad_c; f_col++) {
-        for(R_len_t f_row = -pad_r; f_row <= pad_r; f_row++) {
-          if(kernel(pad_r + f_row, pad_c + f_col)) {
-            K[k++] = foo(i_row + f_row, i_col + f_col);
-          }
+  Rcpp::NumericMatrix foo = clone(out);
+  for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
+    for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
+      R_len_t i_ker = -1;
+      for(R_len_t f_col = i_col - pad_c; f_col < i_col + pad_c_1; f_col++) {
+        for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
+          i_ker += 1;
+          K[i_ker] = kernel[i_ker] ? foo(f_row, f_col) : NA_REAL;
         }
       }
-      out(i_row, i_col) = mean(K);
+      Rcpp::NumericVector KK = Rcpp::na_omit(K);
+      out(i_row, i_col) = KK.size() == 0 ? NA_REAL : Rcpp::mean(KK);
     }
   }
-  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+  return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
 }
 
 //' @title Image Median Filtering
@@ -126,32 +133,35 @@ Rcpp::NumericMatrix hpp_mean(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_median(const Rcpp::NumericMatrix mat,
                                const Rcpp::NumericMatrix kernel) {
-  R_len_t mat_r = mat.nrow();
-  R_len_t mat_c = mat.ncol();
-  // R_len_t i_row, i_col, f_row, f_col, k = 0;
-  Rcpp::List pad = hpp_padding(mat, kernel, 6, 0.0);
-  NumericMatrix out = pad["out"];
-  NumericMatrix foo = clone(out);
-  R_len_t pad_r = pad["ori_r"];
-  R_len_t pad_c = pad["ori_c"];
-  R_len_t k = 0;
-  for(R_len_t i = 0; i < kernel.size(); i++) if(kernel[i]) k++;
-  NumericVector K(k);
+  // get kernel dimension
+  R_len_t pad_c = kernel.ncol() >> 1;
+  R_len_t pad_r = kernel.nrow() >> 1;
+  R_len_t kc = kernel.ncol() % 2;
+  R_len_t kr = kernel.nrow() % 2;
+  R_len_t pad_c_1 = pad_c + kc;
+  R_len_t pad_r_1 = pad_r + kr;
+  if(kr == kc) kr = kc = !kc;                                                    //APPLY OFFSET CORRECTION
+  kr = kc = 0;                                                                   //APPLY OFFSET CORRECTION
+  // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);//APPLY OFFSET CORRECTION
+  // create vector for storage of matrix value at kernel position
+  Rcpp::NumericVector K(kernel.size(), NA_REAL);
   
-  for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
-    for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
-      k = 0;
-      for(R_len_t f_col = -pad_c; f_col <= pad_c; f_col++) {
-        for(R_len_t f_row = -pad_r; f_row <= pad_r; f_row++) {
-          if(kernel(pad_r + f_row, pad_c + f_col)) {
-            K[k++] = foo(i_row + f_row, i_col + f_col);
-          }
+  Rcpp::NumericMatrix foo = clone(out);
+  for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
+    for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
+      R_len_t i_ker = -1;
+      for(R_len_t f_col = i_col - pad_c; f_col < i_col + pad_c_1; f_col++) {
+        for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
+          i_ker += 1;
+          K[i_ker] = kernel[i_ker] ? foo(f_row, f_col) : NA_REAL;
         }
       }
-      out(i_row, i_col) = median(K);
+      Rcpp::NumericVector KK = Rcpp::na_omit(K);
+      out(i_row, i_col) = KK.size() == 0 ? NA_REAL : Rcpp::median(KK);
     }
   }
-  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+  return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
 }
 
 //' @title Image Mode Filtering
@@ -166,32 +176,35 @@ Rcpp::NumericMatrix hpp_median(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_mode(const Rcpp::NumericMatrix mat,
                              const Rcpp::NumericMatrix kernel) {
-  R_len_t mat_r = mat.nrow();
-  R_len_t mat_c = mat.ncol();
-  // R_len_t i_row, i_col, f_row, f_col;
-  Rcpp::List pad = hpp_padding(mat, kernel, 6, 0.0);
-  NumericMatrix out = pad["out"];
-  NumericMatrix foo = clone(out);
-  R_len_t pad_r = pad["ori_r"];
-  R_len_t pad_c = pad["ori_c"];
-  R_len_t k = 0;
-  for(R_len_t i = 0; i < kernel.size(); i++) if(kernel[i]) k++;
-  NumericVector K(k);
+  // get kernel dimension
+  R_len_t pad_c = kernel.ncol() >> 1;
+  R_len_t pad_r = kernel.nrow() >> 1;
+  R_len_t kc = kernel.ncol() % 2;
+  R_len_t kr = kernel.nrow() % 2;
+  R_len_t pad_c_1 = pad_c + kc;
+  R_len_t pad_r_1 = pad_r + kr;
+  if(kr == kc) kr = kc = !kc;                                                    //APPLY OFFSET CORRECTION
+  kr = kc = 0;                                                                   //APPLY OFFSET CORRECTION
+  // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);//APPLY OFFSET CORRECTION
+  // create vector for storage of matrix value at kernel position
+  Rcpp::NumericVector K(kernel.size(), NA_REAL);
   
-  for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
-    for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
-      k = 0;
-      for(R_len_t f_col = -pad_c; f_col <= pad_c; f_col++) {
-        for(R_len_t f_row = -pad_r; f_row <= pad_r; f_row++) {
-          if(kernel(pad_r + f_row, pad_c + f_col)) {
-            K[k++] = foo(i_row + f_row, i_col + f_col);
-          }
+  Rcpp::NumericMatrix foo = clone(out);
+  for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
+    for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
+      R_len_t i_ker = -1;
+      for(R_len_t f_col = i_col - pad_c; f_col < i_col + pad_c_1; f_col++) {
+        for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
+          i_ker += 1;
+          K[i_ker] = kernel[i_ker] ? foo(f_row, f_col) : NA_REAL;
         }
       }
-      out(i_row, i_col) = 3 * median(K) - 2 * mean(K);
+      Rcpp::NumericVector KK = Rcpp::na_omit(K);
+      out(i_row, i_col) = KK.size() == 0 ? NA_REAL : 3 * median(KK) - 2 * mean(KK);
     }
   }
-  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+  return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
 }
 
 //' @title Image Mid Filtering
@@ -206,30 +219,41 @@ Rcpp::NumericMatrix hpp_mode(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_mid(const Rcpp::NumericMatrix mat,
                             const Rcpp::NumericMatrix kernel) {
-  R_len_t mat_r = mat.nrow();
-  R_len_t mat_c = mat.ncol();
-  // R_len_t i_row, i_col, f_row, f_col;
-  Rcpp::List pad = hpp_padding(mat, kernel, 6, 0.0);
-  NumericMatrix out = pad["out"];
-  NumericMatrix foo = clone(out);
-  R_len_t pad_r = pad["ori_r"];
-  R_len_t pad_c = pad["ori_c"];
+  // get kernel dimension
+  R_len_t pad_c = kernel.ncol() >> 1;
+  R_len_t pad_r = kernel.nrow() >> 1;
+  R_len_t kc = kernel.ncol() % 2;
+  R_len_t kr = kernel.nrow() % 2;
+  R_len_t pad_c_1 = pad_c + kc;
+  R_len_t pad_r_1 = pad_r + kr;
+  if(kr == kc) kr = kc = !kc;                                                    //APPLY OFFSET CORRECTION
+  kr = kc = 0;                                                                   //APPLY OFFSET CORRECTION
+  // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);//APPLY OFFSET CORRECTION
+  // create vectors for storage of matrix value at kernel position
+  Rcpp::NumericVector MIN(kernel.size(), NA_REAL);
+  Rcpp::NumericVector MAX(kernel.size(), NA_REAL);
   
-  for(R_len_t i_col = pad_c; i_col < mat_c + pad_c; i_col++) {
-    for(R_len_t i_row = pad_r; i_row < mat_r + pad_r; i_row++) {
-      double MIN = R_PosInf, MAX = R_NegInf;
-      for(R_len_t f_col = -pad_c; f_col <= pad_c; f_col++) {
-        for(R_len_t f_row = -pad_r; f_row <= pad_r; f_row++) {
-          if(kernel(pad_r + f_row, pad_c + f_col)) {
-            MIN = std::min(foo(i_row + f_row, i_col + f_col), MIN);
-            MAX = std::max(foo(i_row + f_row, i_col + f_col), MAX);
+  Rcpp::NumericMatrix foo = clone(out);
+  for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
+    for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
+      R_len_t i_ker = -1;
+      for(R_len_t f_col = i_col - pad_c; f_col < i_col + pad_c_1; f_col++) {
+        for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
+          i_ker += 1;
+          if(kernel[i_ker]) {
+            MAX[i_ker] = MIN[i_ker] = foo(f_row, f_col);
+          } else {
+            MAX[i_ker] = MIN[i_ker] = NA_REAL;
           }
         }
       }
-      out(i_row, i_col) = (MAX - MIN)/2;
+      Rcpp::NumericVector KMAX = Rcpp::na_omit(MAX);
+      Rcpp::NumericVector KMIN = Rcpp::na_omit(MIN);
+      out(i_row, i_col) = (KMAX.size() * KMIN.size()) == 0 ? NA_REAL : (Rcpp::max(KMAX) - Rcpp::min(KMAX))/2;
     }
   }
-  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+  return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
 }
 
 //' @title Image Filtering by Convolution
@@ -244,29 +268,32 @@ Rcpp::NumericMatrix hpp_mid(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_convolve2d(const Rcpp::NumericMatrix mat,
                                    const Rcpp::NumericMatrix kernel) {
-  R_len_t mat_r = mat.nrow();
-  R_len_t mat_c = mat.ncol();
+  // get kernel dimension
+  R_len_t pad_c = kernel.ncol() >> 1;
+  R_len_t pad_r = kernel.nrow() >> 1;
+  R_len_t kc = kernel.ncol() % 2;
+  R_len_t kr = kernel.nrow() % 2;
+  R_len_t pad_c_1 = pad_c + kc;
+  R_len_t pad_r_1 = pad_r + kr;
+  if(kr == kc) kr = kc = !kc;                                                //APPLY OFFSET CORRECTION
+  if(kr) kr = !kr;                                                           //APPLY OFFSET CORRECTION
+  if(kc) kc = !kc;                                                           //APPLY OFFSET CORRECTION
+  // create out padded with 0.0, 0.0 is important to allow removal of extra values from final result (multiply by 0.0)
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, 0.0);//APPLY OFFSET CORRECTION
   
-  // create padding
-  // 6 add closest row / col + copy mat in the center
-  Rcpp::List pad = hpp_padding(mat, kernel, 6, 0.0); 
-  NumericMatrix foo = pad["out"];
-  NumericMatrix out(foo.nrow(), foo.ncol());
-  // NumericMatrix out = foo;
-  R_len_t pad_r = pad["ori_r"];
-  R_len_t pad_c = pad["ori_c"];
-  
-  // apply filtering
+  Rcpp::NumericMatrix foo(out.nrow(), out.ncol());
   for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
     for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
-      for(R_len_t f_col = i_col + pad_c, i_ker = 0; f_col >= i_col - pad_c; f_col--) {
-        for(R_len_t f_row = i_row + pad_r; f_row >= i_row - pad_r; f_row--) {
-          out(i_row, i_col) = kernel[i_ker++] * foo(f_row, f_col) + out(i_row, i_col);
+      R_len_t i_ker = -1;
+      for(R_len_t f_col = i_col + pad_c_1 - 1; f_col >= i_col - pad_c; f_col--) {
+        for(R_len_t f_row = i_row + pad_r_1 - 1; f_row >= i_row - pad_r; f_row--) {
+          i_ker += 1;
+          out(i_row, i_col) = kernel[i_ker] * foo(f_row, f_col) + out(i_row, i_col);
         }
       }
     }
   }
-  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+  return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
 }
 
 //' @title Image Filtering by Correlation
@@ -281,29 +308,31 @@ Rcpp::NumericMatrix hpp_convolve2d(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_correlate2d(const Rcpp::NumericMatrix mat,
                                     const Rcpp::NumericMatrix kernel) {
-  R_len_t mat_r = mat.nrow();
-  R_len_t mat_c = mat.ncol();
+  // get kernel dimension
+  R_len_t pad_c = kernel.ncol() >> 1;
+  R_len_t pad_r = kernel.nrow() >> 1;
+  R_len_t kc = kernel.ncol() % 2;
+  R_len_t kr = kernel.nrow() % 2;
+  R_len_t pad_c_1 = pad_c + kc;
+  R_len_t pad_r_1 = pad_r + kr;
+  if(kr == kc) kr = kc = !kc;                                                 //APPLY OFFSET CORRECTION
+  if(kr == 1 && kc == 1) kr = kc = 2;                                         //APPLY OFFSET CORRECTION
+  // create out padded with 0.0, 0.0 is important to allow removal of extra values from final result (multiply by 0.0)
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5,  0.0);//APPLY OFFSET CORRECTION
 
-  // create padding
-  // 6 add closest row / col + copy mat in the center
-  Rcpp::List pad = hpp_padding(mat, kernel, 6, 0.0);
-  NumericMatrix foo = pad["out"];
-  NumericMatrix out(foo.nrow(), foo.ncol());
-  // NumericMatrix out = foo;
-  R_len_t pad_r = pad["ori_r"];
-  R_len_t pad_c = pad["ori_c"];
-
-  // apply filtering
+  Rcpp::NumericMatrix foo(out.nrow(), out.ncol());
   for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
     for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
-      for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col <= i_col + pad_c; f_col++) {
-        for(R_len_t f_row = i_row - pad_r; f_row <= i_row + pad_r; f_row++) {
-          out(i_row, i_col) = kernel[i_ker++] * foo(f_row, f_col) + out(i_row, i_col);
+      R_len_t i_ker = kernel.size();
+      for(R_len_t f_col = i_col + pad_c_1 - 1; f_col >= i_col - pad_c; f_col--) {
+        for(R_len_t f_row = i_row + pad_r_1 - 1; f_row >= i_row - pad_r; f_row--) {
+          i_ker += -1;
+          out(i_row, i_col) = kernel[i_ker] * foo(f_row, f_col) + out(i_row, i_col);
         }
       }
     }
   }
-  return out(Rcpp::Range(pad_r , mat_r + pad_r - 1), Rcpp::Range(pad_c , mat_c + pad_c - 1));
+  return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
 }
 
 # endif

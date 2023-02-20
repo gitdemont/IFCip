@@ -6,9 +6,9 @@
 \arguments{
 \item{img}{a NumericMatrix, containing image intensity values.}
 
-\item{cx}{double, x centroid of the img\cr}
+\item{cx}{double, x centroid of the img.}
 
-\item{cy}{double, y centroid of the img\cr}
+\item{cy}{double, y centroid of the img.}
 
 \item{p}{uint8_t: p order. Default is 0.}
 

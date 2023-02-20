@@ -6,12 +6,12 @@
 \arguments{
 \item{ctl}{a List, containing contour tracing labeling, object of class `IFCip_ctl`}
 
-\item{label}{an uint32_t corresponding to the label of desired set of contour to be filled.
+\item{label}{an int corresponding to the label of desired set of contour to be filled.
 Default is 0 to fill all set of contours found.}
 
-\item{inner}{a bool, to whether or not fill hole(s) inside contours if some where identified}
+\item{inner}{a bool, to whether or not fill hole(s) inside contours if some where identified.}
 
-\item{outer}{a bool, to whether or not fill contours outside hole(s) if some where identified}
+\item{outer}{a bool, to whether or not fill contours outside hole(s) if some where identified.}
 }
 \value{
 an IntegerMatrix.

@@ -6,7 +6,7 @@
 \arguments{
 \item{mat, }{a NumericMatrix.}
 
-\item{kernel, }{a NumericMatrix.}
+\item{extra_rows, extra_cols}{number of extra rows and/or columns to add. Default is 0.}
 
 \item{method, }{a uint8_t. Default is 1, allowed are [1-8].\cr
 -1, extra cols / rows will be filled with 'k', returned 'out' will not be filled.\cr
@@ -21,10 +21,7 @@
 \item{k, }{a double, constant used when method is 1 or 4. Default is 0.0.}
 }
 \value{
-a List whose elements are:\cr
--out, a NumericMatrix, with extra cols / rows\cr
--ori_c, a R_len_t with x coordinate of the 1st non extra element,\cr
--ori_r, a R_len_t with y coordinate of the 1st non extra element.
+a NumericMatrix, with extra cols / rows
 }
 \description{
 This function creates a new matrix with extra rows / cols according to input mat, kernel

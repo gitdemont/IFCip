@@ -36,9 +36,9 @@ using namespace Rcpp;
 //' @title Image Padding
 //' @name cpp_padding
 //' @description
-//' This function creates a new matrix with extra rows / cols according to input mat, kernel
+//' This function creates a new matrix with extra rows / cols according to input mat, extra_cols, extra_rows
 //' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
+//' @param extra_rows,extra_cols number of extra rows and/or columns to add. Default is 0.
 //' @param method, a uint8_t. Default is 1, allowed are [1-8].\cr
 //' -1, extra cols / rows will be filled with 'k', returned 'out' will not be filled.\cr
 //' -2, extra cols / rows will be filled with the closest col / row, returned 'out' will not be filled.\cr
@@ -49,30 +49,26 @@ using namespace Rcpp;
 //' -7, extra cols / rows will be filled mirroring neighbor cols / rows, returned 'out' will be filled with mat.\cr
 //' -8, extra cols / rows will be filled repeating neighbor cols / rows, returned 'out' will be filled with mat.
 //' @param k, a double, constant used when method is 1 or 4. Default is 0.0.
-//' @return a List whose elements are:\cr
-//' -out, a NumericMatrix, with extra cols / rows\cr
-//' -ori_c, a R_len_t with x coordinate of the 1st non extra element,\cr
-//' -ori_r, a R_len_t with y coordinate of the 1st non extra element.
+//' @return a NumericMatrix, with extra cols / rows
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::List hpp_padding(const Rcpp::NumericMatrix mat,
-                       const Rcpp::NumericMatrix kernel,
-                       const uint8_t method = 1,
-                       const double k = 0.0) {
+Rcpp::NumericMatrix hpp_padding(const Rcpp::NumericMatrix mat,
+                                const R_len_t extra_rows = 0,
+                                const R_len_t extra_cols = 0,
+                                const uint8_t method = 1,
+                                const double k = 0.0) {
   if((method < 1) || (method > 8)) {
     Rcpp::stop("hpp_padding: not allowed 'method' value");
   }
   uint8_t typ = (method > 4) ? (method - 4): method;
   // input dimension
-  R_len_t mat_r, mat_c, fil_r, fil_c, ori_r, ori_c, fin_height, fin_width;
+  R_len_t mat_r, mat_c, ori_r, ori_c, fin_height, fin_width;
   // init var
   mat_r = mat.nrow();
   mat_c = mat.ncol();
-  fil_r = kernel.nrow();
-  fil_c = kernel.ncol();
-  ori_r = (fil_r >> 1);
-  ori_c = (fil_c >> 1);
+  ori_r = std::max(0, extra_rows);
+  ori_c = std::max(0, extra_cols);
   fin_height = mat_r + ori_r * 2;
   fin_width = mat_c + ori_c * 2;
   
@@ -110,6 +106,7 @@ Rcpp::List hpp_padding(const Rcpp::NumericMatrix mat,
   }
     break;
   case 2: { // fill with the closest row / col
+    if((mat_r < 1) || (mat_c < 1)) Rcpp::stop("hpp_padding: 'mat' should have at least 1 row and 1 column");
     // add 1st extra rows
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     for(R_len_t i_row = 0; i_row < ori_r; i_row++) {
@@ -137,6 +134,7 @@ Rcpp::List hpp_padding(const Rcpp::NumericMatrix mat,
   }
     break;
   case 3: { // fill mirroring neighbor rows / cols
+    if((ori_c > mat_c) || (ori_r > mat_r)) Rcpp::stop("hpp_padding: can't add more rows/columns than 'mat' rows/columns");
     // add 1st extra rows
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     for(R_len_t i_row = 0; i_row < ori_r; i_row++) {
@@ -164,6 +162,7 @@ Rcpp::List hpp_padding(const Rcpp::NumericMatrix mat,
   }
     break;
   case 4: { // fill repeating neighbor rows / cols
+    if((ori_c > mat_c) || (ori_r > mat_r)) Rcpp::stop("hpp_padding: can't add more rows/columns than 'mat' rows/columns");
     // add 1st extra rows
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     for(R_len_t i_row = 0; i_row < ori_r; i_row++) {
@@ -231,10 +230,8 @@ Rcpp::List hpp_padding(const Rcpp::NumericMatrix mat,
         out[i_out++] = mat(i_row, i_col);
       }
     }
-  } 
-  return Rcpp::List::create(Rcpp::_["out"] = out,
-                            Rcpp::_["ori_c"] = ori_c,
-                            Rcpp::_["ori_r"] = ori_r);
+  }
+  return out;
 }
 
 #endif

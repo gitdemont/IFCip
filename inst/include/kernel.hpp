@@ -47,24 +47,51 @@ Rcpp::NumericMatrix get_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kernel 
   return kk;
 }
 
-// compute matrix of x, y, offsets relative to kernel center in raster order
-// according to non-zero kernel elements
+// compute matrix of x, y, offsets relative to kernel center
+// nozero: according to non-zero kernel elements
+// center: including center
 // NULL kernel will result in 8 connected neighbors offsets
 // return an IntegerMatrix whose rows are x, y, respectively and columns are elements
-Rcpp::IntegerMatrix offset_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue) {
+// [[Rcpp::export(rng = false)]]
+Rcpp::IntegerMatrix offset_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
+                                  bool nozero = true,
+                                  bool center = false) {
   Rcpp::NumericMatrix kk = get_kernel(kernel);
-  if(!((kk.nrow() % 2) && (kk.ncol() % 2))) Rcpp::stop("offset_kernel: 'kernel' rows and columns are expected to be odd");
-  R_len_t n = 0;
-  for(R_len_t i = 0; i < kk.size(); i++) if(kk[i]) n++;
-  Rcpp::IntegerMatrix out(2, std::max(0, n - 1));
   R_len_t rr = kk.nrow() >> 1;
-  R_len_t rc = kk.ncol() >> 1; 
-  for(R_len_t c = -rc, i = 0, j = 0; c <= rc; c++) {
-    for(R_len_t r = -rr; r <= rr; r++) {
-      if(kk[j++] && !((r == 0) && (c == 0))) {
-        out[i++] = c;
-        out[i++] = r;
+  R_len_t rc = kk.ncol() >> 1;
+  R_len_t kc = kk.ncol() % 2;
+  R_len_t kr = kk.nrow() % 2;
+  R_len_t rc_1 = rc + kc;
+  R_len_t rr_1 = rr + kr;
+  if(nozero) {
+    R_len_t n = 0;
+    for(R_len_t c = -rc, j = 0; c < rc_1; c++) {
+      for(R_len_t r = -rr; r < rr_1; r++) {
+        if(kk[j++]) {
+          if((r == 0) && (c == 0) && !center) continue;
+          n++;
+        }
       }
+    }
+    Rcpp::IntegerMatrix out(2, n);
+    for(R_len_t c = -rc, i = 0, j = 0; c < rc_1; c++) {
+      for(R_len_t r = -rr; r < rr_1; r++) {
+        if(kk[j++]) {
+          if((r == 0) && (c == 0) && !center) continue;
+          out[i++] = c;
+          out[i++] = r;
+        }
+      }
+    }
+    return out;
+  }
+  R_len_t s = kk.size() - !center;
+  Rcpp::IntegerMatrix out(2, std::max(0, s));
+  for(R_len_t c = -rc, i = 0; c < rc_1; c++) {
+    for(R_len_t r = -rr; r < rr_1; r++) {
+      if((r == 0) && (c == 0) && !center) continue;
+      out[i++] = c;
+      out[i++] = r;
     }
   }
   return out;
@@ -72,35 +99,28 @@ Rcpp::IntegerMatrix offset_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kern
 
 // determine x, y, offsets that are scanned before offset (kernel) center in raster order
 // return an IntegerMatrix whose rows are x, y, respectively and columns are elements
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix offset_backward(const Rcpp::IntegerMatrix offset) {
   if(offset.nrow() < 2) Rcpp::stop("offset_backward: 'offset' should be at least 2 rows");
-  R_len_t pos = -2;
-  for(R_len_t i = 0; i < offset.ncol(); i++) {
-    if(is_true(all(offset(Rcpp::_, i) >= 0))) {
-      pos = i;
-      break;
-    }
-  }
-  Rcpp::IntegerMatrix out(offset.nrow(), std::max(0, pos));
-  for(R_len_t i = 0; i < pos * offset.nrow(); i++) out[i] = offset[i];
+  Rcpp::LogicalVector L = Rcpp::no_init_vector(offset.ncol());
+  for(R_len_t i = 0; i < offset.ncol(); i++) L[i] = !((offset(0, i) > 0) || ((offset(0, i) == 0) && (offset(1, i) > 0)));
+  Rcpp::IntegerMatrix out = Rcpp::no_init_matrix(offset.nrow(), sum(L));
+  for(R_len_t i = 0, j = 0; i < offset.ncol(); i++) if(L[i]) out(Rcpp::_, j++) = offset(Rcpp::_, i);
   return out;
 }
 
 // determine x, y, offsets that are scanned after offset (kernel) center in raster order
 // return an IntegerMatrix whose rows are x, y, respectively and columns are elements
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix offset_forward(const Rcpp::IntegerMatrix offset) {
   if(offset.nrow() < 2) Rcpp::stop("offset_forward: 'offset' should be at least 2 rows");
-  R_len_t pos = -2;
-  for(R_len_t i = 0; i < offset.ncol(); i++) {
-    if(is_true(all(offset(Rcpp::_, i) >= 0))) {
-      pos = i;
-      break;
-    }
-  }
-  Rcpp::IntegerMatrix out(offset.nrow(), std::max(0, offset.ncol() - pos));
-  if(pos >= 0) for(R_len_t i = pos * offset.nrow(), j = 0; i < offset.size(); i++, j++) out[j] = offset[i];
+  Rcpp::LogicalVector L = Rcpp::no_init_vector(offset.ncol());
+  for(R_len_t i = offset.ncol() - 1; i >= 0; i--) L[i] = ((offset(0, i) > 0) || ((offset(0, i) == 0) && (offset(1, i) >= 0)));
+  Rcpp::IntegerMatrix out = Rcpp::no_init_matrix(offset.nrow(), sum(L));
+  for(R_len_t i = offset.ncol() - 1, j = 0; i >= 0; i--) if(L[i]) out(Rcpp::_, j++) = offset(Rcpp::_, i);
   return out;
 }
+
 
 // neighbor position computation according to offset
 // Each time a neighbor is found, it is added to nbr vector starting at nbr[1]
@@ -160,8 +180,10 @@ Rcpp::LogicalMatrix hpp_make_box(const uint8_t size = 3) {
 Rcpp::LogicalMatrix hpp_make_plus(const uint8_t size = 3) {
   Rcpp::LogicalMatrix out(size, size);
   double half = size % 2 ? size / 2 : size / 2 - 0.5;
-  out(half, Rcpp::_) = Rcpp::rep(true, size);
-  out(Rcpp::_, half) = Rcpp::rep(true, size);
+  if(half > 0.0) {
+    out(half, Rcpp::_) = Rcpp::rep(true, size);
+    out(Rcpp::_, half) = Rcpp::rep(true, size);
+  }
   return out;
 }
 
@@ -179,23 +201,25 @@ Rcpp::LogicalMatrix hpp_make_cross(const uint8_t size = 3) {
 // [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_make_diamond(uint8_t size = 3) {
   Rcpp::LogicalMatrix out(size, size);
-  double half = size >> 1;
-  R_len_t i = 0;
-  if(size % 2) {
-    for(R_len_t i_col = -half; i_col <= half; i_col++) {
-      for(R_len_t i_row = -half; i_row <= half; i_row++) {
-        if(i >= size * size) Rcpp::stop("Not allowed");
-        out[i++] = (abs(i_col) + abs(i_row)) <= half;
+  if(size >= 1) {
+    double half = size >> 1;
+    R_len_t i = 0;
+    if(size % 2) {
+      for(R_len_t i_col = -half; i_col <= half; i_col++) {
+        for(R_len_t i_row = -half; i_row <= half; i_row++) {
+          if(i >= size * size) Rcpp::stop("Not allowed");
+          out[i++] = (abs(i_col) + abs(i_row)) <= half;
+        }
       }
-    }
-    
-  } else {
-    for(R_len_t i_col = -half; i_col <= half; i_col++) {
-      if(i_col == 0) i_col++;
-      for(R_len_t i_row = -half; i_row <= half; i_row++) {
-        if(i_row == 0) i_row++;
-        if(i >= size * size) Rcpp::stop("Not allowed");
-        out[i++] = (abs(i_col) + abs(i_row)) <= half;
+      
+    } else {
+      for(R_len_t i_col = -half; i_col <= half; i_col++) {
+        if(i_col == 0) i_col++;
+        for(R_len_t i_row = -half; i_row <= half; i_row++) {
+          if(i_row == 0) i_row++;
+          if(i >= size * size) Rcpp::stop("Not allowed");
+          out[i++] = (abs(i_col) + abs(i_row)) <= half;
+        }
       }
     }
   }

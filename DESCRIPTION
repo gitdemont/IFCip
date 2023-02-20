@@ -2,8 +2,8 @@ Package: IFCip
 Encoding: UTF-8
 Type: Package
 Title: Imaging Flow Cytometry Image Processing Tools
-Version: 0.0.7.131
-Date: 2023-02-06
+Version: 0.0.8
+Date: 2023-02-20
 Maintainer: Yohann Demont <git.demont@gmail.com>
 Authors@R: c(person(given = 'Yohann', family = 'Demont', email = 'git.demont@gmail.com', role = c('aut', 'cre')), person(given = 'Jean-Pierre', family = 'Marolleau', role = 'ldr'), person(given = 'Loïc', family = 'Garçon', role = 'ldr'))
 BugReports: https://github.com/gitdemont/IFCip/issues
@@ -15,4 +15,3 @@ Imports: Rcpp (>= 0.10.0), IFC (>= 0.1.2.100), methods, future, future.apply, fu
 Suggests: IFCdata, shiny
 LinkingTo: Rcpp, IFC
 Additional_repositories: https://gitdemont.github.io/IFCdata
-SystemRequirements: C++11
