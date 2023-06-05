@@ -32,7 +32,6 @@
 
 #include <Rcpp.h>
 #include "padding.hpp"
-#include "kernel.hpp"
 using namespace Rcpp;
 
 //' @title Image Standard Deviation Filtering
@@ -279,9 +278,9 @@ Rcpp::NumericMatrix hpp_convolve2d(const Rcpp::NumericMatrix mat,
   if(kr) kr = !kr;                                                           //APPLY OFFSET CORRECTION
   if(kc) kc = !kc;                                                           //APPLY OFFSET CORRECTION
   // create out padded with 0.0, 0.0 is important to allow removal of extra values from final result (multiply by 0.0)
-  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, 0.0);//APPLY OFFSET CORRECTION
+  Rcpp::NumericMatrix foo = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, 0.0);//APPLY OFFSET CORRECTION
   
-  Rcpp::NumericMatrix foo(out.nrow(), out.ncol());
+  Rcpp::NumericMatrix out(foo.nrow(), foo.ncol());
   for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
     for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
       R_len_t i_ker = -1;
@@ -318,9 +317,9 @@ Rcpp::NumericMatrix hpp_correlate2d(const Rcpp::NumericMatrix mat,
   if(kr == kc) kr = kc = !kc;                                                 //APPLY OFFSET CORRECTION
   if(kr == 1 && kc == 1) kr = kc = 2;                                         //APPLY OFFSET CORRECTION
   // create out padded with 0.0, 0.0 is important to allow removal of extra values from final result (multiply by 0.0)
-  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5,  0.0);//APPLY OFFSET CORRECTION
-
-  Rcpp::NumericMatrix foo(out.nrow(), out.ncol());
+  Rcpp::NumericMatrix foo = hpp_padding(mat, pad_r + kc, pad_c + kr, 5,  0.0);//APPLY OFFSET CORRECTION
+  
+  Rcpp::NumericMatrix out(foo.nrow(), foo.ncol());
   for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
     for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
       R_len_t i_ker = kernel.size();
