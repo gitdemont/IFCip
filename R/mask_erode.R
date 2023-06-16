@@ -37,7 +37,7 @@ mask_erode <- function(msk, n = 1) {
   n = as.integer(n); n = n[n>=0]; n = na.omit(n[is.finite(n)])
   assert(n, len=1)
   # TODO check / ask the kernel type used, the number of iteration
-  foo = cpp_erode(mat = msk, kernel = make_kernel(size = n, type = "box"), iter = 0)
+  foo = cpp_erode(mat = msk, kernel = make_kernel(size = n, type = "box"))
   ATT = list("IFC_msk", "erode", n, c(nrow(msk), ncol(msk)))
   names(ATT) = c("class", "type", "n", "dim")
   attributes(foo) <- ATT

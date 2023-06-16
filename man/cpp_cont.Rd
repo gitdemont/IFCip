@@ -7,8 +7,6 @@
 \item{mat, }{a NumericMatrix.}
 
 \item{kernel, }{a NumericMatrix.}
-
-\item{iter, }{an uint8_t, number of time dilate/erode should be iterated. Default is 0.}
 }
 \value{
 a NumericMatrix.

@@ -32,7 +32,6 @@
 
 #include <Rcpp.h>
 #include "padding.hpp"
-#include "morphology.hpp"
 using namespace Rcpp;
 
 static int ifcip_ctl_dx [8]={ 1, 1, 0,-1,-1,-1, 0, 1};

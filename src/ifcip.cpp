@@ -39,6 +39,7 @@
 #include "../inst/include/shift.hpp"
 #include "../inst/include/flip.hpp"
 #include "../inst/include/filter.hpp"
+#include "../inst/include/uw.hpp"
 #include "../inst/include/morphology.hpp"
 #include "../inst/include/geodesic.hpp"
 #include "../inst/include/watershed.hpp"
@@ -51,6 +52,7 @@
 #include "../inst/include/convexhull.hpp"
 #include "../inst/include/caliper.hpp"
 using namespace Rcpp;
+
 
 // FROM utils
 //' @title Image Background
@@ -825,6 +827,25 @@ Rcpp::NumericMatrix cpp_correlate2d(const Rcpp::NumericMatrix mat,
 }
 // END filter
 
+// FROM uw
+//' @title Urbach-Wilkinson Algorithm for Image Erosion and Dilation
+//' @name cpp_uw
+//' @description
+//' This function applies erosion or dilatation on image.
+//' @param mat, a NumericMatrix.
+//' @param kernel, a NumericMatrix.
+//' @param erode, a bool. whether to do image erosion or dilatation. Default is true to perform erosion.
+//' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
+//' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
+//' @return a NumericMatrix.
+//' @keywords internal
+Rcpp::NumericVector cpp_uw(const Rcpp::NumericMatrix mat,
+                           const Rcpp::NumericMatrix kernel,
+                           const bool erode = true) {
+  return hpp_uw(mat, kernel, erode);
+}
+// END uw
+
 // FROM morphology
 //' @title Image Erosion
 //' @name cpp_erode
@@ -832,16 +853,15 @@ Rcpp::NumericMatrix cpp_correlate2d(const Rcpp::NumericMatrix mat,
 //' This function applies erosion on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time erode should be iterated. Default is 0.
+//' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
+//' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_erode(const Rcpp::NumericMatrix mat,
-                              const Rcpp::NumericMatrix kernel,
-                              const uint8_t iter = 0,
-                              const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
-  return hpp_erode(mat, kernel, iter, msk_);
+                              const Rcpp::NumericMatrix kernel) {
+  return hpp_erode(mat, kernel);
 }
 
 //' @title Image Dilatation
@@ -850,16 +870,15 @@ Rcpp::NumericMatrix cpp_erode(const Rcpp::NumericMatrix mat,
 //' This function applies dilatation on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
+//' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
+//' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_dilate(const Rcpp::NumericMatrix mat,
-                               const Rcpp::NumericMatrix kernel,
-                               const uint8_t iter = 0,
-                               const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
-  return hpp_dilate(mat, kernel, iter, msk_);
+                               const Rcpp::NumericMatrix kernel) {
+  return hpp_dilate(mat, kernel);
 }
 
 //' @title Image Opening
@@ -868,16 +887,13 @@ Rcpp::NumericMatrix cpp_dilate(const Rcpp::NumericMatrix mat,
 //' This function applies opening on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_opening(const Rcpp::NumericMatrix mat,
-                                const Rcpp::NumericMatrix kernel,
-                                const uint8_t iter = 0,
-                                const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
-  return hpp_opening(mat, kernel, iter, msk_);
+                                const Rcpp::NumericMatrix kernel) {
+  return hpp_opening(mat, kernel);
 }
 
 //' @title Image Closing
@@ -886,16 +902,13 @@ Rcpp::NumericMatrix cpp_opening(const Rcpp::NumericMatrix mat,
 //' This function applies closing on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_closing(const Rcpp::NumericMatrix mat,
-                                const Rcpp::NumericMatrix kernel,
-                                const uint8_t iter = 0,
-                                const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
-  return hpp_closing(mat, kernel, iter, msk_);
+                                const Rcpp::NumericMatrix kernel) {
+  return hpp_closing(mat, kernel);
 }
 
 //' @title Image Morphological Gradient
@@ -904,16 +917,13 @@ Rcpp::NumericMatrix cpp_closing(const Rcpp::NumericMatrix mat,
 //' This function applies morphological gradient on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_gradient(const Rcpp::NumericMatrix mat,
-                                 const Rcpp::NumericMatrix kernel,
-                                 const uint8_t iter = 0,
-                                 const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
-  return hpp_gradient(mat, kernel, iter, msk_);
+                                 const Rcpp::NumericMatrix kernel) {
+  return hpp_gradient(mat, kernel);
 }
 
 //' @title Image White Top Hat
@@ -922,16 +932,13 @@ Rcpp::NumericMatrix cpp_gradient(const Rcpp::NumericMatrix mat,
 //' This function applies white top hat on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_tophat_white(const Rcpp::NumericMatrix mat,
-                                     const Rcpp::NumericMatrix kernel,
-                                     const uint8_t iter = 0,
-                                     const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
-  return hpp_tophat_white(mat, kernel, iter, msk_);
+                                     const Rcpp::NumericMatrix kernel) {
+  return hpp_tophat_white(mat, kernel);
 }
 
 //' @title Image Black Top Hat
@@ -940,16 +947,13 @@ Rcpp::NumericMatrix cpp_tophat_white(const Rcpp::NumericMatrix mat,
 //' This function applies black top hat on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_tophat_black(const Rcpp::NumericMatrix mat,
-                                     const Rcpp::NumericMatrix kernel,
-                                     const uint8_t iter = 0,
-                                     const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
-  return hpp_tophat_black(mat, kernel, iter, msk_);
+                                     const Rcpp::NumericMatrix kernel) {
+  return hpp_tophat_black(mat, kernel);
 }
 
 //' @title Image Self Complementary Top Hat
@@ -958,16 +962,13 @@ Rcpp::NumericMatrix cpp_tophat_black(const Rcpp::NumericMatrix mat,
 //' This function applies self complementary on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_tophat_self(const Rcpp::NumericMatrix mat,
-                                    const Rcpp::NumericMatrix kernel,
-                                    const uint8_t iter = 0,
-                                    const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
-  return hpp_tophat_self(mat, kernel, iter, msk_);
+                                    const Rcpp::NumericMatrix kernel) {
+  return hpp_tophat_self(mat, kernel);
 }
 
 //' @title Image Contrast Enhancement
@@ -976,16 +977,13 @@ Rcpp::NumericMatrix cpp_tophat_self(const Rcpp::NumericMatrix mat,
 //' This function applies contrast enhancement on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_cont(const Rcpp::NumericMatrix mat,
-                             const Rcpp::NumericMatrix kernel,
-                             const uint8_t iter = 0,
-                             const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
-  return hpp_cont(mat, kernel, iter, msk_);
+                             const Rcpp::NumericMatrix kernel) {
+  return hpp_cont(mat, kernel);
 }
 
 //' @title Image Laplacian
@@ -994,17 +992,59 @@ Rcpp::NumericMatrix cpp_cont(const Rcpp::NumericMatrix mat,
 //' This function applies Laplacian morphology on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_laplacian(const Rcpp::NumericMatrix mat,
+                                  const Rcpp::NumericMatrix kernel) {
+  return hpp_laplacian(mat, kernel);
+}
+
+//' @title Brute Force Image Erosion
+//' @name cpp_erosion_old
+//' @description
+//' This function applies dilatation on image.
+//' @param mat, a NumericMatrix.
+//' @param kernel, a NumericMatrix.
+//' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
+//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' Default is R_NilValue, for using all 'mat' elements without masking anything.
+//' @details Brute force implementation now replaced by Urbach-Wilkinson algorithm.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix cpp_erode_old(const Rcpp::NumericMatrix mat,
                                   const Rcpp::NumericMatrix kernel,
                                   const uint8_t iter = 0,
                                   const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
-  return hpp_laplacian(mat, kernel, iter, msk_);
+  return hpp_erode_old(mat, kernel, iter, msk_);
 }
+
+
+//' @title Brute Force Image Dilatation
+//' @name cpp_dilate_old
+//' @description
+//' This function applies dilatation on image.
+//' @param mat, a NumericMatrix.
+//' @param kernel, a NumericMatrix.
+//' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
+//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' Default is R_NilValue, for using all 'mat' elements without masking anything.
+//' @details Brute force implementation now replaced by Urbach-Wilkinson algorithm.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix cpp_dilate_old(const Rcpp::NumericMatrix mat,
+                                   const Rcpp::NumericMatrix kernel,
+                                   const uint8_t iter = 0,
+                                   const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+  return hpp_dilate_old(mat, kernel, iter, msk_);
+}
+
+
 // END morphology
 
 // FROM geodesic

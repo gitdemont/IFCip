@@ -68,7 +68,7 @@ mask_identify1 <- function(img, threshold = 0.95, size = 5) {
   aa = cpp_fill(ctl, inner = TRUE, outer = TRUE)
 
   # erode and identify object(s)
-  bb = cpp_erode(aa, kernel = make_kernel(size = size, type = "box"), iter = 1)
+  bb = cpp_erode(cpp_erode(aa, kernel = make_kernel(size = size, type = "box")), kernel = make_kernel(size = size, type = "box"))
   ctl = cpp_ctl(bb)
   foo = cpp_fill(ctl, inner = TRUE, outer = TRUE)
   

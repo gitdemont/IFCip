@@ -69,6 +69,13 @@ Information Science and Engineering. 2001(17), Pages 713-727.
 Available at https://doi.org/10.6688/JISE.2001.17.5.1
 
 --------------------------------------------------------------------------------
+functions in uw.hpp are adapted from 'Efficient 2-D grayscale morphological
+transformations with arbitrary flat structuring elements' by E.R. Urbach,
+M.H.F. Wilkinson described in IEEE Transactions on Image Processing, 17(1)
+January 2008. Pages 1-8.
+Available at https://doi.org/10.1109/tip.2007.912582
+
+--------------------------------------------------------------------------------
 functions in geodesic.hpp are adapted from 'Morphological grayscale 
 reconstruction in image analysis: applications and efficient algorithms' by 
 L. Vincent described in IEEE Transactions on Image Processing, 2(2) April 1993.

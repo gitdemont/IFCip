@@ -522,13 +522,27 @@ NULL
 #' @keywords internal
 NULL
 
+#' @title Urbach-Wilkinson Algorithm for Image Erosion and Dilation
+#' @name cpp_uw
+#' @description
+#' This function applies erosion or dilatation on image.
+#' @param mat, a NumericMatrix.
+#' @param kernel, a NumericMatrix.
+#' @param erode, a bool. whether to do image erosion or dilatation. Default is true to perform erosion.
+#' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
+#' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
 #' @title Image Erosion
 #' @name cpp_erode
 #' @description
 #' This function applies erosion on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param iter, an uint8_t, number of time erode should be iterated. Default is 0.
+#' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
+#' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -539,7 +553,8 @@ NULL
 #' This function applies dilatation on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
+#' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
+#' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -550,7 +565,6 @@ NULL
 #' This function applies opening on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -561,7 +575,6 @@ NULL
 #' This function applies closing on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -572,7 +585,6 @@ NULL
 #' This function applies morphological gradient on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -583,7 +595,6 @@ NULL
 #' This function applies white top hat on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -594,7 +605,6 @@ NULL
 #' This function applies black top hat on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -605,7 +615,6 @@ NULL
 #' This function applies self complementary on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -616,7 +625,6 @@ NULL
 #' This function applies contrast enhancement on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -627,7 +635,34 @@ NULL
 #' This function applies Laplacian morphology on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param iter, an uint8_t, number of time dilate/erode should be iterated. Default is 0.
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
+#' @title Brute Force Image Erosion
+#' @name cpp_erosion_old
+#' @description
+#' This function applies dilatation on image.
+#' @param mat, a NumericMatrix.
+#' @param kernel, a NumericMatrix.
+#' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
+#' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+#' Default is R_NilValue, for using all 'mat' elements without masking anything.
+#' @details Brute force implementation now replaced by Urbach-Wilkinson algorithm.
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
+#' @title Brute Force Image Dilatation
+#' @name cpp_dilate_old
+#' @description
+#' This function applies dilatation on image.
+#' @param mat, a NumericMatrix.
+#' @param kernel, a NumericMatrix.
+#' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
+#' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+#' Default is R_NilValue, for using all 'mat' elements without masking anything.
+#' @details Brute force implementation now replaced by Urbach-Wilkinson algorithm.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -1184,44 +1219,52 @@ cpp_correlate2d <- function(mat, kernel) {
     .Call(`_IFCip_cpp_correlate2d`, mat, kernel)
 }
 
-cpp_erode <- function(mat, kernel, iter = 0L, msk_ = NULL) {
-    .Call(`_IFCip_cpp_erode`, mat, kernel, iter, msk_)
+cpp_erode <- function(mat, kernel) {
+    .Call(`_IFCip_cpp_erode`, mat, kernel)
 }
 
-cpp_dilate <- function(mat, kernel, iter = 0L, msk_ = NULL) {
-    .Call(`_IFCip_cpp_dilate`, mat, kernel, iter, msk_)
+cpp_dilate <- function(mat, kernel) {
+    .Call(`_IFCip_cpp_dilate`, mat, kernel)
 }
 
-cpp_opening <- function(mat, kernel, iter = 0L, msk_ = NULL) {
-    .Call(`_IFCip_cpp_opening`, mat, kernel, iter, msk_)
+cpp_opening <- function(mat, kernel) {
+    .Call(`_IFCip_cpp_opening`, mat, kernel)
 }
 
-cpp_closing <- function(mat, kernel, iter = 0L, msk_ = NULL) {
-    .Call(`_IFCip_cpp_closing`, mat, kernel, iter, msk_)
+cpp_closing <- function(mat, kernel) {
+    .Call(`_IFCip_cpp_closing`, mat, kernel)
 }
 
-cpp_gradient <- function(mat, kernel, iter = 0L, msk_ = NULL) {
-    .Call(`_IFCip_cpp_gradient`, mat, kernel, iter, msk_)
+cpp_gradient <- function(mat, kernel) {
+    .Call(`_IFCip_cpp_gradient`, mat, kernel)
 }
 
-cpp_tophat_white <- function(mat, kernel, iter = 0L, msk_ = NULL) {
-    .Call(`_IFCip_cpp_tophat_white`, mat, kernel, iter, msk_)
+cpp_tophat_white <- function(mat, kernel) {
+    .Call(`_IFCip_cpp_tophat_white`, mat, kernel)
 }
 
-cpp_tophat_black <- function(mat, kernel, iter = 0L, msk_ = NULL) {
-    .Call(`_IFCip_cpp_tophat_black`, mat, kernel, iter, msk_)
+cpp_tophat_black <- function(mat, kernel) {
+    .Call(`_IFCip_cpp_tophat_black`, mat, kernel)
 }
 
-cpp_tophat_self <- function(mat, kernel, iter = 0L, msk_ = NULL) {
-    .Call(`_IFCip_cpp_tophat_self`, mat, kernel, iter, msk_)
+cpp_tophat_self <- function(mat, kernel) {
+    .Call(`_IFCip_cpp_tophat_self`, mat, kernel)
 }
 
-cpp_cont <- function(mat, kernel, iter = 0L, msk_ = NULL) {
-    .Call(`_IFCip_cpp_cont`, mat, kernel, iter, msk_)
+cpp_cont <- function(mat, kernel) {
+    .Call(`_IFCip_cpp_cont`, mat, kernel)
 }
 
-cpp_laplacian <- function(mat, kernel, iter = 0L, msk_ = NULL) {
-    .Call(`_IFCip_cpp_laplacian`, mat, kernel, iter, msk_)
+cpp_laplacian <- function(mat, kernel) {
+    .Call(`_IFCip_cpp_laplacian`, mat, kernel)
+}
+
+cpp_erode_old <- function(mat, kernel, iter = 0L, msk_ = NULL) {
+    .Call(`_IFCip_cpp_erode_old`, mat, kernel, iter, msk_)
+}
+
+cpp_dilate_old <- function(mat, kernel, iter = 0L, msk_ = NULL) {
+    .Call(`_IFCip_cpp_dilate_old`, mat, kernel, iter, msk_)
 }
 
 cpp_HMIN <- function(img, h = 0.0, img_min = 0.0, img_max = 1.0, kernel = NULL) {

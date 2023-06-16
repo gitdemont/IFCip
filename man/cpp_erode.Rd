@@ -7,13 +7,15 @@
 \item{mat, }{a NumericMatrix.}
 
 \item{kernel, }{a NumericMatrix.}
-
-\item{iter, }{an uint8_t, number of time erode should be iterated. Default is 0.}
 }
 \value{
 a NumericMatrix.
 }
 \description{
 This function applies erosion on image.
+}
+\details{
+see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
+IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
 }
 \keyword{internal}
