@@ -465,6 +465,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_uw
+Rcpp::NumericVector cpp_uw(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel, const bool erode);
+RcppExport SEXP _IFCip_cpp_uw(SEXP matSEXP, SEXP kernelSEXP, SEXP erodeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const bool >::type erode(erodeSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_uw(mat, kernel, erode));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_erode
 Rcpp::NumericMatrix cpp_erode(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel);
 RcppExport SEXP _IFCip_cpp_erode(SEXP matSEXP, SEXP kernelSEXP) {
@@ -965,6 +977,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_mid", (DL_FUNC) &_IFCip_cpp_mid, 2},
     {"_IFCip_cpp_convolve2d", (DL_FUNC) &_IFCip_cpp_convolve2d, 2},
     {"_IFCip_cpp_correlate2d", (DL_FUNC) &_IFCip_cpp_correlate2d, 2},
+    {"_IFCip_cpp_uw", (DL_FUNC) &_IFCip_cpp_uw, 3},
     {"_IFCip_cpp_erode", (DL_FUNC) &_IFCip_cpp_erode, 2},
     {"_IFCip_cpp_dilate", (DL_FUNC) &_IFCip_cpp_dilate, 2},
     {"_IFCip_cpp_opening", (DL_FUNC) &_IFCip_cpp_opening, 2},

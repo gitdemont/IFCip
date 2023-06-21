@@ -839,6 +839,8 @@ Rcpp::NumericMatrix cpp_correlate2d(const Rcpp::NumericMatrix mat,
 //' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
 //' @return a NumericMatrix.
 //' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector cpp_uw(const Rcpp::NumericMatrix mat,
                            const Rcpp::NumericMatrix kernel,
                            const bool erode = true) {
@@ -1004,10 +1006,10 @@ Rcpp::NumericMatrix cpp_laplacian(const Rcpp::NumericMatrix mat,
 //' @title Brute Force Image Erosion
 //' @name cpp_erosion_old
 //' @description
-//' This function applies dilatation on image.
+//' This function applies erosion on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
+//' @param iter, an uint8_t, number of time erosion should be iterated. Default is 0.
 //' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 //' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @details Brute force implementation now replaced by Urbach-Wilkinson algorithm.
@@ -1029,7 +1031,7 @@ Rcpp::NumericMatrix cpp_erode_old(const Rcpp::NumericMatrix mat,
 //' This function applies dilatation on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
+//' @param iter, an uint8_t, number of time dilatation should be iterated. Default is 0.
 //' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 //' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @details Brute force implementation now replaced by Urbach-Wilkinson algorithm.

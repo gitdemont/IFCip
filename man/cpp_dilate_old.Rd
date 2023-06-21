@@ -8,7 +8,7 @@
 
 \item{kernel, }{a NumericMatrix.}
 
-\item{iter, }{an uint8_t, number of time dilate should be iterated. Default is 0.}
+\item{iter, }{an uint8_t, number of time dilatation should be iterated. Default is 0.}
 
 \item{msk_, }{a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 Default is R_NilValue, for using all 'mat' elements without masking anything.}

@@ -2,8 +2,8 @@ Package: IFCip
 Encoding: UTF-8
 Type: Package
 Title: Imaging Flow Cytometry Image Processing Tools
-Version: 0.0.9
-Date: 2023-06-16
+Version: 0.0.9.101
+Date: 2023-06-21
 Maintainer: Yohann Demont <git.demont@gmail.com>
 Authors@R: c(person(given = 'Yohann', family = 'Demont', email = 'git.demont@gmail.com', role = c('aut', 'cre')), person(given = 'Jean-Pierre', family = 'Marolleau', role = 'ldr'), person(given = 'Loïc', family = 'Garçon', role = 'ldr'))
 BugReports: https://github.com/gitdemont/IFCip/issues

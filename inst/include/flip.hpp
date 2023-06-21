@@ -46,7 +46,7 @@ Rcpp::NumericMatrix hpp_hflip(const Rcpp::NumericMatrix mat) {
   // R_len_t img_r = mat.nrow();
   R_len_t img_c = mat.ncol();
   Rcpp::NumericMatrix out = Rcpp::no_init_matrix(mat.nrow(), img_c);
-  for(R_len_t i_col = img_c -1; i_col >= 0; i_col--) {
+  for(R_len_t i_col = img_c - 1; i_col >= 0; i_col--) {
     out(Rcpp::_, i_col) = mat(Rcpp::_, img_c - i_col - 1);
   }
   return out;

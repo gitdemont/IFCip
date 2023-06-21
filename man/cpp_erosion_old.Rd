@@ -8,7 +8,7 @@
 
 \item{kernel, }{a NumericMatrix.}
 
-\item{iter, }{an uint8_t, number of time dilate should be iterated. Default is 0.}
+\item{iter, }{an uint8_t, number of time erosion should be iterated. Default is 0.}
 
 \item{msk_, }{a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 Default is R_NilValue, for using all 'mat' elements without masking anything.}
@@ -17,7 +17,7 @@ Default is R_NilValue, for using all 'mat' elements without masking anything.}
 a NumericMatrix.
 }
 \description{
-This function applies dilatation on image.
+This function applies erosion on image.
 }
 \details{
 Brute force implementation now replaced by Urbach-Wilkinson algorithm.
