@@ -29,12 +29,47 @@
   
 #ifndef IFCIP_UW_HPP
 #define IFCIP_UW_HPP
-  
+
 #include <Rcpp.h>
-#include "kernel.hpp"
 using namespace Rcpp;
 
-//' @title Chorset Computation
+// [[Rcpp::export(rng = false)]]
+Rcpp::IntegerMatrix kernel_coords(const Rcpp::NumericMatrix kernel,
+                                  const bool erode = true) {
+  double kcx = (kernel.ncol() - 1) / 2;
+  double kcy = (kernel.nrow() - 1) / 2;
+  
+  R_len_t n = 0;
+  for(R_len_t j = 0; j < kernel.size(); j++) if(kernel[j]) n++;
+  Rcpp::IntegerMatrix out = Rcpp::no_init_matrix(2, n);
+  
+  if(erode) {
+    R_len_t kc_x = std::floor(kcx);
+    R_len_t kc_y = std::floor(kcy);
+    for(R_len_t c = 0, i = 0, j = 0; c < kernel.ncol(); c++) {
+      for(R_len_t r = 0; r < kernel.nrow(); r++) {
+        if(kernel[j++]) {
+          out[i++] = c - kc_x;
+          out[i++] = r - kc_y;
+        }
+      }
+    } 
+  } else {
+    R_len_t kc_x = std::ceil(kcx);
+    R_len_t kc_y = std::ceil(kcy);
+    for(R_len_t c = 0, i = 0, j = kernel.size() - 1; c < kernel.ncol(); c++) {
+      for(R_len_t r = 0; r < kernel.nrow(); r++) {
+        if(kernel[j--]) {
+          out[i++] = c - kc_x;
+          out[i++] = r - kc_y;
+        }
+      }
+    } 
+  }
+  return out;
+}
+
+//' @title Chordset Computation
 //' @name chordset
 //' @description
 //' Computes chordset from kernel.
@@ -48,9 +83,10 @@ using namespace Rcpp;
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::IntegerMatrix chordset(const Rcpp::NumericMatrix kernel) {
+Rcpp::IntegerMatrix chordset(const Rcpp::NumericMatrix kernel,
+                             const bool erode = true) {
   // compute coordinates of non zero pixels from kernel center
-  Rcpp::IntegerMatrix o = offset_kernel(kernel, true, true);
+  Rcpp::IntegerMatrix o = kernel_coords(kernel);
   if(o.ncol() == 0) { // no non zero pixel
     Rcpp::IntegerMatrix out = Rcpp::no_init_matrix(0, 4);
     return out;
@@ -70,8 +106,8 @@ Rcpp::IntegerMatrix chordset(const Rcpp::NumericMatrix kernel) {
       if(k >= o.ncol()) break;
     }
     if(count >= out.nrow()) Rcpp::stop("chordset: buff over while computing chordset");
-    out(count, 2) = o(1, k - 1); // last y
-    out(count, 3) = n;           // len
+    out(count, 2) = o(1, k - 1); // y stop
+    out(count, 3) = n;           // length
   }
   return out(Range(0, count - 1), Rcpp::_);
 }
@@ -141,7 +177,6 @@ void LUT(Rcpp::NumericVector T,
       }
     }
   }
-  
 }
 
 // [[Rcpp::export(rng = false)]]
@@ -191,7 +226,7 @@ void dilate_column(Rcpp::NumericMatrix out,
 Rcpp::NumericMatrix hpp_uw (const Rcpp::NumericMatrix mat,
                             const Rcpp::NumericMatrix kernel,
                             const bool erode = true) {
-  Rcpp::IntegerMatrix C = chordset(kernel);
+  Rcpp::IntegerMatrix C = chordset(kernel, erode);
   if(C.nrow() == 0) return mat;
   // compute R
   Rcpp::IntegerVector R = chordset_R(C);
@@ -222,7 +257,7 @@ Rcpp::NumericMatrix hpp_uw (const Rcpp::NumericMatrix mat,
   Rcpp::NumericMatrix out = Rcpp::clone(mat);
   
   // init LUT for column 0
-  for(R_len_t xoff = xmin; xoff <= xmax; xoff++) LUT(T, O, R, out, 0, xoff, xmin, ymax, ymin, erode);
+  for(R_len_t xoff = xmin; xoff <= xmax; xoff++) LUT(T, O, R, mat, 0, xoff, xmin, ymax, ymin, erode);
   // erode column 0
   if(erode) {
     erode_column(out, T, idx, 0, 0); 
@@ -234,7 +269,7 @@ Rcpp::NumericMatrix hpp_uw (const Rcpp::NumericMatrix mat,
     // rotate offsets so that T(;;r) = T(;;r-1) for [xmin - xmax[
     std::rotate(O.begin(), O.begin() + 1, O.end());
     // compute LUT for xmax
-    LUT(T, O, R, out, coln, xmax, xmin, ymax, ymin, erode);
+    LUT(T, O, R, mat, coln, xmax, xmin, ymax, ymin, erode);
     // erode column
     if(erode) {
       erode_column(out, T, idx, O[0], coln); 
@@ -242,7 +277,6 @@ Rcpp::NumericMatrix hpp_uw (const Rcpp::NumericMatrix mat,
       dilate_column(out, T, idx, O[0], coln);
     }
   }
-  
   return out;
 }
 
