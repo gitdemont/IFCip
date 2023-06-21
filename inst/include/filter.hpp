@@ -53,10 +53,11 @@ Rcpp::NumericMatrix hpp_sd(const Rcpp::NumericMatrix mat,
   R_len_t kr = kernel.nrow() % 2;
   R_len_t pad_c_1 = pad_c + kc;
   R_len_t pad_r_1 = pad_r + kr;
-  if(kr == kc) kr = kc = !kc;                                                    // APPLY OFFSET CORRECTION
-  kr = kc = 0;                                                                   // APPLY OFFSET CORRECTION
+  if(kr == kc) kr = kc = !kc;                                                    //APPLY OFFSET CORRECTION
+  if(kr) kr = !kr;                                                               //APPLY OFFSET CORRECTION
+  if(kc) kc = !kc;                                                               //APPLY OFFSET CORRECTION
   // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
-  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);// APPLY OFFSET CORRECTION
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);//APPLY OFFSET CORRECTION
   // create vector for storage of matrix value at kernel position
   Rcpp::NumericVector K(kernel.size(), NA_REAL);
   
@@ -64,8 +65,8 @@ Rcpp::NumericMatrix hpp_sd(const Rcpp::NumericMatrix mat,
   for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
     for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
       R_len_t i_ker = -1;
-      for(R_len_t f_col = i_col - pad_c; f_col < i_col + pad_c_1; f_col++) {
-        for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
+      for(R_len_t f_col = i_col + pad_c_1 - 1; f_col >= i_col - pad_c; f_col--) {
+        for(R_len_t f_row = i_row + pad_r_1 - 1; f_row >= i_row - pad_r; f_row--) {
           i_ker += 1;
           K[i_ker] = kernel[i_ker] ? foo(f_row, f_col) : NA_REAL;
         }
@@ -97,7 +98,8 @@ Rcpp::NumericMatrix hpp_mean(const Rcpp::NumericMatrix mat,
   R_len_t pad_c_1 = pad_c + kc;
   R_len_t pad_r_1 = pad_r + kr;
   if(kr == kc) kr = kc = !kc;                                                    //APPLY OFFSET CORRECTION
-  kr = kc = 0;                                                                   //APPLY OFFSET CORRECTION
+  if(kr) kr = !kr;                                                               //APPLY OFFSET CORRECTION
+  if(kc) kc = !kc;                                                               //APPLY OFFSET CORRECTION
   // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
   Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);//APPLY OFFSET CORRECTION
   // create vector for storage of matrix value at kernel position
@@ -107,8 +109,8 @@ Rcpp::NumericMatrix hpp_mean(const Rcpp::NumericMatrix mat,
   for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
     for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
       R_len_t i_ker = -1;
-      for(R_len_t f_col = i_col - pad_c; f_col < i_col + pad_c_1; f_col++) {
-        for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
+      for(R_len_t f_col = i_col + pad_c_1 - 1; f_col >= i_col - pad_c; f_col--) {
+        for(R_len_t f_row = i_row + pad_r_1 - 1; f_row >= i_row - pad_r; f_row--) {
           i_ker += 1;
           K[i_ker] = kernel[i_ker] ? foo(f_row, f_col) : NA_REAL;
         }
@@ -140,7 +142,8 @@ Rcpp::NumericMatrix hpp_median(const Rcpp::NumericMatrix mat,
   R_len_t pad_c_1 = pad_c + kc;
   R_len_t pad_r_1 = pad_r + kr;
   if(kr == kc) kr = kc = !kc;                                                    //APPLY OFFSET CORRECTION
-  kr = kc = 0;                                                                   //APPLY OFFSET CORRECTION
+  if(kr) kr = !kr;                                                               //APPLY OFFSET CORRECTION
+  if(kc) kc = !kc;                                                               //APPLY OFFSET CORRECTION
   // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
   Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);//APPLY OFFSET CORRECTION
   // create vector for storage of matrix value at kernel position
@@ -150,8 +153,8 @@ Rcpp::NumericMatrix hpp_median(const Rcpp::NumericMatrix mat,
   for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
     for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
       R_len_t i_ker = -1;
-      for(R_len_t f_col = i_col - pad_c; f_col < i_col + pad_c_1; f_col++) {
-        for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
+      for(R_len_t f_col = i_col + pad_c_1 - 1; f_col >= i_col - pad_c; f_col--) {
+        for(R_len_t f_row = i_row + pad_r_1 - 1; f_row >= i_row - pad_r; f_row--) {
           i_ker += 1;
           K[i_ker] = kernel[i_ker] ? foo(f_row, f_col) : NA_REAL;
         }
@@ -183,7 +186,8 @@ Rcpp::NumericMatrix hpp_mode(const Rcpp::NumericMatrix mat,
   R_len_t pad_c_1 = pad_c + kc;
   R_len_t pad_r_1 = pad_r + kr;
   if(kr == kc) kr = kc = !kc;                                                    //APPLY OFFSET CORRECTION
-  kr = kc = 0;                                                                   //APPLY OFFSET CORRECTION
+  if(kr) kr = !kr;                                                               //APPLY OFFSET CORRECTION
+  if(kc) kc = !kc;                                                               //APPLY OFFSET CORRECTION
   // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
   Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);//APPLY OFFSET CORRECTION
   // create vector for storage of matrix value at kernel position
@@ -193,8 +197,8 @@ Rcpp::NumericMatrix hpp_mode(const Rcpp::NumericMatrix mat,
   for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
     for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
       R_len_t i_ker = -1;
-      for(R_len_t f_col = i_col - pad_c; f_col < i_col + pad_c_1; f_col++) {
-        for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
+      for(R_len_t f_col = i_col + pad_c_1 - 1; f_col >= i_col - pad_c; f_col--) {
+        for(R_len_t f_row = i_row + pad_r_1 - 1; f_row >= i_row - pad_r; f_row--) {
           i_ker += 1;
           K[i_ker] = kernel[i_ker] ? foo(f_row, f_col) : NA_REAL;
         }
@@ -226,7 +230,8 @@ Rcpp::NumericMatrix hpp_mid(const Rcpp::NumericMatrix mat,
   R_len_t pad_c_1 = pad_c + kc;
   R_len_t pad_r_1 = pad_r + kr;
   if(kr == kc) kr = kc = !kc;                                                    //APPLY OFFSET CORRECTION
-  kr = kc = 0;                                                                   //APPLY OFFSET CORRECTION
+  if(kr) kr = !kr;                                                               //APPLY OFFSET CORRECTION
+  if(kc) kc = !kc;                                                               //APPLY OFFSET CORRECTION
   // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
   Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);//APPLY OFFSET CORRECTION
   // create vectors for storage of matrix value at kernel position
@@ -237,8 +242,8 @@ Rcpp::NumericMatrix hpp_mid(const Rcpp::NumericMatrix mat,
   for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
     for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
       R_len_t i_ker = -1;
-      for(R_len_t f_col = i_col - pad_c; f_col < i_col + pad_c_1; f_col++) {
-        for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
+      for(R_len_t f_col = i_col + pad_c_1 - 1; f_col >= i_col - pad_c; f_col--) {
+        for(R_len_t f_row = i_row + pad_r_1 - 1; f_row >= i_row - pad_r; f_row--) {
           i_ker += 1;
           if(kernel[i_ker]) {
             MAX[i_ker] = MIN[i_ker] = foo(f_row, f_col);
@@ -249,7 +254,7 @@ Rcpp::NumericMatrix hpp_mid(const Rcpp::NumericMatrix mat,
       }
       Rcpp::NumericVector KMAX = Rcpp::na_omit(MAX);
       Rcpp::NumericVector KMIN = Rcpp::na_omit(MIN);
-      out(i_row, i_col) = (KMAX.size() * KMIN.size()) == 0 ? NA_REAL : (Rcpp::max(KMAX) - Rcpp::min(KMAX))/2;
+      out(i_row, i_col) = (KMAX.size() * KMIN.size()) == 0 ? NA_REAL : (Rcpp::max(KMAX) - Rcpp::min(KMIN))/2;
     }
   }
   return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
@@ -315,13 +320,12 @@ Rcpp::NumericMatrix hpp_correlate2d(const Rcpp::NumericMatrix mat,
   R_len_t pad_c_1 = pad_c + kc;
   R_len_t pad_r_1 = pad_r + kr;
   if(kr == kc) kr = kc = !kc;                                                 //APPLY OFFSET CORRECTION
-  if(kr == 1 && kc == 1) kr = kc = 2;                                         //APPLY OFFSET CORRECTION
   // create out padded with 0.0, 0.0 is important to allow removal of extra values from final result (multiply by 0.0)
   Rcpp::NumericMatrix foo = hpp_padding(mat, pad_r + kc, pad_c + kr, 5,  0.0);//APPLY OFFSET CORRECTION
   
   Rcpp::NumericMatrix out(foo.nrow(), foo.ncol());
-  for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
-    for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
+  for(R_len_t i_col = out.ncol() - pad_c - 1; i_col >= pad_c; i_col--) {
+    for(R_len_t i_row = out.nrow() - pad_r - 1; i_row >= pad_r; i_row--) {
       R_len_t i_ker = kernel.size();
       for(R_len_t f_col = i_col + pad_c_1 - 1; f_col >= i_col - pad_c; f_col--) {
         for(R_len_t f_row = i_row + pad_r_1 - 1; f_row >= i_row - pad_r; f_row--) {
