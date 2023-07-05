@@ -11,7 +11,7 @@ Adaptation from \url{https://escholarship.mcgill.ca/concern/theses/fx719p46g} in
 It has to be an object of class `IFCip_convexhull`}
 }
 \value{
-an IntegerVector of antipodal pairs of the convex input polygon. Note that this vector of indices is in C sort 1st start at 0; add 1 to use it in R.
+an IntegerVector of antipodal pairs of the convex input polygon. Note that this vector of indices is in C so 1st start at 0; add 1 to use it in R.
 }
 \description{
 Computes antipodal pairs of a convex polygon

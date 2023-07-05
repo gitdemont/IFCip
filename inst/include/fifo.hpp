@@ -6,7 +6,7 @@
   -IFCip: An R Package for Imaging Flow Cytometry Image Processing              
   -YEAR: 2021                                                                   
   -COPYRIGHT HOLDERS: Yohann Demont, Jean-Pierre Marolleau, Loïc Garçon,        
-  CHU Amiens                                                
+                      CHU Amiens                                                
 
 
   DISCLAIMER:                                                                   
@@ -40,6 +40,7 @@ using namespace Rcpp;
 //' @param Q, an IntegerVector; the fifo queue.
 //' @details Q[0] will be set to 0 and Q[Q.size() - 1] to 1.
 //' @return it returns nothing but Q will be modified in-place.
+// [[Rcpp::export(rng = false)]]
 void fifo_clear (Rcpp::IntegerVector Q) {
   Q[0] = 0;
   Q[Q.size() - 1] = 1;
@@ -53,9 +54,10 @@ void fifo_clear (Rcpp::IntegerVector Q) {
 //' @param value, an int; the value used to fill the queue. Default is NA_INTEGER.
 //' @details Q[0] will be set to 0 and Q[Q.size() - 1] to 1.
 //' @return an IntegerVector.
+// [[Rcpp::export(rng = false)]]
 Rcpp::IntegerVector fifo_create (const R_len_t size = 1,
                                  const int value = NA_INTEGER) {
-  if(size < 1) Rcpp::stop("fifo queue: size should be at least 1, queue can't be created");
+  if(size < 1) Rcpp::stop("fifo_create: size should be at least 1, fifo queue can't be created");
   Rcpp::IntegerVector out(size + 2, value);
   fifo_clear(out);
   return out;
@@ -72,12 +74,13 @@ Rcpp::IntegerVector fifo_create (const R_len_t size = 1,
 //' Q[Q.size() - 1]  is current starting position.
 //' Q[0] will be decreased by 1 and Q[Q.size() - 1] will be shift by -1
 //' @return an int, the 1st element of the queue.
+// [[Rcpp::export(rng = false)]]
 int fifo_pop (Rcpp::IntegerVector Q) {
   R_len_t xx = Q.size() - 1;
   R_len_t n = Q[0];            // count
   R_len_t s = Q[xx];           // start index
   int out = Q[s];
-  Q[s] = NA_INTEGER;       // should we do it ?
+  Q[s] = NA_INTEGER; // should we do it ?
   if(n > 0) {
     Q[0]--;
     Q[xx] = (s < (xx - 1)) ? (s + 1) : 1;
@@ -92,23 +95,79 @@ int fifo_pop (Rcpp::IntegerVector Q) {
 //' @description
 //' This function push value to a fifo queue.
 //' @param Q, an IntegerVector; the fifo queue.
-//' @param value, an int; the value used to fill the queue. Default is NA_INTEGER. 
+//' @param value, an int; the value used to fill the queue. 
 //' @details not a real pop since pop/push are quite slow but rather a pre-allocated vector
 //' used circularly where:
 //' Q[0]             is current element(s) count,
 //' Q[Q.size() - 1]  is current starting position.
 //' Q[0] will be increased by 1 and Q[Q.size() - 1] will be shift by +1
 //' @return it returns nothing but Q will be modified in-place.
+// [[Rcpp::export(rng = false)]]
 void fifo_add (Rcpp::IntegerVector Q,
                const int value) {
   R_len_t xx = Q.size() - 1;
   R_len_t n = Q[0];            // count
   R_len_t s = Q[xx];           // start index
-  if(n < (xx - 1)) {
+  if((n < (xx - 1)) && (n >= 0)) {
     Q[0]++;
     Q[((s + n) < xx) ? (s + n) : (s + n - xx + 1)] = value;
-  } else {  // should never happen
+  } else { // should never happen
     Rcpp::stop("fifo_add: can't add value");
+  }
+}
+
+//' @title Create Queue
+//' @name queue_create
+//' @description
+//' This function creates a vector queue.
+//' @param size, a R_len_t; the desired size. Default is 1. Should be at least 1.
+//' @details Q[0] will be set to 0.
+//' @return an IntegerVector.
+// [[Rcpp::export(rng = false)]]
+Rcpp::IntegerVector queue_create (const R_len_t size = 1) {
+  if(size < 1) Rcpp::stop("queue_create: size should be at least 1, vector queue can't be created");
+  Rcpp::IntegerVector out = Rcpp::no_init_vector(size + 1);
+  out[0] = 0;
+  return out;
+}
+
+//' @title Pop Queue
+//' @name queue_pop
+//' @description
+//' This function pops a vector queue.
+//' @param Q, an IntegerVector; the vector queue.
+//' @details not a real pop since pop/push are quite slow but rather a pre-allocated vector where:\cr
+//' Q[0] is used to store current element(s) count.\cr
+//' On pop, Q[0] will be decreased by 1 while last entered element will be returned.
+//' @return an int, the most recently pushed element of the vector queue.
+// [[Rcpp::export(rng = false)]]
+int queue_pop (Rcpp::IntegerVector Q) {
+  R_len_t n = Q[0];
+  if(n > 0) {
+    Q[0]--;
+  } else { // should never happen
+    Rcpp::stop("queue_pop: can't pop vector");
+  }
+  return Q[n];
+}
+
+//' @title Push to Queue
+//' @name queue_push
+//' @description
+//' This function pushes a value to a vector queue.
+//' @param Q, an IntegerVector; the vector queue.
+//' @param value, an int; the value used to fill the queue.
+//' @details not a real pop since pop/push are quite slow but rather a pre-allocated vector where:\cr
+//' Q[0] is used to store current element(s) count.\cr
+//' On push, Q[0] will be increased by 1 while value will be positioned in Q at new Q[0].
+//' @return it returns nothing but Q will be modified in-place.
+// [[Rcpp::export(rng = false)]]
+void queue_push (Rcpp::IntegerVector Q, const int value) {
+  if((Q[0] < (Q.size() - 1)) && (Q[0] >= 0)) {
+    Q[0]++;
+    Q[Q[0]] = value;
+  } else { // should never happen
+    Rcpp::stop("queue_push: can't push value");
   }
 }
 

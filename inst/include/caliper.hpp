@@ -31,22 +31,23 @@
 #define IFCIP_CALIPER_HPP
 
 #include <Rcpp.h>
+#include "fifo.hpp"
 #include "geometry.hpp"
 using namespace Rcpp;
 
 // helper
-R_len_t get_next(R_len_t idx,
-             const Rcpp::NumericMatrix pts) {
+R_len_t get_next (R_len_t idx,
+                  const Rcpp::NumericMatrix pts) {
   idx++;
   if(idx >= pts.nrow()) idx = 0;
   return idx;
 }
 
 // helper
-double get_area(const R_len_t idx1,
-                const R_len_t idx2,
-                const R_len_t idx3,
-                const Rcpp::NumericMatrix pts) {
+double get_area (const R_len_t idx1,
+                 const R_len_t idx2,
+                 const R_len_t idx3,
+                 const Rcpp::NumericMatrix pts) {
   return area(pts(idx1, Rcpp::_), pts(idx2, Rcpp::_), pts(idx3, Rcpp::_));
 }
 
@@ -57,11 +58,11 @@ double get_area(const R_len_t idx1,
 //' @param pts a 2-column matrix defining the locations (x and y coordinates, respectively) of points.
 //' It has to be an object of class `IFCip_convexhull`
 //' @source Adaptation from \url{https://escholarship.mcgill.ca/concern/theses/fx719p46g} in Computational geometry with the rotating calipers authored by Pirzadeh, Hormoz under supervision of Toussaint, Godfried T. at McGill University.
-//' @return an IntegerVector of antipodal pairs of the convex input polygon. Note that this vector of indices is in C sort 1st start at 0; add 1 to use it in R.
+//' @return an IntegerVector of antipodal pairs of the convex input polygon. Note that this vector of indices is in C so 1st start at 0; add 1 to use it in R.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::IntegerMatrix hpp_antipodalpairs(const Rcpp::NumericMatrix pts) {
+Rcpp::IntegerMatrix hpp_antipodalpairs (const Rcpp::NumericMatrix pts) {
   if(!Rf_inherits(pts, "IFCip_convexhull")) {
     Rcpp::stop("hpp_antipodalpairs: 'pts' should be of class `IFCip_convexhull`");
   }
@@ -69,26 +70,23 @@ Rcpp::IntegerMatrix hpp_antipodalpairs(const Rcpp::NumericMatrix pts) {
     Rcpp::stop("hpp_antipodalpairs: 'pts' should have at least 3 rows");
   }
   R_len_t q = 0, p0 = 0, p = pts.nrow() - 1;
-  Rcpp::IntegerVector out_p, out_q;
-  while(get_area(p, get_next(p, pts), get_next(q, pts), pts) > get_area(p, get_next(p, pts), q, pts)) {
-    // Rcpp::checkUserInterrupt();
-    // Rcout << q << std::endl;
-    q = get_next(q, pts);
-  }
+  Rcpp::IntegerVector out_p = Rcpp::no_init_vector(2 * pts.nrow() + 1);
+  Rcpp::IntegerVector out_q = Rcpp::no_init_vector(2 * pts.nrow() + 1);
+  out_p[0] = 0;
+  out_q[0] = 0;
+  
+  while(get_area(p, get_next(p, pts), get_next(q, pts), pts) > get_area(p, get_next(p, pts), q, pts)) q = get_next(q, pts);
   R_len_t q0 = q;
   
   while (q != p0) {
-    // Rcpp::checkUserInterrupt();
-    // Rcout << q << std::endl;
     p = get_next(p, pts);
-    out_p.push_back(p);
-    out_q.push_back(q);
+    queue_push(out_p, p);
+    queue_push(out_q, q);;
     while(get_area(p, get_next(p, pts), get_next(q, pts), pts) > get_area(p, get_next(p, pts), q, pts)) {
-      // Rcpp::checkUserInterrupt();
       q = get_next(q, pts);
       if((p != q0) || (q != p0)) {
-        out_p.push_back(p);
-        out_q.push_back(q);
+        queue_push(out_p, p);;
+        queue_push(out_q, q);;
       } else {
         break;
       }
@@ -96,29 +94,29 @@ Rcpp::IntegerMatrix hpp_antipodalpairs(const Rcpp::NumericMatrix pts) {
     // parallel case
     if(get_area(p, get_next(p, pts), get_next(q, pts), pts) == get_area(p, get_next(p, pts), q, pts)) {
       if((p != q0) || (q != (pts.nrow() - 1))) {
-        out_p.push_back(p);
-        out_q.push_back(get_next(q, pts));
+        queue_push(out_p, p);;
+        queue_push(out_q, get_next(q, pts));
       } else {
-        out_p.push_back(get_next(p, pts));
-        out_q.push_back(q);
+        queue_push(out_p, get_next(p, pts));
+        queue_push(out_q, q);;
         break;
       }
     }
   }
   
-  Rcpp::IntegerMatrix out(out_p.size(), 2);
-  for(R_len_t i = 0; i < out_p.size(); i++) {
-    out(i, 0) = out_p[i];
-    out(i, 1) = out_q[i];
+  Rcpp::IntegerMatrix out(out_p[0], 2);
+  for(R_len_t i = 0; i < out_p[0]; i++) {
+    out(i, 0) = out_p[i + 1];
+    out(i, 1) = out_q[i + 1];
   }
   out.attr("class") = "IFCip_antipodal";
   return out;
 }
 
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_antipodalpairs_width(const Rcpp::IntegerMatrix pairs,
-                                             const Rcpp::NumericMatrix pts,
-                                             const double scale = 1.0) {
+Rcpp::NumericMatrix hpp_antipodalpairs_width (const Rcpp::IntegerMatrix pairs,
+                                              const Rcpp::NumericMatrix pts,
+                                              const double scale = 1.0) {
   if(!Rf_inherits(pts, "IFCip_convexhull")) {
     Rcpp::stop("hpp_antipodalpairs: 'pts' should be of class `IFCip_convexhull`");
   }
@@ -127,25 +125,26 @@ Rcpp::NumericMatrix hpp_antipodalpairs_width(const Rcpp::IntegerMatrix pairs,
   }
   Rcpp::NumericMatrix out(pts.nrow(), 4);
   for(R_len_t vertex = 0; vertex < pts.nrow(); vertex++) {
-    Rcpp::IntegerVector V1;
+    Rcpp::IntegerVector V1 = Rcpp::no_init_vector(2 * pairs.nrow() + 1);
+    V1[0] = 0;
     for(R_len_t anti = 0; anti < pairs.nrow(); anti++) {
-      if(pairs(anti, 0) == vertex) V1.push_back(pairs(anti, 1));
-      if(pairs(anti, 1) == vertex) V1.push_back(pairs(anti, 0));
+      if(pairs(anti, 0) == vertex) queue_push(V1, pairs(anti, 1));
+      if(pairs(anti, 1) == vertex) queue_push(V1, pairs(anti, 0));
     }
-    if(V1.size() < 2) {
+    if(V1[0] < 2) {
       out(vertex, 0) = vertex;
-      out(vertex, 1) = V1[0];
+      out(vertex, 1) = V1[1];
       out(vertex, 2) = NA_REAL;
       out(vertex, 3) = R_PosInf;
     } else {
-      Rcpp::NumericVector V2(V1.size() - 1);
+      Rcpp::NumericVector V2(V1[0] - 1);
       for(R_len_t i = 0; i < V2.size(); i++) {
-        V2[i] = pt_shortest(pts(vertex, Rcpp::_), pts(V1[i], Rcpp::_), pts(V1[i+1], Rcpp::_), scale);
+        V2[i] = pt_shortest(pts(vertex, Rcpp::_), pts(V1[i + 1], Rcpp::_), pts(V1[i + 2], Rcpp::_), scale);
       }
       R_len_t m = which_min(V2);
       out(vertex, 0) = vertex;
-      out(vertex, 1) = V1[m];
-      out(vertex, 2) = V1[m+1];
+      out(vertex, 1) = V1[m + 1];
+      out(vertex, 2) = V1[m + 2];
       out(vertex, 3) = V2[m];
     }
   }
@@ -154,9 +153,9 @@ Rcpp::NumericMatrix hpp_antipodalpairs_width(const Rcpp::IntegerMatrix pairs,
 }
 
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericVector hpp_antipodalpairs_feat(const Rcpp::IntegerMatrix pairs,
-                                            const Rcpp::NumericMatrix pts,
-                                            const double scale = 1.0) {
+Rcpp::NumericVector hpp_antipodalpairs_feat (const Rcpp::IntegerMatrix pairs,
+                                             const Rcpp::NumericMatrix pts,
+                                             const double scale = 1.0) {
   if(!Rf_inherits(pts, "IFCip_convexhull")) {
     Rcpp::stop("hpp_antipodalpairs: 'pts' should be of class `IFCip_convexhull`");
   }
@@ -176,12 +175,6 @@ Rcpp::NumericVector hpp_antipodalpairs_feat(const Rcpp::IntegerMatrix pairs,
   
   out[4] /= pts.nrow();
   out[5] /= pts.nrow();
-  
-  // Rcpp::NumericVector out(pts.nrow());
-  // for(R_len_t vertex = 0; vertex < pts.nrow(); vertex++) {
-  //   out[vertex] = pt_distance_accu(pts(vertex, Rcpp::_), cen, scale);
-  // }
-  // return out;
   
   Rcpp::NumericVector dis(pairs.nrow());
   for(R_len_t anti = 0; anti < pairs.nrow(); anti++) {
@@ -207,8 +200,8 @@ Rcpp::NumericVector hpp_antipodalpairs_feat(const Rcpp::IntegerMatrix pairs,
 //' @return a NumericVector of features from convex hull.
 //' @keywords internal
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericVector hpp_bbox(const Rcpp::NumericMatrix pts,
-                             const double scale = 1.0) {
+Rcpp::NumericVector hpp_bbox (const Rcpp::NumericMatrix pts,
+                              const double scale = 1.0) {
   return hpp_antipodalpairs_feat(hpp_antipodalpairs(pts), pts, scale);
 }
 

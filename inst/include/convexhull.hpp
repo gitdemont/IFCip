@@ -31,12 +31,13 @@
 #define IFCIP_CONVEX_HPP
 
 #include <Rcpp.h>
+#include "fifo.hpp"
 using namespace Rcpp;
 
 // helper to sort one vector against 2 others
-Rcpp::IntegerVector sort_1vs2(const Rcpp::IntegerVector V,
-                              const Rcpp::NumericVector vec1,
-                              const Rcpp::NumericVector vec2) {
+Rcpp::IntegerVector sort_1vs2 (const Rcpp::IntegerVector V,
+                               const Rcpp::NumericVector vec1,
+                               const Rcpp::NumericVector vec2) {
   Rcpp::IntegerVector idx = seq_along(V) - 1;
   std::sort(idx.begin(), idx.end(), [&](int i, int j){
     if ( vec1[i] == vec1[j] ) {
@@ -49,8 +50,8 @@ Rcpp::IntegerVector sort_1vs2(const Rcpp::IntegerVector V,
 
 // helper to compute cross product. it returns false if 3 points make a counter clockwise turn
 bool cross (const Rcpp::NumericVector pt1, 
-                   const Rcpp::NumericVector pt2, 
-                   const Rcpp::NumericVector pt3) {
+            const Rcpp::NumericVector pt2, 
+            const Rcpp::NumericVector pt3) {
   return ((pt2[0] - pt1[0]) * (pt3[1] - pt1[1]) <= (pt2[1] - pt1[1]) * (pt3[0] - pt1[0]));
 }
 
@@ -68,46 +69,45 @@ bool cross (const Rcpp::NumericVector pt1,
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_convexhull(const Rcpp::NumericMatrix pts) {
+Rcpp::NumericMatrix hpp_convexhull (const Rcpp::NumericMatrix pts) {
   Rcpp::NumericVector x = pts(Rcpp::_, 0);
   Rcpp::NumericVector y = pts(Rcpp::_, 1);
   Rcpp::IntegerVector idx = Rcpp::seq(0, pts.nrow() - 1);
   Rcpp::IntegerVector oo =  sort_1vs2(idx, x, y);
   
   // reorder input according to sorted x-y
-  Rcpp::NumericMatrix M(pts.nrow(), pts.ncol());
+  Rcpp::NumericMatrix M = Rcpp::no_init_matrix(pts.nrow(), pts.ncol());
   for(R_len_t i = 0; i < M.nrow(); i++) {
     M(i, Rcpp::_) = pts(oo[i], Rcpp::_);
   }
   
   // compute convex hull upper and lower
-  Rcpp::IntegerVector L, U;
+  Rcpp::IntegerVector L = Rcpp::no_init_vector(pts.nrow() + 1);
+  Rcpp::IntegerVector U = Rcpp::no_init_vector(pts.nrow() + 1);
+  L[0] = 0;
+  U[0] = 0;
   for(R_len_t i = 0; i < M.nrow(); i++) {
-    while(L.size() >= 2 && cross(M(L[L.size() - 2], Rcpp::_), M(L[L.size()- 1], Rcpp::_), M(i, Rcpp::_))) {
-      L.erase(L.size() - 1);
-    }
-    L.push_back(i);
+    while((L[0] >= 2) && cross(M(L[L[0] - 1], Rcpp::_), M(L[L[0]], Rcpp::_), M(i, Rcpp::_))) queue_pop(L);
+    queue_push(L,i);
   }
   for(R_len_t i = M.nrow() - 1; i >= 0; i--) {
-    while(U.size() >= 2 && cross(M(U[U.size() - 2], Rcpp::_), M(U[U.size() - 1], Rcpp::_), M(i, Rcpp::_))) {
-      U.erase(U.size() - 1);
-    }
-    U.push_back(i);
+    while((U[0] >= 2) && cross(M(U[U[0] - 1], Rcpp::_), M(U[U[0]], Rcpp::_), M(i, Rcpp::_))) queue_pop(U);
+    queue_push(U,i);
   }
   
   // return result
-  Rcpp::IntegerVector ret = Rcpp::no_init_vector(L.size() + U.size() - 2);
+  Rcpp::IntegerVector ret = Rcpp::no_init_vector(L[0] + U[0] - 2);
   Rcpp::NumericMatrix out = Rcpp::no_init_matrix(ret.size(), 2);
   R_len_t i = 0;
-  for(; i < L.size() - 1; i++) {
-    ret[i] = oo[L[i]] + 1;
-    out(i, 0) = x[oo[L[i]]];
-    out(i, 1) = y[oo[L[i]]];
+  for(; i < L[0] - 1; i++) {
+    ret[i]    = oo[L[i + 1]] + 1;
+    out(i, 0) = x[oo[L[i + 1]]];
+    out(i, 1) = y[oo[L[i + 1]]];
   }
-  for(R_len_t j = 0; j <  U.size() - 1; j++) {
-    ret[i + j] = oo[U[j]] + 1;
-    out(i + j, 0) = x[oo[U[j]]];
-    out(i + j, 1) = y[oo[U[j]]];
+  for(R_len_t j = 0; j < U[0] - 1; j++) {
+    ret[i + j] = oo[U[j + 1]] + 1;
+    out(i + j, 0) = x[oo[U[j + 1]]];
+    out(i + j, 1) = y[oo[U[j + 1]]];
   }
   colnames(out) = CharacterVector::create("x", "y");
   out.attr("subset") = ret;
