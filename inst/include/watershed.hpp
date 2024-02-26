@@ -45,7 +45,7 @@ using namespace Rcpp;
 //' @param draw_lines, a bool; whether to draw watershed lines or not. Default is true.
 //' @param invert, a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
 //' When 'mat' is the result of the distance transformation of an image, peaks (highest values) represent largest distances from background.
-//' Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.
+//' Thus, they are the ones to be filled first; this can be done with 'invert' set to true.
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
@@ -62,7 +62,7 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
                                       const bool draw_lines = true,
                                       const bool invert = false,
                                       const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
-                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+                                      const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue) {
   R_len_t mat_r = mat.nrow();
   R_len_t mat_c = mat.ncol();
   R_len_t MAX_SIZ = mat_r * mat_c;
@@ -73,7 +73,8 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
   
   // create scaled image
   Rcpp::NumericMatrix img = Rcpp::clone(mat);
-  hpp_scale(img, msk_, -invert, n_lev, invert);
+  int hop = -1;
+  hpp_scale(img, msk_, hop, n_lev, invert, true);
   Rcpp::IntegerMatrix sca = as<Rcpp::IntegerMatrix>(img);
   
   // idx for sorting
@@ -95,33 +96,17 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
   unsigned short count = 1;
   
   bool flag = true;
-  int h, hop, k_start = 0, k = 0, k_stop = mat.size();
-  if(invert) {
-    h = MAX_LEV - 1;
-    hop = -1;
-    std::sort(idx.begin(), idx.end(), [&](int i, int j){return sca[i] > sca[j];});
-  } else {
-    h = 2 - MAX_LEV;
-    hop = 1;
-    std::sort(idx.begin(), idx.end(), [&](int i, int j){return sca[i] < sca[j];});
-  }
+  int h, k_start = 0, k = 0, k_stop = mat.size();
+  h = MAX_LEV - 1;
+  std::sort(idx.begin(), idx.end(), [&](int i, int j){return sca[i] > sca[j];});
   // start flooding
   while(h != 0) {
     h += hop;
     k_stop = mat.size();
-    if(invert) {
-      for(k = k_start; k < k_stop; k++) {
-        if(sca[idx[k]] < h) {
-          k_stop = k;
-          break;
-        }
-      }
-    } else {
-      for(k = k_start; k < k_stop; k++) {
-        if(sca[idx[k]] >= h) {
-          k_stop = k;
-          break;
-        }
+    for(k = k_start; k < k_stop; k++) {
+      if(sca[idx[k]] < h) {
+        k_stop = k;
+        break;
       }
     }
     for(k = k_start; k < k_stop; k++) {
@@ -230,7 +215,7 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 //' @param draw_lines, a bool; whether to draw watershed lines or not. Default is true.
 //' @param invert, a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
 //' When 'mat' is the result of the distance transformation of an image, peaks (highest values) represent largest distances from background.
-//' Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.
+//' Thus, they are the ones to be filled first; this can be done with 'invert' set to true.
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
@@ -248,7 +233,7 @@ Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
                                       const bool draw_lines = true,
                                       const bool invert = false,
                                       const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
-                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+                                      const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue) {
   R_len_t mat_r = mat.nrow();
   R_len_t mat_c = mat.ncol();
   R_len_t MAX_SIZ = mat_r * mat_c;
@@ -260,7 +245,8 @@ Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
   
   // create scaled image
   Rcpp::NumericMatrix img = Rcpp::clone(mat);
-  hpp_scale(img, msk_, -invert, n_lev, invert);
+  int hop = -1;
+  hpp_scale(img, msk_, hop, n_lev, invert, true);
   Rcpp::IntegerMatrix sca = as<Rcpp::IntegerMatrix>(img);
   
   // idx for sorting
@@ -282,33 +268,18 @@ Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
   Rcpp::IntegerVector Q = fifo_create(MAX_SIZ + 3, NA_INTEGER);// hierarchical priority queue
   unsigned short count = 1;
   
-  int h, hop, k_start = 0, k = 0, k_stop = mat.size();
-  if(invert) {
-    h = MAX_LEV - 1;
-    hop = -1;
-    std::sort(idx.begin(), idx.end(), [&](int i, int j){return sca[i] > sca[j];});
-  } else {
-    h = 2 - MAX_LEV;
-    hop = 1;
-    std::sort(idx.begin(), idx.end(), [&](int i, int j){return sca[i] < sca[j];});
-  }
+  int h, k_start = 0, k = 0, k_stop = mat.size();
+  h = MAX_LEV - 1;
+  std::sort(idx.begin(), idx.end(), [&](int i, int j){return sca[i] > sca[j];});
+  
   // start flooding
   while(h != 0) {
     h += hop;
     k_stop = mat.size();
-    if(invert) {
-      for(k = k_start; k < k_stop; k++) {
-        if(sca[idx[k]] < h) {
-          k_stop = k;
-          break;
-        }
-      }
-    } else {
-      for(k = k_start; k < k_stop; k++) {
-        if(sca[idx[k]] >= h) {
-          k_stop = k;
-          break;
-        }
+    for(k = k_start; k < k_stop; k++) {
+      if(sca[idx[k]] < h) {
+        k_stop = k;
+        break;
       }
     }
     for(k = k_start; k < k_stop; k++) {

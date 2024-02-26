@@ -31,6 +31,7 @@
 #define IFCIP_UTILS_HPP
 
 #include <Rcpp.h>
+#include <utils.hpp>
 using namespace Rcpp;
 
 // retrieve mask matrix or set new one filled with true

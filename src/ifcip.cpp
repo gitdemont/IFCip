@@ -51,6 +51,7 @@
 #include "../inst/include/kernel.hpp"
 #include "../inst/include/convexhull.hpp"
 #include "../inst/include/caliper.hpp"
+#include "../inst/include/scale.hpp"
 using namespace Rcpp;
 
 
@@ -100,6 +101,7 @@ Rcpp::IntegerMatrix cpp_antipodalpairs(const Rcpp::NumericMatrix pts) {
 //' @param scale a double used to scale the returned values.
 //' @return a NumericVector of features from convex hull.
 //' @keywords internal
+////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector cpp_bbox(const Rcpp::NumericMatrix pts,
                              const double scale = 1.0) {
@@ -107,25 +109,36 @@ Rcpp::NumericVector cpp_bbox(const Rcpp::NumericMatrix pts,
 }
 // END caliper
 
-// FROM haralick
-//' @title hpp_rescale_M
-//' @name cpp_rescale_M
+// FROM scale
+//' @title Image Scaling
+//' @name cpp_rescale
 //' @description
-//' This function is designed to rescale a matrix to [0, 2^bits - 1]
-//' @param img a Rcpp::IntegerMatrix, containing image intensity values.
-//' @param msk_, a Rcpp::NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' This function is designed to scale a SEXP to [0, n_lev - 1]
+//' @param img, a SEXP (integer or numeric) vector or matrix containing image intensity values.
+//' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 //' Default is R_NilValue, for using all 'img' elements without masking anything.
-//' @param bits uint8_t number of bit to shift matrix values. Default is 4. Allowed are [2,10].
-//' @return a Rcpp::IntegerMatrix.
+//' @param value, a double; it is the replacement value that will be used when 'msk' element is false. Default is NA_REAL.
+//' @param n_lev, an unsigned short determining the number of levels used for the computation. Default is 256.
+//' @param invert, a bool determining whether 'img' should be scaled from min to max (when false, [min(img),max(img)] becoming [0,n_lev-1]) or inverted (when true, with [max(img),min(img)] rescaled to [0,n_lev-1]) values. Default is false.
+//' @param bin, a bool determining whether 'img' should be binned or if scaling should be continuous. Default is true to return discrete values.
+//' @details when 'msk' is provided it has to be of the same dimensions as 'img', otherwise an error will be thrown.\cr
+//' an error will be thrown also if 'msk' contains non-finite value.\cr
+//' 'img' range will be determined based on indices of non 0 'msk' values and only the values in 'img' at those indices will be scaled; the others will be filled with 'value'.
+//' @return a SEXP of same type as 'img' with class `IFCip_rescale`
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::IntegerMatrix cpp_rescale_M(const Rcpp::IntegerMatrix img,
-                                  const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
-                                  const uint8_t bits = 4) {
-  return hpp_rescale_M(img, msk_, bits);
+SEXP cpp_rescale( SEXP img,
+                  const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue,
+                  const double value = NA_REAL,
+                  const unsigned short n_lev = 256,
+                  const bool invert = false,
+                  const bool bin = false) {
+  return hpp_rescale(img, msk_, value, n_lev, invert, bin);
 }
+// END scale
 
+// FROM haralick
 //' @title Haralick Co-occurrence Matrix
 //' @name cpp_cooc
 //' @description
@@ -385,7 +398,7 @@ Rcpp::NumericMatrix cpp_features_hu3(const Rcpp::NumericMatrix img,
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector cpp_multi_otsu (const Rcpp::NumericMatrix img,
-                                    const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
+                                    const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue,
                                     const uint8_t n_comp = 2,
                                     const unsigned short n_lev = 256) {
   return hpp_multi_otsu(img, msk_, n_comp, n_lev);
@@ -1255,7 +1268,7 @@ Rcpp::NumericMatrix cpp_geo_tophat_black (const Rcpp::NumericMatrix img,
 //' @param draw_lines, a bool; whether to draw watershed lines or not. Default is true.
 //' @param invert, a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
 //' When 'mat' is the result of the distance transformation of an image, peaks (highest values) represent largest distances from background.
-//' Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.
+//' Thus, they are the ones to be filled first; this can be done with 'invert' set to true.
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
@@ -1272,7 +1285,7 @@ Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat,
                                       const bool draw_lines = true,
                                       const bool invert = false,
                                       const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
-                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+                                      const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue) {
   return hpp_watershed_sv1(mat, n_lev, draw_lines, invert, kernel, msk_);
 }
 
@@ -1283,11 +1296,11 @@ Rcpp::IntegerVector cpp_watershed_sv1(const Rcpp::NumericMatrix mat,
 //' @param mat, a NumericMatrix; a distance transform matrix is expected.
 //' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
 //' @param draw_lines, a bool; whether to draw watershed lines or not. Default is true.
-//' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
-//' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @param invert, a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
 //' When 'mat' is the result of the distance transformation of an image, peaks (highest values) represent largest distances from background.
-//' Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.
+//' Thus, they are the ones to be filled first; this can be done with 'invert' set to true.
+//' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
+//' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 //' Default is R_NilValue, for using all 'mat' elements without masking anything.
 //' @details adaptation of 'Watersheds in digital spaces: an efficient algorithm based on immersion simulations' from  L. Vincent and P. Soille.
@@ -1303,7 +1316,7 @@ Rcpp::IntegerVector cpp_watershed_sv2(const Rcpp::NumericMatrix mat,
                                       const bool draw_lines = true,
                                       const bool invert = false,
                                       const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
-                                      const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
+                                      const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue) {
   return hpp_watershed_sv2(mat, n_lev, draw_lines, invert, kernel, msk_);
 }
 // END watershed

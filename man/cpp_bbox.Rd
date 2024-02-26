@@ -3,9 +3,6 @@
 \name{cpp_bbox}
 \alias{cpp_bbox}
 \title{Bounding Box of Convex Hull}
-\usage{
-cpp_bbox(pts, scale = 1)
-}
 \arguments{
 \item{pts}{a 2-column matrix defining the locations (x and y coordinates, respectively) of points.
 It has to be an object of class `IFCip_convexhull`}

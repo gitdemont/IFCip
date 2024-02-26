@@ -14,12 +14,12 @@ from Roerdink, J. B. T. M. and Meijster, A. (2000) in Fundamenta Informaticae, 4
 
 \item{draw_lines, }{a bool; whether to draw watershed lines or not. Default is true.}
 
-\item{kernel, }{a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
-Default is R_NilValue, resulting in 8-connected pixels neighbors computation.}
-
 \item{invert, }{a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
 When 'mat' is the result of the distance transformation of an image, peaks (highest values) represent largest distances from background.
-Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.}
+Thus, they are the ones to be filled first; this can be done with 'invert' set to true.}
+
+\item{kernel, }{a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
+Default is R_NilValue, resulting in 8-connected pixels neighbors computation.}
 
 \item{msk_, }{a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 Default is R_NilValue, for using all 'mat' elements without masking anything.}

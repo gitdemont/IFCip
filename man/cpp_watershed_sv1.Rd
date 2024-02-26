@@ -15,7 +15,7 @@ MorphoLib plugin for ImageJ presents a Java implementation of the algorithm in  
 
 \item{invert, }{a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
 When 'mat' is the result of the distance transformation of an image, peaks (highest values) represent largest distances from background.
-Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.}
+Thus, they are the ones to be filled first; this can be done with 'invert' set to true.}
 
 \item{kernel, }{a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 Default is R_NilValue, resulting in 8-connected pixels neighbors computation.}
