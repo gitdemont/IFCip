@@ -99,7 +99,7 @@ ifcip_handler_winprogressbar <- function(intrusiveness = getOption("progressr.in
             args[[target]] <- progression$message
         }
       }
-      for (target in c("title", "label")) if (is.null(args[[target]])) args[[target]] <- pb$args[[target]]
+      for (target in c("title", "label")) if (length(args[[target]]) == 0) args[[target]] <- ifelse(length(pb$args[[target]]) == 0, " ", pb$args[[target]])
       args <- c(list(pb = pb$bar, value = state$step), args)
       if(not_fake) args <- args[names(args) %in% alw_upd]
       pb$args <<- args[setdiff(names(args), "pb")]
