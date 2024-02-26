@@ -388,8 +388,17 @@ ExtractFeatures <- function(...,
                   bg_mean = attr(i_chan, "BG_MEAN")
                   bg_sd = attr(i_chan, "BG_STD")
                   msk = !attr(i_chan, "mask")
+                  class(msk) = "IFC_msk"
+                  ctl = cpp_ctl(msk, global = TRUE)
+                  msk_i = which.max(ctl$perimeter)
+                  if(length(msk_i) != 0) {
+                    msk = cpp_k_equal_M(ctl$matrix, msk_i)
+                  } else {
+                    msk = msk
+                  }
                 }
                 class(msk) = "IFC_msk"
+                
                 hu = cpp_features_hu3(img = i_chan, msk = msk, components = 1, mag = mag)
                 if((nrow(hu) == 0) || !is.finite(hu[1,1]) || (hu[1,1] == 0)) {
                   hu = no_hu

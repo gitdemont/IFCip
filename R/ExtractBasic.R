@@ -339,7 +339,16 @@ ExtractBasic <- function(...,
                 } else {
                   bg_mean = attr(i_chan, "BG_MEAN")
                   bg_sd = attr(i_chan, "BG_STD")
-                  hu = cpp_basic(img = i_chan, msk = attr(i_chan, "mask"), mag = mag)
+                  msk = attr(i_chan, "mask")
+                  class(msk) = "IFC_msk"
+                  ctl = cpp_ctl(!msk, global = TRUE)
+                  msk_i = which.max(ctl$perimeter)
+                  if(length(msk_i) != 0) {
+                    msk = !cpp_k_equal_M(ctl$matrix, msk_i)
+                  } else {
+                    msk = msk
+                  }
+                  hu = cpp_basic(img = i_chan, msk = msk, mag = mag)
                 }
                 avg_intensity = hu["Raw Mean Pixel"] - bg_mean
                 min_intensity = hu["Raw Min Pixel"] - bg_mean
