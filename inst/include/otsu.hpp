@@ -54,7 +54,7 @@ using namespace Rcpp;
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector hpp_multi_otsu (const Rcpp::NumericMatrix img,
-                                    const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
+                                    const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue,
                                     const uint8_t n_comp = 2,
                                     const unsigned short n_lev = 256) {
   R_len_t mat_r = img.nrow();
@@ -68,24 +68,8 @@ Rcpp::NumericVector hpp_multi_otsu (const Rcpp::NumericMatrix img,
   int MAX_LEV_2 = MAX_LEV - 2;
   if((n_comp < 2) || (n_comp > MAX_LEV - 2)) Rcpp::stop("'n_comp' value is not allowed");
   
-  // // determines image range
-  // double img_min = R_PosInf, img_max = R_NegInf;
-  // for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-  //   Rcpp::NumericVector col_ran = range(img(Rcpp::_, i_col));
-  //   if(col_ran[0] < img_min) {
-  //     img_min = col_ran[0];
-  //   } else {
-  //     if(col_ran[1] > img_max) img_max = col_ran[1];
-  //   }
-  // }
-  // 
-  // // creates scaled mat ranging from [0, MAX_LEV - 1]
-  // Rcpp::IntegerMatrix sca = Rcpp::no_init(mat_r, mat_c);
-  // double MAX_LEV_SCA = MAX_LEV_1 / (img_max - img_min);
-  // for(R_len_t i = 0; i < MAX_SIZ; i++) sca[i] = MAX_LEV_SCA * (img[i] - img_min);
-  
   Rcpp::NumericMatrix mat = Rcpp::clone(img);
-  Rcpp::NumericVector Q = hpp_scale(mat, msk_, -1.0, n_lev, true);
+  Rcpp::NumericVector Q = hpp_scale(mat, msk_, -1.0, n_lev, false, true);
   Rcpp::IntegerMatrix sca = as<Rcpp::IntegerMatrix>(mat);
   
   // fill bins

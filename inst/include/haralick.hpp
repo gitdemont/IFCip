@@ -31,36 +31,8 @@
 #define IFCIP_HARALICK_HPP
 
 #include <Rcpp.h>
-// [[Rcpp::depends(IFC)]]
-#include <utils.hpp>
+#include "utils.hpp"
 using namespace Rcpp;
-
-//' @title hpp_rescale_M
-//' @name cpp_rescale_M
-//' @description
-//' This function is designed to rescale a matrix to [0, 2^bits - 1]
-//' @param img a Rcpp::IntegerMatrix, containing image intensity values.
-//' @param msk_, a Rcpp::NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
-//' Default is R_NilValue, for using all 'img' elements without masking anything.
-//' @param bits uint8_t number of bit to shift matrix values. Default is 4. Allowed are [2,10].
-//' @return a Rcpp::IntegerMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::IntegerMatrix hpp_rescale_M(const Rcpp::IntegerMatrix img,
-                                  const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
-                                  const uint8_t bits = 4) {
-  if(bits > 10 || bits < 2) {
-    Rcpp::stop("hpp_rescale_M: 'bits' should be a [2,10] integer");
-  }
-  Rcpp::IntegerMatrix out = Rcpp::clone(img);
-  Rcpp::NumericVector sca = hpp_scale(out, msk_, NA_REAL, std::pow(2.0, bits), true);
-  out.attr("class") = "IFCip_rescale";
-  out.attr("msk") = msk_;
-  out.attr("scale") = sca;
-  out.attr("bits") = bits;
-  return out;
-}
 
 //' @title Haralick Co-occurrence Matrix
 //' @name cpp_cooc
@@ -79,8 +51,11 @@ Rcpp::IntegerMatrix hpp_cooc(const Rcpp::IntegerMatrix img,
   if(!Rf_inherits(img, "IFCip_rescale")) {
     Rcpp::stop("hpp_cooc: 'img' should be of class `IFCip_rescale`");
   }
+  if(!img.hasAttribute("levels")) {
+    Rcpp::stop("hpp_cooc: 'img' should have `levels` attribute");
+  }
   
-  uint16_t depth = std::pow(2.0, as<int>(img.attr("bits")));
+  uint16_t depth = as<int>(img.attr("levels"));
   R_len_t mat_r = img.nrow();
   R_len_t mat_c = img.ncol();
   
@@ -123,9 +98,16 @@ Rcpp::IntegerMatrix hpp_cooc(const Rcpp::IntegerMatrix img,
         if(t_row >= 0 && t_row < mat_r && 
            t_col >= 0 && t_col < mat_c) {
           if(M(t_row, t_col)) {
-            out(img(i_row, i_col), img(t_row, t_col))++;
-            out(img(t_row, t_col), img(i_row, i_col))++;
-            K++;
+            if(img(i_row, i_col) >= 0 &&
+               img(t_row, t_col) >= 0 &&
+               img(i_row, i_col) < depth &&
+               img(t_row, t_col) < depth) {
+              out(img(i_row, i_col), img(t_row, t_col))++;
+              out(img(t_row, t_col), img(i_row, i_col))++;
+              K++;
+            } else {
+              Rcpp::stop("hpp_cooc: values are out of range");
+            }
           }
         }
       }
@@ -155,7 +137,6 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
     Rcpp::stop("hpp_h_features: 'cooc' should be of class `IFCip_cooc`");
   }
   R_len_t N = cooc.ncol();
-  R_len_t NN = cooc.size() - 1;
   if(N < 4) {
     Rcpp::stop("hpp_h_features: 'cooc' is too small");
   }
@@ -185,7 +166,7 @@ Rcpp::NumericVector hpp_h_features(const Rcpp::IntegerMatrix cooc,
   // copy and weight cooc to p, in addition add +1 index offset
   for(R_len_t i = 0, i_col1 = 1; i_col1 <= N; i_col1++) {
     for(R_len_t i_row1 = 1; i_row1 <= N; i_row1++, i++) {
-      p(i_row1, i_col1) = cooc[NN - i] * d_ij;
+      p(i_row1, i_col1) = cooc[i] * d_ij;
     }
   }
 

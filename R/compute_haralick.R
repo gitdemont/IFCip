@@ -60,7 +60,7 @@ compute_haralick = function(img, msk, granularity = 3, bits = 4) {
   assert(granularity, alw = c(1:20))
   
   # rescale masked image to bin ranging [0, 2^bits -1]
-  rescaled = cpp_rescale_M(attr(img, "raw"), msk, bits = bits)
+  rescaled = cpp_rescale(attr(img, "raw"), msk, NA_integer_, 2^bits, FALSE, TRUE)
   
   # compute 0, 45, 90 and 135 degree GLCM and then Haralick's features for each granularity
   ans = lapply(granularity, FUN = function(i) {

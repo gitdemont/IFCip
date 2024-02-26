@@ -31,149 +31,209 @@
 #define IFCIP_SCALE_HPP
 
 #include <Rcpp.h>
+#include <utils.hpp>
 using namespace Rcpp;
 
-Rcpp::NumericVector hpp_n_scale(Rcpp::NumericMatrix img,
-                                const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
+Rcpp::NumericVector hpp_n_scale(Rcpp::NumericVector img,
+                                const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue,
                                 const double value = NA_REAL,
                                 const double n_lev = 256,
-                                const bool positive = true) {
-  R_len_t mat_r = img.nrow(), mat_c = img.ncol();
-  double MAX_LEV_SCA = positive ? (n_lev - 1) : (1 - n_lev);
+                                const bool invert = false,
+                                const bool bin = true) {
+  if(n_lev < 1) {
+    Rcpp::stop("hpp_scale: n_lev should be at least 1.0"); 
+  }
+  double MAX_LEV_SCA = bin + n_lev - 1;
   double mat_min = R_PosInf, mat_max = R_NegInf;
   if(msk_.isNotNull()) {
-    Rcpp::NumericMatrix msk(msk_.get());
-    if((mat_r != msk.nrow()) || (mat_c != msk.ncol())) {
+    Rcpp::NumericVector msk(msk_.get());
+    if(img.size() != msk.size()) {
       Rcpp::stop("hpp_scale: when 'msk' is provided 'img' and 'msk' should have same dimensions");
     }
-    for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-      for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
-        if((msk(i_row, i_col) != NA_REAL) &&
-           (msk(i_row, i_col) != R_NaN) &&
-           (msk(i_row, i_col) != R_PosInf) &&
-           (msk(i_row, i_col) != R_NegInf)) {
-          if(msk(i_row, i_col)) {
-            if((img(i_row, i_col) != NA_REAL) &&
-               (img(i_row, i_col) != R_NaN) &&
-               (img(i_row, i_col) != R_PosInf) &&
-               (img(i_row, i_col) != R_NegInf)) {
-              if(img(i_row, i_col) < mat_min) {
-                mat_min = img(i_row, i_col);
-              } else {
-                if(img(i_row, i_col) > mat_max) mat_max = img(i_row, i_col);
-              }
+    if(img.hasAttribute("dim") && msk.hasAttribute("dim")) {
+      Rcpp::IntegerVector i_dim = img.attr("dim");
+      Rcpp::IntegerVector m_dim = msk.attr("dim");
+      if(i_dim.size() != m_dim.size() || !setequal(i_dim, m_dim)) {
+        Rcpp::stop("hpp_scale: when 'msk' is provided 'img' and 'msk' should have same dimensions");
+      }
+    } else {
+      if((img.hasAttribute("dim") && !msk.hasAttribute("dim")) || 
+         (msk.hasAttribute("dim") && !img.hasAttribute("dim"))) {
+        Rcpp::stop("hpp_scale: when 'msk' is provided 'img' and 'msk' should have same dimensions");
+      }
+    }
+    for(R_len_t i = 0; i < img.size(); i++) {
+      if((msk[i] != NA_REAL) &&
+         (msk[i] != R_NaN) &&
+         (msk[i] != R_PosInf) &&
+         (msk[i] != R_NegInf)) {
+        if(msk[i]) {
+          if((img[i] != NA_REAL) &&
+             (img[i] != R_NaN) &&
+             (img[i] != R_PosInf) &&
+             (img[i] != R_NegInf)) {
+            if(img[i] < mat_min) {
+              mat_min = img[i];
             } else {
-              Rcpp::stop("hpp_scale: non-finite values found in 'img'");
+              if(img[i] > mat_max) mat_max = img[i];
             }
-          }
-        } else {
-          Rcpp::stop("hpp_scale: non-finite values found in 'msk'");
-        }
-      }
-    }
-    MAX_LEV_SCA /= (mat_max - mat_min);
-    if(positive) {
-      for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? MAX_LEV_SCA * (mat_max -img[i]) : value; 
-    } else {
-      for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? MAX_LEV_SCA * (img[i] - mat_min) : value;
-    }
-    return Rcpp::NumericVector::create(mat_min, mat_max, MAX_LEV_SCA, positive, value);
-  } else {
-    for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-      for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
-        if((img(i_row, i_col) != NA_REAL) &&
-           (img(i_row, i_col) != R_NaN) &&
-           (img(i_row, i_col) != R_PosInf) &&
-           (img(i_row, i_col) != R_NegInf)) {
-          if(img(i_row, i_col) < mat_min) {
-            mat_min = img(i_row, i_col);
           } else {
-            if(img(i_row, i_col) > mat_max) mat_max = img(i_row, i_col);
+            Rcpp::stop("hpp_scale: non-finite values found in 'img'");
           }
-        } else {
-          Rcpp::stop("hpp_scale: non-finite values found in 'img'");
         }
+      } else {
+        Rcpp::stop("hpp_scale: non-finite values found in 'msk'");
       }
     }
     MAX_LEV_SCA /= (mat_max - mat_min);
-    if(positive) {
-      for(R_len_t i = 0; i < img.size(); i++) img[i] = MAX_LEV_SCA * (mat_max - img[i]);
+    if(bin) {
+      int MAX_LEV_DIS = n_lev - 1;
+      if(invert) {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? (img[i] == mat_min ? MAX_LEV_DIS : std::trunc(MAX_LEV_SCA * (mat_max - img[i]))) : std::trunc(value);
+      } else {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? (img[i] == mat_max ? MAX_LEV_DIS : std::trunc(MAX_LEV_SCA * (img[i] - mat_min))) : std::trunc(value);
+      }
     } else {
-      for(R_len_t i = 0; i < img.size(); i++) img[i] = MAX_LEV_SCA * (img[i] - mat_min);
+      if(invert) {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? MAX_LEV_SCA * (mat_max - img[i]) : value;
+      } else {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? MAX_LEV_SCA * (img[i] - mat_min) : value;
+      }
     }
-    return Rcpp::NumericVector::create(mat_min, mat_max, MAX_LEV_SCA, positive, value);
+    return Rcpp::NumericVector::create(mat_min, mat_max, MAX_LEV_SCA, invert, value);
+  } else {
+    for(R_len_t i = 0; i < img.size(); i++) {
+      if((img[i] != NA_REAL) &&
+         (img[i] != R_NaN) &&
+         (img[i] != R_PosInf) &&
+         (img[i] != R_NegInf)) {
+        if(img[i] < mat_min) {
+          mat_min = img[i];
+        } else {
+          if(img[i] > mat_max) mat_max = img[i];
+        }
+      } else {
+        Rcpp::stop("hpp_scale: non-finite values found in 'img'");
+      }
+    }
+    MAX_LEV_SCA /= (mat_max - mat_min);
+    if(bin) {
+      int MAX_LEV_DIS = n_lev - 1;
+      if(invert) {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = (img[i] == mat_min ? MAX_LEV_DIS : std::trunc(MAX_LEV_SCA * (mat_max - img[i])));
+      } else {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = (img[i] == mat_max ? MAX_LEV_DIS : std::trunc(MAX_LEV_SCA * (img[i] - mat_min)));
+      }
+    } else {
+      if(invert) {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = MAX_LEV_SCA * (mat_max - img[i]);
+      } else {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = MAX_LEV_SCA * (img[i] - mat_min);
+      }
+    }
+    return Rcpp::NumericVector::create(mat_min, mat_max, MAX_LEV_SCA, invert, value);
   }
 }
 
-Rcpp::NumericVector hpp_i_scale(Rcpp::IntegerMatrix img,
-                                const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
-                                const int value = NA_INTEGER,
+Rcpp::NumericVector hpp_i_scale(Rcpp::IntegerVector img,
+                                const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue,
+                                const double value = NA_REAL,
                                 const int n_lev = 256,
-                                const bool positive = true) {
-  R_len_t mat_r = img.nrow(), mat_c = img.ncol();
-  double MAX_LEV_SCA = positive ? (n_lev - 1) : (1 - n_lev);
+                                const bool invert = false,
+                                const bool bin = true) {
+  if(n_lev < 1) {
+    Rcpp::stop("hpp_scale: n_lev should be at least 1.0"); 
+  }
+  double MAX_LEV_SCA = bin + n_lev - 1;
   double mat_min = R_PosInf, mat_max = R_NegInf;
   if(msk_.isNotNull()) {
-    Rcpp::NumericMatrix msk(msk_.get());
-    if(mat_r != msk.nrow() || mat_c != msk.ncol()) {
+    Rcpp::NumericVector msk(msk_.get());
+    if(img.size() != msk.size()) {
       Rcpp::stop("hpp_scale: when 'msk' is provided 'img' and 'msk' should have same dimensions");
     }
-    for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-      for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
-        if((msk(i_row, i_col) != NA_REAL) &&
-           (msk(i_row, i_col) != R_NaN) &&
-           (msk(i_row, i_col) != R_PosInf) &&
-           (msk(i_row, i_col) != R_NegInf)) {
-          if(msk(i_row, i_col)) {
-            if(img(i_row, i_col) != NA_INTEGER) {
-              if(img(i_row, i_col) < mat_min) {
-                mat_min = img(i_row, i_col);
-              } else {
-                if(img(i_row, i_col) > mat_max) mat_max = img(i_row, i_col);
-              }
+    if(img.hasAttribute("dim") && msk.hasAttribute("dim")) {
+      Rcpp::IntegerVector i_dim = img.attr("dim");
+      Rcpp::IntegerVector m_dim = msk.attr("dim");
+      if(i_dim.size() != m_dim.size() || !setequal(i_dim, m_dim)) {
+        Rcpp::stop("hpp_scale: when 'msk' is provided 'img' and 'msk' should have same dimensions");
+      }
+    } else {
+      if((img.hasAttribute("dim") && !msk.hasAttribute("dim")) || 
+        (msk.hasAttribute("dim") && !img.hasAttribute("dim"))) {
+        Rcpp::stop("hpp_scale: when 'msk' is provided 'img' and 'msk' should have same dimensions");
+      }
+    }
+    for(R_len_t i = 0; i < img.size(); i++) {
+      if((msk[i] != NA_REAL) &&
+         (msk[i] != R_NaN) &&
+         (msk[i] != R_PosInf) &&
+         (msk[i] != R_NegInf)) {
+        if(msk[i]) {
+          if(img[i] != NA_INTEGER) {
+            if(img[i] < mat_min) {
+              mat_min = img[i];
             } else {
-              Rcpp::stop("hpp_scale: non-finite values found in 'img'");
+              if(img[i] > mat_max) mat_max = img[i];
             }
+          } else {
+            Rcpp::stop("hpp_scale: non-finite values found in 'img'");
           }
-        } else {
-          Rcpp::stop("hpp_scale: non-finite values found in 'msk'");
         }
+      } else {
+        Rcpp::stop("hpp_scale: non-finite values found in 'msk'");
       }
     }
     MAX_LEV_SCA /= (mat_max - mat_min);
-    if(positive) {
-      for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? MAX_LEV_SCA * (mat_max -img[i]) : value; 
+    if(bin) {
+      int MAX_LEV_DIS = n_lev - 1;
+      if(invert) {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? (img[i] == mat_min ? MAX_LEV_DIS : std::trunc(MAX_LEV_SCA * (mat_max - img[i]))) : std::trunc(value);
+      } else {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? (img[i] == mat_max ? MAX_LEV_DIS : std::trunc(MAX_LEV_SCA * (img[i] - mat_min))) : std::trunc(value);
+      }
     } else {
-      for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? MAX_LEV_SCA * (img[i] - mat_min) : value;
+      if(invert) {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? MAX_LEV_SCA * (mat_max - img[i]) : value;
+      } else {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? MAX_LEV_SCA * (img[i] - mat_min) : value;
+      }
     }
-    return Rcpp::NumericVector::create(mat_min, mat_max, MAX_LEV_SCA, positive, value);
+    return Rcpp::NumericVector::create(mat_min, mat_max, MAX_LEV_SCA, invert, value);
   } else {
-    for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-      for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
-        if(img(i_row, i_col) != NA_INTEGER) {
-          if(img(i_row, i_col) < mat_min) {
-            mat_min = img(i_row, i_col);
+    for(R_len_t i = 0; i < img.size(); i++) {
+        if(img[i] != NA_INTEGER) {
+          if(img[i] < mat_min) {
+            mat_min = img[i];
           } else {
-            if(img(i_row, i_col) > mat_max) mat_max = img(i_row, i_col);
+            if(img[i] > mat_max) mat_max = img[i];
           }
         } else {
           Rcpp::stop("hpp_scale: non-finite values found in 'img'");
         }
-      }
+      
     }
     MAX_LEV_SCA /= (mat_max - mat_min);
-    if(positive) {
-      for(R_len_t i = 0; i < img.size(); i++) img[i] = MAX_LEV_SCA * (mat_max - img[i]);
+    if(bin) {
+      int MAX_LEV_DIS = n_lev - 1;
+      if(invert) {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = (img[i] == mat_min ? MAX_LEV_DIS : std::trunc(MAX_LEV_SCA * (mat_max - img[i])));
+      } else {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = (img[i] == mat_max ? MAX_LEV_DIS : std::trunc(MAX_LEV_SCA * (img[i] - mat_min)));
+      }
     } else {
-      for(R_len_t i = 0; i < img.size(); i++) img[i] = MAX_LEV_SCA * (img[i] - mat_min);
+      if(invert) {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = MAX_LEV_SCA * (mat_max - img[i]);
+      } else {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = MAX_LEV_SCA * (img[i] - mat_min);
+      }
     }
-    return Rcpp::NumericVector::create(mat_min, mat_max, MAX_LEV_SCA, positive, value);
+    return Rcpp::NumericVector::create(mat_min, mat_max, MAX_LEV_SCA, invert, value);
   }
 }
 
-void hpp_n_scalerev(Rcpp::NumericMatrix img,
+void hpp_n_scalerev(Rcpp::NumericVector img,
                     const Rcpp::NumericVector sca) {
-  if(sca.size() != 5) Rcpp::stop("hpp_rescale: bad 'sca' argument");
+  if(sca.size() != 5) Rcpp::stop("hpp_scalerev: bad 'sca' argument");
   if(sca[3]) {
     for(R_len_t i = 0; i < img.size(); i++) if(img[i] != sca[4]) img[i] = sca[1] - img[i] / sca[2];
   } else {
@@ -181,9 +241,9 @@ void hpp_n_scalerev(Rcpp::NumericMatrix img,
   }
 }
 
-void hpp_i_scalerev(Rcpp::IntegerMatrix img,
+void hpp_i_scalerev(Rcpp::IntegerVector img,
                     const Rcpp::NumericVector sca) {
-  if(sca.size() != 5) Rcpp::stop("hpp_rescale: bad 'sca' argument");
+  if(sca.size() != 5) Rcpp::stop("hpp_scalerev: bad 'sca' argument");
   if(sca[3]) {
     for(R_len_t i = 0; i < img.size(); i++) if(img[i] != sca[4]) img[i] = sca[1] - img[i] / sca[2];
   } else {
@@ -191,51 +251,25 @@ void hpp_i_scalerev(Rcpp::IntegerMatrix img,
   }
 }
 
-//' @title Image Scaling
-//' @name cpp_scale
-//' @description
-//' This function scales a image.
-//' @param img, either non-null IntegerMatrix or NumericMatrix, with finite values. Non-finite values will trigger an error.
-//' @param msk, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
-//' Default is R_NilValue, for using all 'img' elements without masking anything.
-//' @param value, a double; it is the replacement value that will be used when 'msk' element is false. Default is NA_REAL..
-//' @param n_lev, a double determining the number of grey levels used for the computation. Default is 256.
-//' @param positive, a bool determining whether 'img' should be scaled with positive (when true) or negative(when false) values. Default is true.
-//' @details when 'msk' is provided it has to be of the same dimensions as 'img', otherwise an error will be thrown.\cr
-//' an error will be thrown also if 'msk' contains non-finite value.\cr
-//' 'img' range will be determined based on indexes of non 0 'msk' values and only the values in 'img' at those indexes will be scaled; the other will be filled with 'value'.
-//' @return a NumericVector containing min(img), max(img), scaling factor and 'positive' flag as masked according to 'msk' when provided.\cr
-//' /!\ in addition 'img' will be modified (scaled) in-place.
-//' @keywords internal
-////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericVector hpp_scale(SEXP img,
-                              const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue,
-                              const double value = NA_REAL,
-                              const double n_lev = 256,
-                              const bool positive = true) {
+Rcpp::NumericVector hpp_scale( SEXP img,
+                               const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue,
+                               const double value = NA_REAL,
+                               const double n_lev = 256,
+                               const bool invert = false,
+                               const bool bin = true) {
   switch( TYPEOF(img) ) {
   case INTSXP: {
-    return hpp_i_scale(img, msk_, value, n_lev, positive);
+    return hpp_i_scale(img, msk_, value, n_lev, invert, bin);
   }
     break;
   case REALSXP: {
-    return hpp_n_scale(img, msk_, value, n_lev, positive);
+    return hpp_n_scale(img, msk_, value, n_lev, invert, bin);
   } break;
   default: Rcpp::stop("hpp_scale: not supported SEXP type in 'img'");
   }
 }
 
-//' @title Image Scaling Reversion
-//' @name cpp_scalerev
-//' @description
-//' This function reverts image scaling done by hpp_scale.
-//' @param img, an IntegerMatrix or NumericMatrix.
-//' @param sca, a NumericVector as returned by hpp_scale.
-//' @details all values in 'img' that are different from sca[4] will be reverted back to original values.
-//' @return Nothing, but 'img' will be modified (scale reversion) in-place.
-//' @keywords internal
-////' @export
 // [[Rcpp::export(rng = false)]]
 void hpp_scalerev(SEXP img,
                   const Rcpp::NumericVector sca) {
@@ -247,6 +281,53 @@ void hpp_scalerev(SEXP img,
   case REALSXP: {
     hpp_n_scalerev(img, sca);
   } break;
+  default: Rcpp::stop("hpp_scalerev: not supported SEXP type in 'img'");
+  }
+}
+
+// Template to allow safe-use of hpp scale in R i.e. without in place modification of img
+template <int RTYPE>
+Rcpp::Vector<RTYPE> rescale_T(const Rcpp::Vector<RTYPE>& img,
+                              const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue,
+                              const double value = NA_REAL,
+                              const unsigned short n_lev = 256,
+                              const bool invert = false,
+                              const bool bin = false) {
+  Rcpp::Vector<RTYPE> out = Rcpp::clone(img);
+  out.attr("class") = "IFCip_rescale";
+  out.attr("msk") = msk_;
+  out.attr("scale") = hpp_scale(out, msk_, value, n_lev, invert, bin); 
+  out.attr("levels") = n_lev;
+  return out;
+}
+
+//' @title Image Scaling
+//' @name cpp_rescale
+//' @description
+//' This function is designed to scale a SEXP to [0, n_lev - 1]
+//' @param img, a SEXP (integer or numeric) vector or matrix containing image intensity values.
+//' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' Default is R_NilValue, for using all 'img' elements without masking anything.
+//' @param value, a double; it is the replacement value that will be used when 'msk' element is false. Default is NA_REAL.
+//' @param n_lev, an unsigned short determining the number of levels used for the computation. Default is 256.
+//' @param invert, a bool determining whether 'img' should be scaled from min to max (when false, [min(img),max(img)] becoming [0,n_lev-1]) or inverted (when true, with [max(img),min(img)] rescaled to [0,n_lev-1]) values. Default is false.
+//' @param bin, a bool determining whether 'img' should be binned or if scaling should be continuous. Default is true to return discrete values.
+//' @details when 'msk' is provided it has to be of the same dimensions as 'img', otherwise an error will be thrown.\cr
+//' an error will be thrown also if 'msk' contains non-finite value.\cr
+//' 'img' range will be determined based on indices of non 0 'msk' values and only the values in 'img' at those indices will be scaled; the others will be filled with 'value'.
+//' @return a SEXP of same type as 'img' with class `IFCip_rescale`
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+SEXP hpp_rescale( SEXP img,
+                  const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue,
+                  const double value = NA_REAL,
+                  const unsigned short n_lev = 256,
+                  const bool invert = false,
+                  const bool bin = false) {
+  switch( TYPEOF(img) ) {
+  case INTSXP: return rescale_T(as<Rcpp::IntegerVector>(img), msk_, value, n_lev, invert, bin);
+  case REALSXP: return rescale_T(as<Rcpp::NumericVector>(img), msk_, value, n_lev, invert, bin);
   default: Rcpp::stop("hpp_rescale: not supported SEXP type in 'img'");
   }
 }

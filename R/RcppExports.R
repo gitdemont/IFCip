@@ -24,15 +24,32 @@ NULL
 #' @keywords internal
 NULL
 
-#' @title hpp_rescale_M
-#' @name cpp_rescale_M
+#' @title Bounding Box of Convex Hull
+#' @name cpp_bbox
 #' @description
-#' This function is designed to rescale a matrix to [0, 2^bits - 1]
-#' @param img a Rcpp::IntegerMatrix, containing image intensity values.
-#' @param msk_, a Rcpp::NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+#' Computes features from a Convex Hull 
+#' @param pts a 2-column matrix defining the locations (x and y coordinates, respectively) of points.
+#' It has to be an object of class `IFCip_convexhull`
+#' @param scale a double used to scale the returned values.
+#' @return a NumericVector of features from convex hull.
+#' @keywords internal
+NULL
+
+#' @title Image Scaling
+#' @name cpp_rescale
+#' @description
+#' This function is designed to scale a SEXP to [0, n_lev - 1]
+#' @param img, a SEXP (integer or numeric) vector or matrix containing image intensity values.
+#' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 #' Default is R_NilValue, for using all 'img' elements without masking anything.
-#' @param bits uint8_t number of bit to shift matrix values. Default is 4. Allowed are [2,10].
-#' @return a Rcpp::IntegerMatrix.
+#' @param value, a double; it is the replacement value that will be used when 'msk' element is false. Default is NA_REAL.
+#' @param n_lev, an unsigned short determining the number of levels used for the computation. Default is 256.
+#' @param invert, a bool determining whether 'img' should be scaled from min to max (when false, [min(img),max(img)] becoming [0,n_lev-1]) or inverted (when true, with [max(img),min(img)] rescaled to [0,n_lev-1]) values. Default is false.
+#' @param bin, a bool determining whether 'img' should be binned or if scaling should be continuous. Default is true to return discrete values.
+#' @details when 'msk' is provided it has to be of the same dimensions as 'img', otherwise an error will be thrown.\cr
+#' an error will be thrown also if 'msk' contains non-finite value.\cr
+#' 'img' range will be determined based on indices of non 0 'msk' values and only the values in 'img' at those indices will be scaled; the others will be filled with 'value'.
+#' @return a SEXP of same type as 'img' with class `IFCip_rescale`
 #' @keywords internal
 NULL
 
@@ -814,7 +831,7 @@ NULL
 #' @param draw_lines, a bool; whether to draw watershed lines or not. Default is true.
 #' @param invert, a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
 #' When 'mat' is the result of the distance transformation of an image, peaks (highest values) represent largest distances from background.
-#' Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.
+#' Thus, they are the ones to be filled first; this can be done with 'invert' set to true.
 #' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 #' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 #' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
@@ -833,11 +850,11 @@ NULL
 #' @param mat, a NumericMatrix; a distance transform matrix is expected.
 #' @param n_lev, an unsigned short determining the number of elevation levels. Default is 256, should be at least 2.
 #' @param draw_lines, a bool; whether to draw watershed lines or not. Default is true.
-#' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
-#' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 #' @param invert, a bool; whether to fill from basins (lowest values) to peaks (highest values). Default is false.
 #' When 'mat' is the result of the distance transformation of an image, peaks (highest values) represent largest distances from background.
-#' Thus, they are the ones to be filled first; this is the default behavior with 'invert' set to false.
+#' Thus, they are the ones to be filled first; this can be done with 'invert' set to true.
+#' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
+#' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 #' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 #' Default is R_NilValue, for using all 'mat' elements without masking anything.
 #' @details adaptation of 'Watersheds in digital spaces: an efficient algorithm based on immersion simulations' from  L. Vincent and P. Soille.
@@ -1058,21 +1075,12 @@ cpp_antipodalpairs <- function(pts) {
     .Call(`_IFCip_cpp_antipodalpairs`, pts)
 }
 
-#' @title Bounding Box of Convex Hull
-#' @name cpp_bbox
-#' @description
-#' Computes features from a Convex Hull 
-#' @param pts a 2-column matrix defining the locations (x and y coordinates, respectively) of points.
-#' It has to be an object of class `IFCip_convexhull`
-#' @param scale a double used to scale the returned values.
-#' @return a NumericVector of features from convex hull.
-#' @keywords internal
 cpp_bbox <- function(pts, scale = 1.0) {
     .Call(`_IFCip_cpp_bbox`, pts, scale)
 }
 
-cpp_rescale_M <- function(img, msk_ = NULL, bits = 4L) {
-    .Call(`_IFCip_cpp_rescale_M`, img, msk_, bits)
+cpp_rescale <- function(img, msk_ = NULL, value = NA_real_, n_lev = 256L, invert = FALSE, bin = FALSE) {
+    .Call(`_IFCip_cpp_rescale`, img, msk_, value, n_lev, invert, bin)
 }
 
 cpp_cooc <- function(img, delta) {
