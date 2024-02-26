@@ -64,18 +64,15 @@ Rcpp::NumericVector hpp_multi_otsu (const Rcpp::NumericMatrix img,
   if(MAX_SIZ >= (std::pow(2.0,31.0) - 2)) Rcpp::stop("'img' is too large");
   if(n_lev < 2) Rcpp::stop("'n_lev' should be at least >= 2");
   int MAX_LEV = n_lev;
-  int MAX_LEV_1 = MAX_LEV - 1;
   int MAX_LEV_2 = MAX_LEV - 2;
   if((n_comp < 2) || (n_comp > MAX_LEV - 2)) Rcpp::stop("'n_comp' value is not allowed");
   
   Rcpp::NumericMatrix mat = Rcpp::clone(img);
-  Rcpp::NumericVector Q = hpp_scale(mat, msk_, -1.0, n_lev, false, true);
-  Rcpp::IntegerMatrix sca = as<Rcpp::IntegerMatrix>(mat);
+  Rcpp::NumericVector Q = hpp_scale(mat, msk_, -1.0, n_lev, true, true);
   
   // fill bins
-  // in the article LUT start at 1 and end at L, here there is an extra [0] = 0.0 to handle this
-  Rcpp::NumericVector B(MAX_LEV + 1);
-  for (int i=0; i < MAX_SIZ; ++i) if(sca[i] >= 0) B[sca[i] + 1]++;
+  Rcpp::IntegerVector B(MAX_LEV);
+  for (int i=0; i < MAX_SIZ; ++i) if(mat[i] >= 0) B[mat[i]]++;
   
   // compute LUT
   // in the article LUT start at 1 and end at L, here there is an extra row0 and col0 with value 0.0 to handle this
@@ -84,8 +81,8 @@ Rcpp::NumericVector hpp_multi_otsu (const Rcpp::NumericMatrix img,
   Rcpp::NumericMatrix H = no_init(MAX_LEV + 1, MAX_LEV + 1);      // H(0,_) and H(_,0) are never used
   for (int v = 0; v < MAX_LEV; v++) {
     int vv = v + 1;
-    P(1, vv) = P(1, v) + B[vv];                                   // eq 22, 0th-order moment
-    S(1, vv) = S(1, v) + vv * B[vv];                              // eq 23, 1st-order moment
+    P(1, vv) = P(1, v) + B[v];                                    // eq 22, 0th-order moment
+    S(1, vv) = S(1, v) + vv * B[v];                               // eq 23, 1st-order moment
   }
   for (int u = 1; u <= MAX_LEV; u++) {
     int uu = u - 1;
@@ -108,8 +105,7 @@ Rcpp::NumericVector hpp_multi_otsu (const Rcpp::NumericMatrix img,
   // and store combination with max sigma
   double smax = 0.0;
   do {
-    double s = 0.0;                                                               // eq 28
-    s += H(1, curr_tr[0]) + H(curr_tr[n_comp_2] + 1, MAX_LEV_1);                  // H(1,t1) + ... + H(tm-1, L)
+    double s = H(1, curr_tr[0]) + H(curr_tr[n_comp_2] + 1, MAX_LEV);              // eq 28, H(1,t1) + ... + H(tm-1, L)
     for(uint8_t i = 0; i < n_comp_2; i++) s += H(curr_tr[i] + 1, curr_tr[i + 1]); // all the remaining ...
     if(smax < s) {
       std::copy(curr_tr.begin(), curr_tr.end(), best_tr.begin());
@@ -126,8 +122,7 @@ Rcpp::NumericVector hpp_multi_otsu (const Rcpp::NumericMatrix img,
     }
   } while (curr_tr[0] < MAX_LEV_2 - n_comp_1);
   // one last to compute and test
-  double s = 0.0;                                                                 // eq 28
-  s += H(1, curr_tr[0]) + H(curr_tr[n_comp_2] + 1, MAX_LEV_1);                    // H(1,t1) + ... + H(tm-1, L)
+  double s = H(1, curr_tr[0]) + H(curr_tr[n_comp_2] + 1, MAX_LEV);                // eq 28, H(1,t1) + ... + H(tm-1, L)
   for(uint8_t i = 0; i < n_comp_2; i++) s += H(curr_tr[i] + 1, curr_tr[i + 1]);   // all the remaining  ...
   if(smax < s) {
     std::copy(curr_tr.begin(), curr_tr.end(), best_tr.begin());
@@ -136,7 +131,7 @@ Rcpp::NumericVector hpp_multi_otsu (const Rcpp::NumericMatrix img,
   
   // returned threshold(s) need to be rescaled back to initial image value
   Rcpp::NumericVector out = no_init(n_comp_1);
-  for(uint8_t i = 0; i < n_comp_1; i++) out[i] = Q[1] - best_tr[n_comp_1 - i - 1] / Q[2];
+  for(uint8_t i = 0; i < n_comp_1; i++) out[i] = Q[1] - (best_tr[n_comp_1 - i - 1] + 1) / Q[2];
   return out;
 }
 
