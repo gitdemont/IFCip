@@ -38,8 +38,8 @@ using namespace Rcpp;
 //' @name cpp_multi_otsu
 //' @description
 //' This function determines best threshold(s) according to Otsu's method.
-//' @param img, a NumericMatrix.
-//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' @param img, a NumericVector.
+//' @param msk_, a NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 //' Default is R_NilValue, for using all 'img' elements without masking anything.
 //' @param n_comp, number of components to separate. Default is 2, should be at least 2.\cr
 //' Returned thresholds will be of length n_comp - 1.
@@ -53,13 +53,11 @@ using namespace Rcpp;
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericVector hpp_multi_otsu (const Rcpp::NumericMatrix img,
+Rcpp::NumericVector hpp_multi_otsu (const Rcpp::NumericVector img,
                                     const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue,
                                     const uint8_t n_comp = 2,
                                     const unsigned short n_lev = 256) {
-  R_len_t mat_r = img.nrow();
-  R_len_t mat_c = img.ncol();
-  R_len_t MAX_SIZ = mat_r * mat_c;
+  R_len_t MAX_SIZ = img.size();
   if(MAX_SIZ <= 0) Rcpp::stop("'img' should be at least 1px row and 1px col");
   if(MAX_SIZ >= (std::pow(2.0,31.0) - 2)) Rcpp::stop("'img' is too large");
   if(n_lev < 2) Rcpp::stop("'n_lev' should be at least >= 2");
@@ -67,8 +65,8 @@ Rcpp::NumericVector hpp_multi_otsu (const Rcpp::NumericMatrix img,
   int MAX_LEV_2 = MAX_LEV - 2;
   if((n_comp < 2) || (n_comp > MAX_LEV - 2)) Rcpp::stop("'n_comp' value is not allowed");
   
-  Rcpp::NumericMatrix mat = Rcpp::clone(img);
-  Rcpp::NumericVector Q = hpp_scale(mat, msk_, -1.0, n_lev, true, true);
+  Rcpp::NumericVector mat = Rcpp::clone(img);
+  Rcpp::NumericVector sca = hpp_scale(mat, msk_, -1.0, n_lev, false, true);
   
   // fill bins
   Rcpp::IntegerVector B(MAX_LEV);
@@ -86,7 +84,7 @@ Rcpp::NumericVector hpp_multi_otsu (const Rcpp::NumericMatrix img,
   }
   for (int u = 1; u <= MAX_LEV; u++) {
     int uu = u - 1;
-    for (int v = 1; v <= MAX_LEV; v++) {
+    for (int v = u; v <= MAX_LEV; v++) {
       P(u, v) = P(1, v) - P(1, uu);                               // eq 24
       S(u, v) = S(1, v) - S(1, uu);                               // eq 25
       H(u, v) = P(u, v) == 0 ? 0.0 : S(u, v) * S(u, v) / P(u, v); // eq 29
@@ -131,7 +129,10 @@ Rcpp::NumericVector hpp_multi_otsu (const Rcpp::NumericMatrix img,
   
   // returned threshold(s) need to be rescaled back to initial image value
   Rcpp::NumericVector out = no_init(n_comp_1);
-  for(uint8_t i = 0; i < n_comp_1; i++) out[i] = Q[1] - (best_tr[n_comp_1 - i - 1] + 1) / Q[2];
+  for(uint8_t i = 0; i < n_comp_1; i++) out[i] = sca[0] + (best_tr[i] - 1) / sca[2];
+  out.attr("threshold") = best_tr - 1;
+  out.attr("scale") = sca;
+  out.attr("levels") = n_lev;
   return out;
 }
 

@@ -118,7 +118,7 @@ Rcpp::NumericVector cpp_bbox(const Rcpp::NumericMatrix pts,
 //' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 //' Default is R_NilValue, for using all 'img' elements without masking anything.
 //' @param value, a double; it is the replacement value that will be used when 'msk' element is false. Default is NA_REAL.
-//' @param n_lev, an unsigned short determining the number of levels used for the computation. Default is 256.
+//' @param n_lev, an int determining the number of levels used for the computation. Default is 256.
 //' @param invert, a bool determining whether 'img' should be scaled from min to max (when false, [min(img),max(img)] becoming [0,n_lev-1]) or inverted (when true, with [max(img),min(img)] rescaled to [0,n_lev-1]) values. Default is false.
 //' @param bin, a bool determining whether 'img' should be binned or if scaling should be continuous. Default is true to return discrete values.
 //' @details when 'msk' is provided it has to be of the same dimensions as 'img', otherwise an error will be thrown.\cr
@@ -131,7 +131,7 @@ Rcpp::NumericVector cpp_bbox(const Rcpp::NumericMatrix pts,
 SEXP cpp_rescale( SEXP img,
                   const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue,
                   const double value = NA_REAL,
-                  const unsigned short n_lev = 256,
+                  const int n_lev = 256,
                   const bool invert = false,
                   const bool bin = false) {
   return hpp_rescale(img, msk_, value, n_lev, invert, bin);
@@ -382,8 +382,8 @@ Rcpp::NumericMatrix cpp_features_hu3(const Rcpp::NumericMatrix img,
 //' @name cpp_multi_otsu
 //' @description
 //' This function determines best threshold(s) according to Otsu's method.
-//' @param img, a NumericMatrix.
-//' @param msk_, a NumericMatrix with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+//' @param img, a NumericVector.
+//' @param msk_, a NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 //' Default is R_NilValue, for using all 'img' elements without masking anything.
 //' @param n_comp, number of components to separate. Default is 2, should be at least 2.\cr
 //' Returned thresholds will be of length n_comp - 1.
@@ -397,7 +397,7 @@ Rcpp::NumericMatrix cpp_features_hu3(const Rcpp::NumericMatrix img,
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericVector cpp_multi_otsu (const Rcpp::NumericMatrix img,
+Rcpp::NumericVector cpp_multi_otsu (const Rcpp::NumericVector img,
                                     const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue,
                                     const uint8_t n_comp = 2,
                                     const unsigned short n_lev = 256) {

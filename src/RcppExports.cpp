@@ -45,14 +45,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_rescale
-SEXP cpp_rescale(SEXP img, const Rcpp::Nullable<Rcpp::NumericVector> msk_, const double value, const unsigned short n_lev, const bool invert, const bool bin);
+SEXP cpp_rescale(SEXP img, const Rcpp::Nullable<Rcpp::NumericVector> msk_, const double value, const int n_lev, const bool invert, const bool bin);
 RcppExport SEXP _IFCip_cpp_rescale(SEXP imgSEXP, SEXP msk_SEXP, SEXP valueSEXP, SEXP n_levSEXP, SEXP invertSEXP, SEXP binSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< SEXP >::type img(imgSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericVector> >::type msk_(msk_SEXP);
     Rcpp::traits::input_parameter< const double >::type value(valueSEXP);
-    Rcpp::traits::input_parameter< const unsigned short >::type n_lev(n_levSEXP);
+    Rcpp::traits::input_parameter< const int >::type n_lev(n_levSEXP);
     Rcpp::traits::input_parameter< const bool >::type invert(invertSEXP);
     Rcpp::traits::input_parameter< const bool >::type bin(binSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_rescale(img, msk_, value, n_lev, invert, bin));
@@ -165,11 +165,11 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_multi_otsu
-Rcpp::NumericVector cpp_multi_otsu(const Rcpp::NumericMatrix img, const Rcpp::Nullable<Rcpp::NumericVector> msk_, const uint8_t n_comp, const unsigned short n_lev);
+Rcpp::NumericVector cpp_multi_otsu(const Rcpp::NumericVector img, const Rcpp::Nullable<Rcpp::NumericVector> msk_, const uint8_t n_comp, const unsigned short n_lev);
 RcppExport SEXP _IFCip_cpp_multi_otsu(SEXP imgSEXP, SEXP msk_SEXP, SEXP n_compSEXP, SEXP n_levSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector >::type img(imgSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericVector> >::type msk_(msk_SEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type n_comp(n_compSEXP);
     Rcpp::traits::input_parameter< const unsigned short >::type n_lev(n_levSEXP);

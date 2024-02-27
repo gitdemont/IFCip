@@ -11,7 +11,7 @@ Default is R_NilValue, for using all 'img' elements without masking anything.}
 
 \item{value, }{a double; it is the replacement value that will be used when 'msk' element is false. Default is NA_REAL.}
 
-\item{n_lev, }{an unsigned short determining the number of levels used for the computation. Default is 256.}
+\item{n_lev, }{an int determining the number of levels used for the computation. Default is 256.}
 
 \item{invert, }{a bool determining whether 'img' should be scaled from min to max (when false, [min(img),max(img)] becoming [0,n_lev-1]) or inverted (when true, with [max(img),min(img)] rescaled to [0,n_lev-1]) values. Default is false.}
 
