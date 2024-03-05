@@ -31,25 +31,45 @@
 #define IFCIP_UTILS_HPP
 
 #include <Rcpp.h>
-#include <utils.hpp>
 using namespace Rcpp;
 
-// retrieve mask matrix or set new one filled with true
-Rcpp::LogicalMatrix get_mask(const Rcpp::Nullable<Rcpp::LogicalMatrix> msk_ = R_NilValue,
-                             const R_len_t mat_r = 0,
-                             const R_len_t mat_c = 0) {
+template <int RTYPE>
+Rcpp::NumericVector getmask_T(const Rcpp::Vector<RTYPE>& img,
+                              const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue) {
   if(msk_.isNotNull()) {
-    Rcpp::LogicalMatrix msk(msk_.get());
-    if(mat_r != msk.nrow() || mat_c != msk.ncol()) {
-      Rcpp::LogicalMatrix mskk = Rcpp::no_init(mat_r, mat_c);
-      mskk.fill(true);
-      return mskk;
+    Rcpp::NumericVector msk(msk_.get());
+    if(img.size() != msk.size()) {
+      Rcpp::stop("hpp_getmask: when 'msk' is provided 'img' and 'msk' should have same dimensions");
+    }
+    if(img.hasAttribute("dim") && msk.hasAttribute("dim")) {
+      Rcpp::IntegerVector i_dim = img.attr("dim");
+      Rcpp::IntegerVector m_dim = msk.attr("dim");
+      if(i_dim.size() != m_dim.size() || !setequal(i_dim, m_dim)) {
+        Rcpp::stop("hpp_getmask: when 'msk' is provided 'img' and 'msk' should have same dimensions");
+      }
+    } else {
+      if((img.hasAttribute("dim") && !msk.hasAttribute("dim")) || 
+         (msk.hasAttribute("dim") && !img.hasAttribute("dim"))) {
+        Rcpp::stop("hpp_getmask: when 'msk' is provided 'img' and 'msk' should have same dimensions");
+      }
     }
     return msk;
   }
-  Rcpp::LogicalMatrix msk(mat_r, mat_c);
-  msk.fill(true);
+  Rcpp::NumericVector msk(img.size(), 1.0);
+  if(img.hasAttribute("dim")) msk.attr("dim") = img.attr("dim");
   return msk;
+}
+
+// [[Rcpp::export]]
+Rcpp::NumericVector hpp_getmask(const SEXP img,
+                                const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue) {
+  switch( TYPEOF(img) ) {
+  case LGLSXP : return getmask_T(as<Rcpp::LogicalVector>(img), msk_);
+  case INTSXP : return getmask_T(as<Rcpp::IntegerVector>(img), msk_);
+  case REALSXP : return getmask_T(as<Rcpp::NumericVector>(img), msk_);
+  case RAWSXP : return getmask_T(as<Rcpp::RawVector>(img), msk_);
+  default : Rcpp::stop("hpp_getmask: not supported SEXP in 'img'");
+  }
 }
 
 //' @title Image Background

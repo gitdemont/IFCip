@@ -39,7 +39,7 @@ NULL
 #' @name cpp_rescale
 #' @description
 #' This function is designed to scale a SEXP to [0, n_lev - 1]
-#' @param img, a SEXP (integer or numeric) vector or matrix containing image intensity values.
+#' @param img, a SEXP (logical, raw, integer or numeric) vector or matrix containing image intensity values.
 #' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 #' Default is R_NilValue, for using all 'img' elements without masking anything.
 #' @param value, a double; it is the replacement value that will be used when 'msk' element is false. Default is NA_REAL.

@@ -31,7 +31,6 @@
 #define IFCIP_KERNEL_HPP
 
 #include <Rcpp.h>
-#include <utils.hpp>
 using namespace Rcpp;
 
 // retrieve kernel matrix or set it to default [[1,1,1],[1,1,1],[1,1,1]] if NULL

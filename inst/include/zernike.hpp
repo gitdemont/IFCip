@@ -58,6 +58,23 @@ R_len_t VIND(uint8_t n, uint8_t l, uint8_t m, uint8_t N1) {
   return l + n * N1 + m * N1 * N1;
 }
 
+Rcpp::LogicalMatrix get_mask(const Rcpp::Nullable<Rcpp::LogicalMatrix> msk_ = R_NilValue,
+                             const R_len_t mat_r = 0,
+                             const R_len_t mat_c = 0) {
+  if(msk_.isNotNull()) {
+    Rcpp::LogicalMatrix msk(msk_.get());
+    if(mat_r != msk.nrow() || mat_c != msk.ncol()) {
+      Rcpp::LogicalMatrix mskk = Rcpp::no_init(mat_r, mat_c);
+      mskk.fill(true);
+      return mskk;
+    }
+    return msk;
+  }
+  Rcpp::LogicalMatrix msk(mat_r, mat_c);
+  msk.fill(true);
+  return msk;
+}
+
 //' @title Zernike's Features
 //' @name cpp_zernike1
 //' @description

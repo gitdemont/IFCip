@@ -70,16 +70,8 @@ Rcpp::IntegerMatrix hpp_cooc(const Rcpp::IntegerMatrix img,
   }
   
   // Ensure no NA will be encountered
-  Rcpp::LogicalMatrix msk = get_mask(img.attr("msk"), mat_r, mat_c);
   Rcpp::LogicalMatrix M = Rcpp::no_init(mat_r, mat_c);
-  for(R_len_t i = 0; i < img.size(); i++) {
-    if(img[i] == NA_INTEGER ||
-       msk[i] == NA_LOGICAL) {
-      M[i] = false;
-    } else {
-      M[i] = msk[i];
-    }
-  }
+  for(R_len_t i = 0; i < img.size(); i++) M[i] = img[i] != NA_INTEGER;
   
   // Non normalized Gray-Level Co-occurence Matrix, GLCM
   Rcpp::IntegerMatrix out(depth, depth);

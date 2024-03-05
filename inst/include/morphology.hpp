@@ -31,7 +31,6 @@
 #define IFCIP_MORPHOLOGY_HPP
 
 #include <Rcpp.h>
-#include <utils.hpp>
 #include "kernel.hpp"
 #include "padding.hpp"
 #include "uw.hpp"
