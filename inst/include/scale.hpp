@@ -43,11 +43,8 @@ Rcpp::NumericVector range_T(const Rcpp::Vector<RTYPE>& img,
         if(R_finite(msk[i])) {
           if(msk[i]) {
             if(R_finite(img[i])) {
-              if(img[i] < out[0]) {
-                out[0] = img[i];
-              } else {
-                if(img[i] > out[1]) out[1] = img[i];
-              }
+              if(img[i] < out[0]) out[0] = img[i];
+              if(img[i] > out[1]) out[1] = img[i];
             } else {
               Rcpp::stop("hpp_range: non-finite values found in 'img'");
             }
@@ -61,11 +58,8 @@ Rcpp::NumericVector range_T(const Rcpp::Vector<RTYPE>& img,
         if(R_finite(msk[i])) {
           if(msk[i]) {
             if(img[i] != NA_INTEGER) {
-              if(img[i] < out[0]) {
-                out[0] = img[i];
-              } else {
-                if(img[i] > out[1]) out[1] = img[i];
-              }
+              if(img[i] < out[0]) out[0] = img[i];
+              if(img[i] > out[1]) out[1] = img[i];
             } else {
               Rcpp::stop("hpp_range: non-finite values found in 'img'");
             }
@@ -79,11 +73,8 @@ Rcpp::NumericVector range_T(const Rcpp::Vector<RTYPE>& img,
     if(RTYPE == REALSXP) {
       for(R_len_t i = 0; i < img.size(); i++) {
         if(R_finite(img[i])) {
-          if(img[i] < out[0]) {
-            out[0] = img[i];
-          } else {
-            if(img[i] > out[1]) out[1] = img[i];
-          }
+          if(img[i] < out[0]) out[0] = img[i];
+          if(img[i] > out[1]) out[1] = img[i];
         } else {
           Rcpp::stop("hpp_range: non-finite values found in 'img'");
         }
@@ -91,11 +82,8 @@ Rcpp::NumericVector range_T(const Rcpp::Vector<RTYPE>& img,
     } else {
       for(R_len_t i = 0; i < img.size(); i++) {
         if(img[i] != NA_INTEGER) {
-          if(img[i] < out[0]) {
-            out[0] = img[i];
-          } else {
-            if(img[i] > out[1]) out[1] = img[i];
-          }
+          if(img[i] < out[0]) out[0] = img[i];
+          if(img[i] > out[1]) out[1] = img[i];
         } else {
           Rcpp::stop("hpp_range: non-finite values found in 'img'");
         }
