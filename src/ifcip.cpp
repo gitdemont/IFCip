@@ -114,7 +114,7 @@ Rcpp::NumericVector cpp_bbox(const Rcpp::NumericMatrix pts,
 //' @name cpp_rescale
 //' @description
 //' This function is designed to scale a SEXP to [0, n_lev - 1]
-//' @param img, a SEXP (integer or numeric) vector or matrix containing image intensity values.
+//' @param img, a SEXP (logical, raw, integer or numeric) vector or matrix containing image intensity values.
 //' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 //' Default is R_NilValue, for using all 'img' elements without masking anything.
 //' @param value, a double; it is the replacement value that will be used when 'msk' element is false. Default is NA_REAL.
@@ -128,12 +128,12 @@ Rcpp::NumericVector cpp_bbox(const Rcpp::NumericMatrix pts,
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-SEXP cpp_rescale( SEXP img,
-                  const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue,
-                  const double value = NA_REAL,
-                  const int n_lev = 256,
-                  const bool invert = false,
-                  const bool bin = false) {
+SEXP cpp_rescale(const SEXP img,
+                 const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue,
+                 const double value = NA_REAL,
+                 const int n_lev = 256,
+                 const bool invert = false,
+                 const bool bin = false) {
   return hpp_rescale(img, msk_, value, n_lev, invert, bin);
 }
 // END scale

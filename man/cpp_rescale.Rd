@@ -4,7 +4,7 @@
 \alias{cpp_rescale}
 \title{Image Scaling}
 \arguments{
-\item{img, }{a SEXP (integer or numeric) vector or matrix containing image intensity values.}
+\item{img, }{a SEXP (logical, raw, integer or numeric) vector or matrix containing image intensity values.}
 
 \item{msk_, }{a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 Default is R_NilValue, for using all 'img' elements without masking anything.}

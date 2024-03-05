@@ -45,11 +45,11 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_rescale
-SEXP cpp_rescale(SEXP img, const Rcpp::Nullable<Rcpp::NumericVector> msk_, const double value, const int n_lev, const bool invert, const bool bin);
+SEXP cpp_rescale(const SEXP img, const Rcpp::Nullable<Rcpp::NumericVector> msk_, const double value, const int n_lev, const bool invert, const bool bin);
 RcppExport SEXP _IFCip_cpp_rescale(SEXP imgSEXP, SEXP msk_SEXP, SEXP valueSEXP, SEXP n_levSEXP, SEXP invertSEXP, SEXP binSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< SEXP >::type img(imgSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type img(imgSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericVector> >::type msk_(msk_SEXP);
     Rcpp::traits::input_parameter< const double >::type value(valueSEXP);
     Rcpp::traits::input_parameter< const int >::type n_lev(n_levSEXP);
