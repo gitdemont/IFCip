@@ -82,7 +82,9 @@ Rcpp::NumericMatrix hpp_dilate(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_opening(const Rcpp::NumericMatrix mat,
                                 const Rcpp::NumericMatrix kernel) {
-  return hpp_dilate(hpp_erode(mat, kernel), kernel);
+  Rcpp::NumericMatrix rev_kernel = Rcpp::no_init_matrix(kernel.nrow(), kernel.ncol());
+  for(R_len_t i = kernel.size() - 1, k = 0; i >= 0; i--) rev_kernel[k++] = kernel[i];
+  return hpp_dilate(hpp_erode(mat, kernel), rev_kernel);
 }
 
 //' @title Image Closing
@@ -97,7 +99,9 @@ Rcpp::NumericMatrix hpp_opening(const Rcpp::NumericMatrix mat,
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_closing(const Rcpp::NumericMatrix mat,
                                 const Rcpp::NumericMatrix kernel) {
-  return hpp_erode(hpp_dilate(mat, kernel), kernel);
+  Rcpp::NumericMatrix rev_kernel = Rcpp::no_init_matrix(kernel.nrow(), kernel.ncol());
+  for(R_len_t i = kernel.size() - 1, k = 0; i >= 0; i--) rev_kernel[k++] = kernel[i];
+  return hpp_erode(hpp_dilate(mat, kernel), rev_kernel);
 }
 
 //' @title Image Morphological Gradient
