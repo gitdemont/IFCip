@@ -144,11 +144,8 @@ Rcpp::NumericMatrix hpp_dist_int(const Rcpp::NumericMatrix img,
 Rcpp::NumericMatrix hpp_distance_eucl(const Rcpp::IntegerMatrix msk) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(msk);
   R_len_t cen_r = cen.nrow(), mat_r = msk.nrow(), mat_c = msk.ncol();
-  Rcpp::NumericMatrix out = Rcpp::no_init(mat_r, mat_c);
-  if(cen_r == 0) {
-    out.fill(0.0);
-    return out;
-  }
+  Rcpp::NumericMatrix out(mat_r, mat_c);
+  if(cen_r == 0) return out;
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
       R_len_t i_comp = msk(i_row, i_col) - 1;
@@ -173,11 +170,8 @@ Rcpp::NumericMatrix hpp_distance_eucl(const Rcpp::IntegerMatrix msk) {
 Rcpp::NumericMatrix hpp_distance_eucl_norm(const Rcpp::IntegerMatrix msk) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(msk);
   R_len_t cen_r = cen.nrow(), mat_r = msk.nrow(), mat_c = msk.ncol();
-  Rcpp::NumericMatrix out = Rcpp::no_init(mat_r, mat_c);
-  if(cen_r == 0) {
-    out.fill(0.0);
-    return out;
-  }
+  Rcpp::NumericMatrix out(mat_r, mat_c);
+  if(cen_r == 0) return out;
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
       R_len_t i_comp = msk(i_row, i_col) - 1;
@@ -211,11 +205,8 @@ Rcpp::NumericMatrix hpp_distance_eucl_norm(const Rcpp::IntegerMatrix msk) {
 Rcpp::NumericMatrix hpp_distance_manh(const Rcpp::IntegerMatrix msk) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(msk);
   R_len_t cen_r = cen.nrow(), mat_r = msk.nrow(), mat_c = msk.ncol();
-  Rcpp::NumericMatrix out = Rcpp::no_init(mat_r, mat_c);
-  if(cen_r == 0) {
-    out.fill(0.0);
-    return out; 
-  }
+  Rcpp::NumericMatrix out(mat_r, mat_c);
+  if(cen_r == 0) return out;
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
       R_len_t i_comp = msk(i_row, i_col) - 1;
@@ -239,11 +230,8 @@ Rcpp::NumericMatrix hpp_distance_manh(const Rcpp::IntegerMatrix msk) {
 Rcpp::NumericMatrix hpp_distance_manh_norm(const Rcpp::IntegerMatrix msk) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(msk);
   R_len_t cen_r = cen.nrow(), mat_r = msk.nrow(), mat_c = msk.ncol();
-  Rcpp::NumericMatrix out = Rcpp::no_init(mat_r, mat_c);
-  if(cen_r == 0) {
-    out.fill(0.0);
-    return out;
-  }
+  Rcpp::NumericMatrix out(mat_r, mat_c);
+  if(cen_r == 0) return out;
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
       R_len_t i_comp = msk(i_row, i_col) - 1;
@@ -422,11 +410,8 @@ Rcpp::NumericMatrix hpp_disttrans_eucl (const Rcpp::NumericMatrix img) {
 Rcpp::IntegerMatrix hpp_voronoi_eucl (const Rcpp::IntegerMatrix img) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(img);
   R_len_t cen_r = cen.nrow(), mat_r = img.nrow(), mat_c = img.ncol();
-  Rcpp::IntegerMatrix out = Rcpp::no_init(mat_r, mat_c);
-  if(cen_r == 0) {
-    out.fill(0);
-    return out;
-  }
+  Rcpp::IntegerMatrix out(mat_r, mat_c);
+  if(cen_r == 0) return out;
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     R_len_t i_col_1 = i_col - 1;
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
@@ -458,11 +443,8 @@ Rcpp::IntegerMatrix hpp_voronoi_eucl (const Rcpp::IntegerMatrix img) {
 Rcpp::IntegerMatrix hpp_voronoi_manh (const Rcpp::IntegerMatrix img) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(img);
   R_len_t cen_r = cen.nrow(), mat_r = img.nrow(), mat_c = img.ncol();
-  Rcpp::IntegerMatrix out = Rcpp::no_init(mat_r, mat_c);
-  if(cen_r == 0) {
-    out.fill(0);
-    return out;
-  }
+  Rcpp::IntegerMatrix out(mat_r, mat_c);
+  if(cen_r == 0) return out;
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     R_len_t i_col_1 = i_col - 1;
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
