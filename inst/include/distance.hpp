@@ -43,6 +43,8 @@ using namespace Rcpp;
 //' -pix cy, y centroid of the component in pixels\cr
 //' -pix count, number of pixels occupied by the component.
 //' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_dist_cen(const Rcpp::IntegerMatrix msk) {
   R_len_t mat_r = msk.nrow(), mat_c = msk.ncol();
   R_len_t nC = 0;
@@ -55,10 +57,6 @@ Rcpp::NumericMatrix hpp_dist_cen(const Rcpp::IntegerMatrix msk) {
   
   // initialize matrix
   Rcpp::NumericMatrix out(nC, 3);
-  
-  // create colnames  (not needed)
-  // Rcpp::StringVector N = Rcpp::StringVector::create("pix cx", "pix cy", "pix count");
-  // Rcpp::colnames(out) = N;
   if(nC == 0) return out;
 
   // define raw moments
@@ -101,6 +99,8 @@ Rcpp::NumericMatrix hpp_dist_cen(const Rcpp::IntegerMatrix msk) {
 //' -pix cy, y centroid of the component in pixels\cr
 //' -pix count, number of pixels occupied by the component.
 //' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_dist_int(const Rcpp::NumericMatrix img,
                                  const Rcpp::IntegerMatrix msk,
                                  const R_len_t nC = 0) {
@@ -108,10 +108,6 @@ Rcpp::NumericMatrix hpp_dist_int(const Rcpp::NumericMatrix img,
   
   // initialize matrix
   Rcpp::NumericMatrix out(nC, 2);
-  
-  // create colnames (not needed)
-  // Rcpp::StringVector N = Rcpp::StringVector::create("Raw Min Pixel","Raw Max Pixel");
-  // Rcpp::colnames(out) = N;
   if(nC == 0) return out;
   
   // fill min, max
@@ -148,8 +144,11 @@ Rcpp::NumericMatrix hpp_dist_int(const Rcpp::NumericMatrix img,
 Rcpp::NumericMatrix hpp_distance_eucl(const Rcpp::IntegerMatrix msk) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(msk);
   R_len_t cen_r = cen.nrow(), mat_r = msk.nrow(), mat_c = msk.ncol();
-  Rcpp::NumericMatrix out(mat_r, mat_c);
-  if(cen_r == 0) return out;
+  Rcpp::NumericMatrix out = Rcpp::no_init(mat_r, mat_c);
+  if(cen_r == 0) {
+    out.fill(0.0);
+    return out;
+  }
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
       R_len_t i_comp = msk(i_row, i_col) - 1;
@@ -174,8 +173,11 @@ Rcpp::NumericMatrix hpp_distance_eucl(const Rcpp::IntegerMatrix msk) {
 Rcpp::NumericMatrix hpp_distance_eucl_norm(const Rcpp::IntegerMatrix msk) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(msk);
   R_len_t cen_r = cen.nrow(), mat_r = msk.nrow(), mat_c = msk.ncol();
-  Rcpp::NumericMatrix out(mat_r, mat_c);
-  if(cen_r == 0) return out;
+  Rcpp::NumericMatrix out = Rcpp::no_init(mat_r, mat_c);
+  if(cen_r == 0) {
+    out.fill(0.0);
+    return out;
+  }
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
       R_len_t i_comp = msk(i_row, i_col) - 1;
@@ -209,8 +211,11 @@ Rcpp::NumericMatrix hpp_distance_eucl_norm(const Rcpp::IntegerMatrix msk) {
 Rcpp::NumericMatrix hpp_distance_manh(const Rcpp::IntegerMatrix msk) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(msk);
   R_len_t cen_r = cen.nrow(), mat_r = msk.nrow(), mat_c = msk.ncol();
-  Rcpp::NumericMatrix out(mat_r, mat_c);
-  if(cen_r == 0) return out;
+  Rcpp::NumericMatrix out = Rcpp::no_init(mat_r, mat_c);
+  if(cen_r == 0) {
+    out.fill(0.0);
+    return out; 
+  }
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
       R_len_t i_comp = msk(i_row, i_col) - 1;
@@ -234,8 +239,11 @@ Rcpp::NumericMatrix hpp_distance_manh(const Rcpp::IntegerMatrix msk) {
 Rcpp::NumericMatrix hpp_distance_manh_norm(const Rcpp::IntegerMatrix msk) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(msk);
   R_len_t cen_r = cen.nrow(), mat_r = msk.nrow(), mat_c = msk.ncol();
-  Rcpp::NumericMatrix out(mat_r, mat_c);
-  if(cen_r == 0) return out;
+  Rcpp::NumericMatrix out = Rcpp::no_init(mat_r, mat_c);
+  if(cen_r == 0) {
+    out.fill(0.0);
+    return out;
+  }
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
       R_len_t i_comp = msk(i_row, i_col) - 1;
@@ -415,8 +423,10 @@ Rcpp::IntegerMatrix hpp_voronoi_eucl (const Rcpp::IntegerMatrix img) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(img);
   R_len_t cen_r = cen.nrow(), mat_r = img.nrow(), mat_c = img.ncol();
   Rcpp::IntegerMatrix out = Rcpp::no_init(mat_r, mat_c);
-  if(cen_r == 0) return out;
-  
+  if(cen_r == 0) {
+    out.fill(0);
+    return out;
+  }
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     R_len_t i_col_1 = i_col - 1;
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
@@ -449,8 +459,10 @@ Rcpp::IntegerMatrix hpp_voronoi_manh (const Rcpp::IntegerMatrix img) {
   Rcpp::NumericMatrix cen = hpp_dist_cen(img);
   R_len_t cen_r = cen.nrow(), mat_r = img.nrow(), mat_c = img.ncol();
   Rcpp::IntegerMatrix out = Rcpp::no_init(mat_r, mat_c);
-  if(cen_r == 0) return out;
-  
+  if(cen_r == 0) {
+    out.fill(0);
+    return out;
+  }
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     R_len_t i_col_1 = i_col - 1;
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
