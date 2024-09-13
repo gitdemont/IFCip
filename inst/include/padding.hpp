@@ -48,7 +48,7 @@ using namespace Rcpp;
 //' -6, extra cols / rows will be filled with the closest col / row, returned 'out' will be filled with mat.\cr
 //' -7, extra cols / rows will be filled mirroring neighbor cols / rows, returned 'out' will be filled with mat.\cr
 //' -8, extra cols / rows will be filled repeating neighbor cols / rows, returned 'out' will be filled with mat.
-//' @param k, a double, constant used when method is 1 or 4. Default is 0.0.
+//' @param k, a double, constant used when method is 1 or 5. Default is 0.0.
 //' @return a NumericMatrix, with extra cols / rows
 //' @keywords internal
 ////' @export

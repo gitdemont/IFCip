@@ -7,6 +7,8 @@
 \item{mat, }{a NumericMatrix.}
 
 \item{kernel, }{a NumericMatrix.}
+
+\item{method}{used for padding, a uint8_t. Default is 5 (with k = 0.0, see hpp_padding), allowed are [1-8].}
 }
 \value{
 a NumericMatrix.

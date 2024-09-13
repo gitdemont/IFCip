@@ -18,7 +18,7 @@
 -7, extra cols / rows will be filled mirroring neighbor cols / rows, returned 'out' will be filled with mat.\cr
 -8, extra cols / rows will be filled repeating neighbor cols / rows, returned 'out' will be filled with mat.}
 
-\item{k, }{a double, constant used when method is 1 or 4. Default is 0.0.}
+\item{k, }{a double, constant used when method is 1 or 5. Default is 0.0.}
 }
 \value{
 a NumericMatrix, with extra cols / rows

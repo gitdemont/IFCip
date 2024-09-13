@@ -40,12 +40,14 @@ using namespace Rcpp;
 //' This function applies standard deviation filtering on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
+//' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_sd(const Rcpp::NumericMatrix mat,
-                           const Rcpp::NumericMatrix kernel) {
+                           const Rcpp::NumericMatrix kernel,
+                           const uint8_t method = 5) {
   // get kernel dimension 
   R_len_t pad_c = kernel.ncol() >> 1;
   R_len_t pad_r = kernel.nrow() >> 1;
@@ -57,7 +59,7 @@ Rcpp::NumericMatrix hpp_sd(const Rcpp::NumericMatrix mat,
   if(kr) kr = !kr;                                                               //APPLY OFFSET CORRECTION
   if(kc) kc = !kc;                                                               //APPLY OFFSET CORRECTION
   // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
-  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);//APPLY OFFSET CORRECTION
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, method, NA_REAL);//APPLY OFFSET CORRECTION
   // create vector for storage of matrix value at kernel position
   Rcpp::NumericVector K(kernel.size(), NA_REAL);
   
@@ -84,12 +86,14 @@ Rcpp::NumericMatrix hpp_sd(const Rcpp::NumericMatrix mat,
 //' This function applies mean filtering on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
+//' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_mean(const Rcpp::NumericMatrix mat,
-                             const Rcpp::NumericMatrix kernel) {
+                             const Rcpp::NumericMatrix kernel,
+                             const uint8_t method = 5) {
   // get kernel dimension
   R_len_t pad_c = kernel.ncol() >> 1;
   R_len_t pad_r = kernel.nrow() >> 1;
@@ -101,7 +105,7 @@ Rcpp::NumericMatrix hpp_mean(const Rcpp::NumericMatrix mat,
   if(kr) kr = !kr;                                                               //APPLY OFFSET CORRECTION
   if(kc) kc = !kc;                                                               //APPLY OFFSET CORRECTION
   // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
-  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);//APPLY OFFSET CORRECTION
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, method, NA_REAL);//APPLY OFFSET CORRECTION
   // create vector for storage of matrix value at kernel position
   Rcpp::NumericVector K(kernel.size(), NA_REAL);
   
@@ -128,12 +132,14 @@ Rcpp::NumericMatrix hpp_mean(const Rcpp::NumericMatrix mat,
 //' This function applies median filtering on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
+//' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_median(const Rcpp::NumericMatrix mat,
-                               const Rcpp::NumericMatrix kernel) {
+                               const Rcpp::NumericMatrix kernel,
+                               const uint8_t method = 5) {
   // get kernel dimension
   R_len_t pad_c = kernel.ncol() >> 1;
   R_len_t pad_r = kernel.nrow() >> 1;
@@ -145,7 +151,7 @@ Rcpp::NumericMatrix hpp_median(const Rcpp::NumericMatrix mat,
   if(kr) kr = !kr;                                                               //APPLY OFFSET CORRECTION
   if(kc) kc = !kc;                                                               //APPLY OFFSET CORRECTION
   // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
-  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);//APPLY OFFSET CORRECTION
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, method, NA_REAL);//APPLY OFFSET CORRECTION
   // create vector for storage of matrix value at kernel position
   Rcpp::NumericVector K(kernel.size(), NA_REAL);
   
@@ -172,12 +178,14 @@ Rcpp::NumericMatrix hpp_median(const Rcpp::NumericMatrix mat,
 //' This function applies mode filtering on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
+//' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_mode(const Rcpp::NumericMatrix mat,
-                             const Rcpp::NumericMatrix kernel) {
+                             const Rcpp::NumericMatrix kernel,
+                             const uint8_t method = 5) {
   // get kernel dimension
   R_len_t pad_c = kernel.ncol() >> 1;
   R_len_t pad_r = kernel.nrow() >> 1;
@@ -189,7 +197,7 @@ Rcpp::NumericMatrix hpp_mode(const Rcpp::NumericMatrix mat,
   if(kr) kr = !kr;                                                               //APPLY OFFSET CORRECTION
   if(kc) kc = !kc;                                                               //APPLY OFFSET CORRECTION
   // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
-  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);//APPLY OFFSET CORRECTION
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, method, NA_REAL);//APPLY OFFSET CORRECTION
   // create vector for storage of matrix value at kernel position
   Rcpp::NumericVector K(kernel.size(), NA_REAL);
   
@@ -216,12 +224,14 @@ Rcpp::NumericMatrix hpp_mode(const Rcpp::NumericMatrix mat,
 //' This function applies mid filtering on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
+//' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_mid(const Rcpp::NumericMatrix mat,
-                            const Rcpp::NumericMatrix kernel) {
+                            const Rcpp::NumericMatrix kernel,
+                            const uint8_t method = 5) {
   // get kernel dimension
   R_len_t pad_c = kernel.ncol() >> 1;
   R_len_t pad_r = kernel.nrow() >> 1;
@@ -233,7 +243,7 @@ Rcpp::NumericMatrix hpp_mid(const Rcpp::NumericMatrix mat,
   if(kr) kr = !kr;                                                               //APPLY OFFSET CORRECTION
   if(kc) kc = !kc;                                                               //APPLY OFFSET CORRECTION
   // create out padded with NA, NA is important to allow removal of extra values from final result (na_omit)
-  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, NA_REAL);//APPLY OFFSET CORRECTION
+  Rcpp::NumericMatrix out = hpp_padding(mat, pad_r + kc, pad_c + kr, method, NA_REAL);//APPLY OFFSET CORRECTION
   // create vectors for storage of matrix value at kernel position
   Rcpp::NumericVector MIN(kernel.size(), NA_REAL);
   Rcpp::NumericVector MAX(kernel.size(), NA_REAL);
@@ -266,12 +276,14 @@ Rcpp::NumericMatrix hpp_mid(const Rcpp::NumericMatrix mat,
 //' This function applies 2D convolution filtering on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
+//' @param method used for padding, a uint8_t. Default is 5 (with k = 0.0, see hpp_padding), allowed are [1-8].
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_convolve2d(const Rcpp::NumericMatrix mat,
-                                   const Rcpp::NumericMatrix kernel) {
+                                   const Rcpp::NumericMatrix kernel,
+                                   const uint8_t method = 5) {
   // get kernel dimension
   R_len_t pad_c = kernel.ncol() >> 1;
   R_len_t pad_r = kernel.nrow() >> 1;
@@ -283,7 +295,7 @@ Rcpp::NumericMatrix hpp_convolve2d(const Rcpp::NumericMatrix mat,
   if(kr) kr = !kr;                                                           //APPLY OFFSET CORRECTION
   if(kc) kc = !kc;                                                           //APPLY OFFSET CORRECTION
   // create out padded with 0.0, 0.0 is important to allow removal of extra values from final result (multiply by 0.0)
-  Rcpp::NumericMatrix foo = hpp_padding(mat, pad_r + kc, pad_c + kr, 5, 0.0);//APPLY OFFSET CORRECTION
+  Rcpp::NumericMatrix foo = hpp_padding(mat, pad_r + kc, pad_c + kr, method, 0.0);//APPLY OFFSET CORRECTION
   
   Rcpp::NumericMatrix out(foo.nrow(), foo.ncol());
   for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
@@ -306,12 +318,14 @@ Rcpp::NumericMatrix hpp_convolve2d(const Rcpp::NumericMatrix mat,
 //' This function applies 2D correlation filtering on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
+//' @param method used for padding, a uint8_t. Default is 5 (with k = 0.0, see hpp_padding), allowed are [1-8].
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_correlate2d(const Rcpp::NumericMatrix mat,
-                                    const Rcpp::NumericMatrix kernel) {
+                                    const Rcpp::NumericMatrix kernel, 
+                                    const uint8_t method = 5) {
   // get kernel dimension
   R_len_t pad_c = kernel.ncol() >> 1;
   R_len_t pad_r = kernel.nrow() >> 1;
@@ -321,7 +335,7 @@ Rcpp::NumericMatrix hpp_correlate2d(const Rcpp::NumericMatrix mat,
   R_len_t pad_r_1 = pad_r + kr;
   if(kr == kc) kr = kc = !kc;                                                 //APPLY OFFSET CORRECTION
   // create out padded with 0.0, 0.0 is important to allow removal of extra values from final result (multiply by 0.0)
-  Rcpp::NumericMatrix foo = hpp_padding(mat, pad_r + kc, pad_c + kr, 5,  0.0);//APPLY OFFSET CORRECTION
+  Rcpp::NumericMatrix foo = hpp_padding(mat, pad_r + kc, pad_c + kr, method,  0.0);//APPLY OFFSET CORRECTION
   
   Rcpp::NumericMatrix out(foo.nrow(), foo.ncol());
   for(R_len_t i_col = out.ncol() - pad_c - 1; i_col >= pad_c; i_col--) {

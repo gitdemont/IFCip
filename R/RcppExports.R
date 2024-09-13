@@ -464,7 +464,7 @@ NULL
 #' -6, extra cols / rows will be filled with the closest col / row, returned 'out' will be filled with mat.\cr
 #' -7, extra cols / rows will be filled mirroring neighbor cols / rows, returned 'out' will be filled with mat.\cr
 #' -8, extra cols / rows will be filled repeating neighbor cols / rows, returned 'out' will be filled with mat.
-#' @param k, a double, constant used when method is 1 or 4. Default is 0.0.
+#' @param k, a double, constant used when method is 1 or 5. Default is 0.0.
 #' @return a NumericMatrix, with extra cols / rows
 #' @keywords internal
 NULL
@@ -475,6 +475,7 @@ NULL
 #' This function applies standard deviation filtering on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
+#' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -485,6 +486,7 @@ NULL
 #' This function applies mean filtering on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
+#' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -495,6 +497,7 @@ NULL
 #' This function applies median filtering on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
+#' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -505,6 +508,7 @@ NULL
 #' This function applies mode filtering on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
+#' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -515,6 +519,7 @@ NULL
 #' This function applies mid filtering on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
+#' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -525,6 +530,7 @@ NULL
 #' This function applies 2D convolution filtering on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
+#' @param method used for padding, a uint8_t. Default is 5 (with k = 0.0, see hpp_padding), allowed are [1-8].
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -535,6 +541,7 @@ NULL
 #' This function applies 2D correlation filtering on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
+#' @param method used for padding, a uint8_t. Default is 5 (with k = 0.0, see hpp_padding), allowed are [1-8].
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -1199,32 +1206,32 @@ cpp_padding <- function(mat, extra_rows = 0L, extra_cols = 0L, method = 1L, k = 
     .Call(`_IFCip_cpp_padding`, mat, extra_rows, extra_cols, method, k)
 }
 
-cpp_sd <- function(mat, kernel) {
-    .Call(`_IFCip_cpp_sd`, mat, kernel)
+cpp_sd <- function(mat, kernel, method = 5L) {
+    .Call(`_IFCip_cpp_sd`, mat, kernel, method)
 }
 
-cpp_mean <- function(mat, kernel) {
-    .Call(`_IFCip_cpp_mean`, mat, kernel)
+cpp_mean <- function(mat, kernel, method = 5L) {
+    .Call(`_IFCip_cpp_mean`, mat, kernel, method)
 }
 
-cpp_median <- function(mat, kernel) {
-    .Call(`_IFCip_cpp_median`, mat, kernel)
+cpp_median <- function(mat, kernel, method = 5L) {
+    .Call(`_IFCip_cpp_median`, mat, kernel, method)
 }
 
-cpp_mode <- function(mat, kernel) {
-    .Call(`_IFCip_cpp_mode`, mat, kernel)
+cpp_mode <- function(mat, kernel, method = 5L) {
+    .Call(`_IFCip_cpp_mode`, mat, kernel, method)
 }
 
-cpp_mid <- function(mat, kernel) {
-    .Call(`_IFCip_cpp_mid`, mat, kernel)
+cpp_mid <- function(mat, kernel, method = 5L) {
+    .Call(`_IFCip_cpp_mid`, mat, kernel, method)
 }
 
-cpp_convolve2d <- function(mat, kernel) {
-    .Call(`_IFCip_cpp_convolve2d`, mat, kernel)
+cpp_convolve2d <- function(mat, kernel, method = 5L) {
+    .Call(`_IFCip_cpp_convolve2d`, mat, kernel, method)
 }
 
-cpp_correlate2d <- function(mat, kernel) {
-    .Call(`_IFCip_cpp_correlate2d`, mat, kernel)
+cpp_correlate2d <- function(mat, kernel, method = 5L) {
+    .Call(`_IFCip_cpp_correlate2d`, mat, kernel, method)
 }
 
 cpp_uw <- function(mat, kernel, erode = TRUE) {
