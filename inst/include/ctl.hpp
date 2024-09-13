@@ -58,7 +58,7 @@ static int ifcip_ctl_bk [8]={ 7, 7, 1, 1, 3, 3, 5, 5};
 Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
                    const bool global = false) {
   R_len_t mat_r = mat.nrow(), mat_c = mat.ncol();
-  R_len_t i_cont = 0, i_per = -1, new_l = 2, max_count = (std::ceil(mat_r / 2) + 1) * (std::ceil(mat_c / 2) + 1) * 10;
+  R_len_t i_cont = 0, i_per = -1, new_l = 2, max_count = ((mat_r >> 1) + (mat_r % 2) + 1) * ((mat_c >> 1) + (mat_c % 2) + 1) * 10;
   
   // create output matrix with extra cols / rows
   Rcpp::IntegerMatrix out(mat_r + 2, mat_c + 2);
@@ -68,7 +68,7 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
   // meaning that each point is separated by 1 background px
   // when recorded we store (5 + 5) values for each foreground px
   // so maximal final length should be
-  // Rcpp::IntegerVector contours((ceil(mat_r / 2) + 1) * (ceil(mat_c / 2) + 1) * 10);
+  // Rcpp::IntegerVector contours(((mat_r >> 1) + (mat_r % 2) + 1) * ((mat_c >> 1) + (mat_c % 2) + 1) * 10);
   Rcpp::IntegerVector contours(max_count);
   
   // create output perimeter
@@ -88,14 +88,6 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
           // Initialize external contour recording
           i_per++; 
           perimeter.push_back(0);
-          if(max_count - i_cont < 5) { // safer
-            Rcpp::stop("hpp_ctl: buffer overrun");
-          }
-          contours[i_cont++] = -2;
-          contours[i_cont++] = -2;
-          contours[i_cont++] = -2;
-          contours[i_cont++] =  8;
-          contours[i_cont++] =  1;
           
           // register current position + set 1st visiting position
           R_len_t len = i_cont, nbr_x = 0, nbr_y = 0;
@@ -166,14 +158,6 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
         else if(out(i_row + 1, i_col) == 0) { // unprocessed internal contour
           // Rcpp::checkUserInterrupt();
           // Initialize internal contour recording
-          if(max_count - i_cont < 5) { // safer
-            Rcpp::stop("hpp_ctl: buffer overrun");
-          }
-          contours[i_cont++] = -3;
-          contours[i_cont++] = -3;
-          contours[i_cont++] = -3;
-          contours[i_cont++] =  8;
-          contours[i_cont++] =  2;
           
           // register current position + set 1st visiting position
           R_len_t len = i_cont, nbr_x = 0, nbr_y = 0;
