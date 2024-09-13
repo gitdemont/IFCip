@@ -72,7 +72,7 @@ make_kernel <- function(size = 3, type = "box", sigma = 0.3) {
            x = seq(-(size - 1)/2, (size - 1)/2, length = size)
            x = matrix(x, ncol = size, nrow = size)
            ans = -(x^2 + t(x)^2) / (2*sigma^2)
-           ans = -(1+ans)*exp(ans)/(pi*sigma^4)
+           ans = -(1+ans)*exp(ans)/(sigma^4)
          },
          "sobelx" = { 
            ans = matrix(c( -1,  0,  1,
