@@ -6,16 +6,18 @@
 \arguments{
 \item{img, }{a NumericMatrix.}
 
-\item{h, }{a double, specifying the minimal depth. Default is 0.0. it should be positive.}
+\item{h, }{a double, specifying the minimal depth. Default is 0.0.}
 
-\item{img_min, }{a double. Minimal value of image range. Default is 0.0.
-It is the value provided by the user, according to what the 'img' range should cover and not the actual minimal value of 'img'.}
+\item{n_lev, }{an unsigned short determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.}
 
-\item{img_max, }{a double. Maximal value of image range. Default is 1.0.
-It is the value provided by the user, according to what the 'img' range should cover and not the actual maximal value of 'img'.}
+\item{range, }{a NumericVector. Default is R_NilValue, to use 'img' range.\cr
+Otherwise, desired range 'img' should cover and not the actual minimal/maximal value of 'img'.}
 
 \item{kernel, }{a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 Default is R_NilValue, resulting in 8-connected pixels neighbors computation.}
+
+\item{msk_, }{a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
+Default is R_NilValue, for using all 'img' elements without masking anything.}
 }
 \value{
 a NumericMatrix of H-Minima transformation of 'img'.
