@@ -70,10 +70,6 @@ Rcpp::NumericVector pt_rotate(const Rcpp::NumericVector pt1,
 // [[Rcpp::export(rng = false)]]
 double pt_slope(const Rcpp::NumericVector pt1,
                 const Rcpp::NumericVector pt2) {
-  // parallel to axes
-  if(pt1[1] == pt2[1]) return 0.0;
-  if(pt1[0] == pt2[0]) return 1.0;
-  // otherwise
   return (pt1[1] - pt2[1]) / (pt1[0] - pt2[0]);
 }
 
@@ -115,13 +111,14 @@ double pt_projection_y(const Rcpp::NumericVector pt1,
 Rcpp::NumericVector pt_inversion(const Rcpp::NumericVector pt1,
                                  const Rcpp::NumericVector pt2) {
   double xo = pt2[0], yo = pt2[1], xx = pt1[0], yy = pt1[1];
-  if(yo == yy) return Rcpp::NumericVector::create(_["x"] = xx, _["y"] = yy);
+  if(yo == yy) return Rcpp::NumericVector::create(_["x"] = 2 * xo - xx, _["y"] = yy);
+  if(xo == xx) return Rcpp::NumericVector::create(_["x"] = xx, _["y"] = 2 * yo - yy);
   double m = pt_slope(pt1, pt2);
   double a = -1 / m;
   double c = yo + xo / m;
   double d = 2 * (xx + a * (yy - c) ) / (1 + a * a);
   return Rcpp::NumericVector::create(_["x"] = d - xx,
-                                      _["y"] = d * a - yy + 2 * c);
+                                     _["y"] = d * a - yy + 2 * c);
 }
 
 // pt_inversion is faster than pt_inversion2
@@ -139,11 +136,19 @@ Rcpp::NumericVector pt_reflection(const Rcpp::NumericVector pt1,  // pt of inter
                                   const Rcpp::NumericVector pt2,  // 1st coord of the segment
                                   const Rcpp::NumericVector pt3) {// 2nd coord of the segment
   // line ax + by + c; b = -1
+  if(pt2[0] == pt3[0]) {
+    return Rcpp::NumericVector::create(_["x"] = 2 * pt2[0] - pt1[0],
+                                       _["y"] = pt1[1]);
+  }
+  if(pt2[1] == pt3[1]) {
+    return Rcpp::NumericVector::create(_["x"] = pt1[0],
+                                       _["y"] = 2 * pt2[1] - pt1[1]);
+  }
   double a = pt_slope(pt2, pt3);
   double c = pt_projection_y(pt2, pt3, 0);
   double d = 2 * (a * pt1[0] - pt1[1] + c) / (a * a + 1);
   return Rcpp::NumericVector::create(_["x"] = pt1[0] - d * a,
-                                      _["y"] = pt1[1] + d);
+                                     _["y"] = pt1[1] + d);
 }
 
 // helper to determine orthogonal projection of point pt1 on the line defined by pt2 and pt3.
@@ -154,6 +159,14 @@ Rcpp::NumericVector pt_projection(const Rcpp::NumericVector pt1,  // pt of inter
                                   const Rcpp::NumericVector pt2,  // 1st coord of the segment
                                   const Rcpp::NumericVector pt3) {// 2nd coord of the segment
   // pt' is at the middle of pt1 and its pt_projection
+  if(pt2[0] == pt3[0]) {
+    return Rcpp::NumericVector::create(_["x"] = pt2[0],
+                                       _["y"] = pt1[1]);
+  }
+  if(pt2[1] == pt3[1]) {
+    return Rcpp::NumericVector::create(_["x"] = pt1[0],
+                                       _["y"] = pt2[1]);
+  }
   double a = pt_slope(pt2, pt3);
   double c = pt_projection_y(pt2, pt3, 0);
   double d = (a * pt1[0] - pt1[1] + c) / (a * a + 1);
@@ -181,13 +194,18 @@ double pt_distance_accu(const Rcpp::NumericVector pt1,
 double pt_shortest(const Rcpp::NumericVector pt1,  // pt of interest
                    const Rcpp::NumericVector pt2,  // 1st coord of the segment
                    const Rcpp::NumericVector pt3,  // 2nd coord of the segment
-                   const double scale = 1.0) {
+                   const double scale = 1.0,
+                   const double eps = 0.000000001) {
+  if((pt1[0] == pt2[0] && pt1[1] == pt2[1]) || (pt1[0] == pt3[0] && pt1[1] == pt3[1])) return 0;
   double dx = pt3[0] - pt2[0], dy = pt3[1] - pt2[1];
   double dot = (pt1[0] - pt2[0]) * dx + (pt1[1] - pt2[1]) * dy;
+  if((dot < 0) && (dot > (-1.0 * eps))) dot = 0;
   double dist = dx * dx + dy * dy;
   double n = -1.0;
-  if(dist != 0) n = dot / dist;
-  if(n < 0.0 || n > 1.0) return R_PosInf;
+  n = dot / dist;
+  if(n < 0.0) return R_PosInf;
+  if((n > 1.0) && (n < (1 + eps))) n = 1.0;
+  if(n > 1.0) return R_PosInf;
   return scale * std::sqrt(pow(pt1[0] - (pt2[0] + n * dx), 2.0) + pow(pt1[1] - (pt2[1] + n * dy), 2.0));
 }
 
