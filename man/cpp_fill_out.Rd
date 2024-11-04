@@ -5,6 +5,10 @@
 \title{Contours Filling Outer Only}
 \arguments{
 \item{ctl}{a List, containing contour tracing labeling, object of class `IFCip_ctl`.}
+
+\item{o_border}{a bool, to whether or draw external contours.}
+
+\item{o_fill}{a bool, to whether or not fill external contours.}
 }
 \value{
 an IntegerMatrix.

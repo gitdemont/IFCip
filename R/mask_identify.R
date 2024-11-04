@@ -65,12 +65,12 @@ mask_identify1 <- function(img, threshold = 0.95, size = 5) {
   # dilate and fill object(s) found
   b = cpp_dilate(a, kernel = make_kernel(size = size + 2, type = "disc"))
   ctl = cpp_ctl(b)
-  aa = cpp_fill(ctl, inner = TRUE, outer = TRUE)
+  aa = cpp_fill_out(ctl)
 
   # erode and identify object(s)
   bb = cpp_erode(cpp_erode(aa, kernel = make_kernel(size = size, type = "box")), kernel = make_kernel(size = size, type = "box"))
   ctl = cpp_ctl(bb)
-  foo = cpp_fill(ctl, inner = TRUE, outer = TRUE)
+  foo = cpp_fill_out(ctl)
   
   ATT = list("IFC_msk", "identify", threshold, size, ctl$perimeter, c(nrow(foo), ncol(foo)))
   names(ATT) = c("class", "type", "threshold", "size", "perimeter", "dim")

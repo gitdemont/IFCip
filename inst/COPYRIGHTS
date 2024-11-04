@@ -6,7 +6,8 @@ IFC: An R Package for Imaging Flow Cytometry Image Processing
 Copyright (C) 2021 Yohann Demont
 
 --------------------------------------------------------------------------------
-hpp_zernike1 and hpp_zernike2 are adapted from File src/features_zernike.c and
+hpp_zernike1 and hpp_zernike2 are adapted from File src/features_zernike.c,
+scanfill is adapted from File src/floodFill.cpp, and
 gaussian and laplacian kernel in makeKernel is adapted from File R/morphology.R
 in EBImage R package in its version 3.12.0 available at
 https://www.bioconductor.org/packages/2.10/bioc/html/EBImage.html

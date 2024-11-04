@@ -36,7 +36,7 @@ mask_fill <- function(msk) {
   # compute contours
   # fill every contours found
   # return every foreground pixels
-  foo = cpp_k_sup_equal_M(cpp_fill(ctl = cpp_ctl(mat = msk, global = TRUE), label = 0, inner = TRUE, outer = TRUE), 1)
+  foo = cpp_k_sup_equal_M(cpp_fill_out(ctl = cpp_ctl(mat = msk, global = TRUE)), 1)
   ATT = list("IFC_msk", "fill", c(nrow(msk), ncol(msk)))
   names(ATT) = c("class", "type", "dim")
   attributes(foo) <- ATT

@@ -1051,7 +1051,6 @@ Rcpp::NumericMatrix cpp_erode_old(const Rcpp::NumericMatrix mat,
   return hpp_erode_old(mat, kernel, iter, msk_);
 }
 
-
 //' @title Brute Force Image Dilatation
 //' @name cpp_dilate_old
 //' @description
@@ -1072,8 +1071,6 @@ Rcpp::NumericMatrix cpp_dilate_old(const Rcpp::NumericMatrix mat,
                                    const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
   return hpp_dilate_old(mat, kernel, iter, msk_);
 }
-
-
 // END morphology
 
 // FROM geodesic
@@ -1415,7 +1412,6 @@ Rcpp::List cpp_ctl(const Rcpp::LogicalMatrix mat,
                    const bool global = false) {
   return hpp_ctl(mat, global);
 }
-
 //' @title Contours Dilatation
 //' @name cpp_dilate_ctl
 //' @description
@@ -1459,22 +1455,22 @@ Rcpp::NumericMatrix cpp_erode_ctl(const List ctl,
 //' @param poly, a 2-column matrix defining the locations (x and y) of vertices of the polygon of interest.
 //' @param border, an int used to trace polygon border.
 //' @param fill, an int used to fill polygon.
-//' @param mat_, an IntegerMatrix to be filled.
-//' @return copy of mat_ with poly 
+//' @param tol, a double, tolerance between fill color and connected pixels. Use \code{NA}, for filling every pixel inside 'poly'.
+//' @param edge, a bool whether to close 'poly' at 'mat_' edges. Default is \code{false}. Closing 'poly' at 'edge' is experimental and may fail.
+//' @param mat_, a NumericMatrix to be filled.\cr
+//' When 'mat_' is provided 'poly' will be drawn in 'mat_' if its vertices are within 'mat_' dimensions and if there is no \code{NA} directly (4-connectedness) connected to internal poly' border.\cr
+//' /!\ Note that filling will not propagate on \code{NA}, \code{NaN} values, unless 'tol' is \code{NA}.
+//' @return copy of 'mat_' with 'poly' or a new matrix with 'poly'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::Nullable<Rcpp::IntegerMatrix> cpp_polydraw(const Rcpp::IntegerMatrix poly,
-                                                 const int border = 1,
-                                                 const int fill = 1,
-                                                 const Rcpp::Nullable<Rcpp::IntegerMatrix> mat_ = R_NilValue) {
-  if(mat_.isNotNull()) {
-    Rcpp::IntegerMatrix mat(mat_.get());
-    Rcpp::IntegerMatrix out = Rcpp::clone(mat); // it is important here to clone mat to avoid modifying it
-    polydraw(poly, out, border, fill);          // because polyfill is designed to modify out in place
-    return out;
-  }
-  return mat_;
+Rcpp::NumericMatrix cpp_polydraw (const Rcpp::IntegerMatrix poly,
+                                  const double border = 1.0,
+                                  const double fill = 1.0,
+                                  const double tol = 0.0,
+                                  const bool edge = false,
+                                  const Rcpp::Nullable<Rcpp::NumericMatrix> mat_ = R_NilValue) {
+  return hpp_polydraw(poly, border, fill, tol, edge, mat_);
 }
 
 //' @title Contours Filling
@@ -1483,18 +1479,22 @@ Rcpp::Nullable<Rcpp::IntegerMatrix> cpp_polydraw(const Rcpp::IntegerMatrix poly,
 //' This function is designed to fill contours.
 //' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
 //' @param label an int corresponding to the label of desired set of contour to be filled.
-//' Default is 0 to fill all set of contours found.
-//' @param inner a bool, to whether or not fill hole(s) inside contours if some where identified.
-//' @param outer a bool, to whether or not fill contours outside hole(s) if some where identified.
+//' Default is \code{0} to fill all sets of contours found.
+//' @param i_border a bool, to whether or not draw inside contours if some were identified.
+//' @param i_fill a bool, to whether or not fill inside contours if some were identified.
+//' @param o_border a bool, to whether or draw external contours.
+//' @param o_fill a bool, to whether or not fill external contours.
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix cpp_fill(const List ctl,
                              const uint32_t label = 0,
-                             const bool inner = true,
-                             const bool outer = true) {
-  return hpp_fill(ctl, label, inner, outer);
+                             const bool i_border = true,
+                             const bool i_fill = true,
+                             const bool o_border = true,
+                             const bool o_fill = true) {
+  return hpp_fill(ctl, label, i_border, i_fill, i_border, o_fill);
 }
 
 //' @title Contours Filling Outer Only
@@ -1502,12 +1502,32 @@ Rcpp::IntegerMatrix cpp_fill(const List ctl,
 //' @description
 //' This function is designed to fill the most external contours.
 //' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`.
+//' @param o_border a bool, to whether or draw external contours.
+//' @param o_fill a bool, to whether or not fill external contours.
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::IntegerMatrix cpp_fill_out(const List ctl) {
-  return hpp_fill_out(ctl);
+Rcpp::IntegerMatrix cpp_fill_out(const List ctl,
+                                 const bool o_border = true,
+                                 const bool o_fill = true) {
+  return hpp_fill_out(ctl, o_border, o_fill);
+}
+
+//' @title Connected Region Flood Filling
+//' @name cpp_floodfill
+//' @description
+//' Flood fills image region.
+//' @param img, a NumericMatrix. The image to be modified.
+//' @param markers, a NumericMatrix, It should be a matrix with at least 3 columns being "row", "col", and "value", respectively. It represents coordinates of the seeds to start filling 'img', with the new "value". Eventually, an additional column being "tolerance" can be provided.\cr
+//' /!\ Note that "row" and "col" should be provided at C-level meaning 1st start at 0.
+//' @return a NumericMatrix, the modified image.
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix cpp_floodfill (const Rcpp::NumericMatrix img,
+                                   const Rcpp::NumericMatrix markers) {
+  return hpp_floodfill(img, markers);
 }
 // END fill
 

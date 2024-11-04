@@ -10,10 +10,16 @@
 
 \item{fill, }{an int used to fill polygon.}
 
-\item{mat_, }{an IntegerMatrix to be filled.}
+\item{tol, }{a double, tolerance between fill color and connected pixels. Use \code{NA}, for filling every pixel inside 'poly'.}
+
+\item{edge, }{a bool whether to close 'poly' at 'mat_' edges. Default is \code{false}. Closing 'poly' at 'edge' is experimental and may fail.}
+
+\item{mat_, }{a NumericMatrix to be filled.\cr
+When 'mat_' is provided 'poly' will be drawn in 'mat_' if its vertices are within 'mat_' dimensions and if there is no \code{NA} directly (4-connectedness) connected to internal poly' border.\cr
+/!\ Note that filling will not propagate on \code{NA}, \code{NaN} values, unless 'tol' is \code{NA}.}
 }
 \value{
-copy of mat_ with poly
+copy of 'mat_' with 'poly' or a new matrix with 'poly'.
 }
 \description{
 This function is designed to trace and fill polygon inside a matrix.

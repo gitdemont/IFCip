@@ -7,11 +7,15 @@
 \item{ctl}{a List, containing contour tracing labeling, object of class `IFCip_ctl`}
 
 \item{label}{an int corresponding to the label of desired set of contour to be filled.
-Default is 0 to fill all set of contours found.}
+Default is \code{0} to fill all sets of contours found.}
 
-\item{inner}{a bool, to whether or not fill hole(s) inside contours if some where identified.}
+\item{i_border}{a bool, to whether or not draw inside contours if some were identified.}
 
-\item{outer}{a bool, to whether or not fill contours outside hole(s) if some where identified.}
+\item{i_fill}{a bool, to whether or not fill inside contours if some were identified.}
+
+\item{o_border}{a bool, to whether or draw external contours.}
+
+\item{o_fill}{a bool, to whether or not fill external contours.}
 }
 \value{
 an IntegerMatrix.

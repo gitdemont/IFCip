@@ -92,7 +92,7 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
           // register current position + set 1st visiting position
           R_len_t len = i_cont, nbr_x = 0, nbr_y = 0;
           R_len_t ori_r = i_row, ori_c = i_col;
-          unsigned short pos = 7, visit, j;
+          unsigned short pos = 7, visit, j, first = 1;
           
           // for debugging
           // Rcout << "ext ori, i_col: " << i_col + 1 << ", i_row: " << i_row + 1 << std::endl;
@@ -132,7 +132,7 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
               contours[i_cont++] = i_col;
               contours[i_cont++] = i_row;
               contours[i_cont++] = new_l - 1;
-              contours[i_cont++] = 8;
+              contours[i_cont++] = 16;
               contours[i_cont++] = 1;
               break; // isolated point
             }
@@ -147,8 +147,9 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
             contours[i_cont++] = i_col;
             contours[i_cont++] = i_row;
             contours[i_cont++] = new_l - 1;
-            contours[i_cont++] = visit;
+            contours[i_cont++] = visit + 8 * first;
             contours[i_cont++] = 1;
+            first = 0;
             // go to next neighbour point
             i_col = nbr_x;
             i_row = nbr_y;
@@ -162,7 +163,7 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
           // register current position + set 1st visiting position
           R_len_t len = i_cont, nbr_x = 0, nbr_y = 0;
           R_len_t ori_r = i_row, ori_c = i_col;
-          unsigned short pos = 3, visit, j;
+          unsigned short pos = 3, visit, j, first = 1;
           
           // for debugging
           // Rcout << "int ori, i_col: " << i_col + 1 << ", i_row: " << i_row + 1 << std::endl;
@@ -202,8 +203,9 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
             contours[i_cont++] = i_col;
             contours[i_cont++] = i_row;
             contours[i_cont++] = exg_l - 1;
-            contours[i_cont++] = visit;
+            contours[i_cont++] = visit + 8 * first;
             contours[i_cont++] = 2;
+            first = 0;
             // go to next neighbour point
             i_col = nbr_x;
             i_row = nbr_y;
@@ -221,20 +223,20 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
   }
   
   // return contours to user-friendly output
-  Rcpp::IntegerMatrix foo(i_cont / 5, 5);
+  Rcpp::IntegerMatrix foo = Rcpp::no_init_matrix(i_cont / 5, 5);
   i_cont = 0;
   for(R_len_t i_row = 0; i_row < foo.nrow(); i_row++) {
     for(R_len_t i_col = 0; i_col < 5; i_col++) {
       foo(i_row, i_col) = contours[i_cont++];
     }
   }
-  // Rcpp::IntegerVector dim = Rcpp::IntegerVector::create(mat_r, mat_c);
+  
   colnames(foo) = Rcpp::CharacterVector::create("x","y","label","direction","type");
   Rcpp::List ret = Rcpp::List::create(_["matrix"] = out(Rcpp::Range(1, mat_r), Rcpp::Range(1, mat_c)),
                                       _["dim"] = Rcpp::IntegerVector::create(_["nrow"] = mat_r, _["ncol"] = mat_c), 
-                                        _["contours"] = foo,
-                                        _["nb_lab"] = new_l - 2,
-                                        _["perimeter"] = perimeter);
+                                      _["contours"] = foo,
+                                      _["nb_lab"] = new_l - 2,
+                                      _["perimeter"] = perimeter);
   ret.attr("class") = "IFCip_ctl";
   return ret;
 }
