@@ -186,40 +186,39 @@ void rec_erode (Rcpp::NumericMatrix r,
 //' @description
 //' Keep deepest valleys from image.
 //' @param img, a NumericMatrix.
-//' @param h, a double, specifying the minimal depth. Default is 0.0.
+//' @param h, a double, specifying the minimal depth. Default is \code{NA_REAL}. When not \code{NA/NaN} it will be used instead of 'h_lev'
+//' @param h_lev, an int, specifying the minimal depth normalized to n_lev (being h_lev out of n_lev). Default is \code{1}.
 //' @param n_lev, an int determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.
-//' @param range, a NumericVector. Default is R_NilValue, to use 'img' range.\cr
-//' Otherwise, desired range 'img' should cover and not the actual minimal/maximal value of 'img'.
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 //' Default is R_NilValue, for using all 'img' elements without masking anything.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
 //' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
-//' HMIN is the erosion reconstruction of (img + h) by kernel where img + h is clipped to range.
+//' HMIN is the erosion reconstruction of (img + h) by kernel.
 //' @return a NumericMatrix of H-Minima transformation of 'img'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_HMIN (const Rcpp::NumericMatrix img,
-                              const double h = 0.0,
+                              const double h = NA_REAL,
+                              const int h_lev = 1.0,
                               const int n_lev = 65536,
-                              const Rcpp::Nullable<Rcpp::NumericVector> range = R_NilValue,
                               const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
                               const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue) {
-  Rcpp::NumericMatrix out;
-  if(Rf_inherits(img, "IFCip_rescale")) {out = img; } else { out = hpp_rescale(img, msk_, NA_REAL, n_lev, true); }
-  Rcpp::NumericVector sca = out.attr("scale");
-  int lev = out.attr("levels"); lev--;
-  Rcpp::NumericVector ran = range.isNotNull() ? hpp_range(range.get()) : Rcpp::NumericVector::create(sca[0], sca[1]);
-  double mn = std::min(std::max(ran[0], sca[0]), sca[1]);
-  double mx = std::max(std::min(ran[1], sca[1]), sca[0]);
-  double hh = std::min(std::max(h, mn), mx);
-  hh = lev - ((h - sca[0]) * sca[2]);
-  for(R_len_t i = 0; i < img.size(); i++) out[i] = std::max(out[i] - hh, 0.0);
-  hpp_scalerev(out, sca);
-  rec_erode(out, img, kernel);
-  return out;
+  Rcpp::NumericMatrix rsc;
+  if(Rf_inherits(img, "IFCip_rescale")) { rsc = Rcpp::clone(img); } else { rsc = hpp_rescale(img, msk_, NA_REAL, n_lev, false, true); }
+  Rcpp::NumericVector sca = rsc.attr("scale");
+  int lev = rsc.attr("levels"); lev--;
+  int hh = traits::is_na<14>(h) ? h_lev : (h - sca[0]) * sca[2];
+  Rcpp::NumericMatrix out = Rcpp::no_init_matrix(img.nrow(), img.ncol());
+  for(R_len_t i = 0; i < img.size(); i++) out[i] = std::max(rsc[i] + hh, 0.0);
+  rec_erode(out, rsc, kernel);
+  out.attr("class") = rsc.attr("class");
+  if(rsc.hasAttribute("msk")) out.attr("msk") = rsc.attr("msk");
+  out.attr("scale") = rsc.attr("scale");
+  out.attr("levels") = rsc.attr("levels");
+  return(out);
 }
 
 //' @title H-Maxima transformation
@@ -227,38 +226,38 @@ Rcpp::NumericMatrix hpp_HMIN (const Rcpp::NumericMatrix img,
 //' @description
 //' Keep highest peaks in image.
 //' @param img, a NumericMatrix.
-//' @param h, a double, specifying the minimal height. Default is 0.0.
+//' @param h, a double, specifying the minimal height. Default is \code{NA_REAL}. When not \code{NA/NaN} it will be used instead of 'h_lev'
+//' @param h_lev, an int, specifying the minimal height normalized to n_lev (being h_lev out of n_lev). Default is \code{1}.
 //' @param n_lev, an int determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.
-//' @param range, a NumericVector. Default is R_NilValue, to use 'img' range.\cr
-//' Otherwise, desired range 'img' should cover and not the actual minimal/maximal value of 'img'.
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 //' Default is R_NilValue, for using all 'img' elements without masking anything.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
 //' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
-//' HMAX is the dilatation reconstruction of (img - h) by kernel where img - h is clipped to range.
+//' HMAX is the dilatation reconstruction of (img - h) by kernel.
 //' @return a NumericMatrix of H-Maxima transformation of 'img'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_HMAX (const Rcpp::NumericMatrix img,
-                              const double h = 0.0,
+                              const double h = NA_REAL,
+                              const int h_lev = 1,
                               const int n_lev = 65536,
-                              const Rcpp::Nullable<Rcpp::NumericVector> range = R_NilValue,
                               const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
                               const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue) {
-  Rcpp::NumericMatrix out;
-  if(Rf_inherits(img, "IFCip_rescale")) {out = img; } else { out = hpp_rescale(img, msk_, NA_REAL, n_lev, false); }
-  Rcpp::NumericVector sca = out.attr("scale");
-  Rcpp::NumericVector ran = range.isNotNull() ? hpp_range(range.get()) : Rcpp::NumericVector::create(sca[0], sca[1]);
-  double mn = std::min(std::max(ran[0], sca[0]), sca[1]);
-  double mx = std::max(std::min(ran[1], sca[1]), sca[0]);
-  double hh = std::min(std::max(h, mn), mx);
-  hh = (h - sca[0]) * sca[2];
-  for(R_len_t i = 0; i < img.size(); i++) out[i] = std::max(out[i] - hh, 0.0);
-  hpp_scalerev(out, sca);
-  rec_dilate(out, img, kernel);
+  Rcpp::NumericMatrix rsc;
+  if(Rf_inherits(img, "IFCip_rescale")) { rsc = Rcpp::clone(img); } else { rsc = hpp_rescale(img, msk_, NA_REAL, n_lev, false, true); }
+  Rcpp::NumericVector sca = rsc.attr("scale");
+  int lev = rsc.attr("levels"); lev--;
+  int hh = traits::is_na<14>(h) ? h_lev : (h - sca[0]) * sca[2];
+  Rcpp::NumericMatrix out = Rcpp::no_init_matrix(img.nrow(), img.ncol());
+  for(R_len_t i = 0; i < img.size(); i++) out[i] = std::max(rsc[i] - hh, 0.0);
+  rec_dilate(out, rsc, kernel);
+  out.attr("class") = rsc.attr("class");
+  if(rsc.hasAttribute("msk")) out.attr("msk") = rsc.attr("msk");
+  out.attr("scale") = rsc.attr("scale");
+  out.attr("levels") = rsc.attr("levels");
   return out;
 }
 
@@ -268,30 +267,26 @@ Rcpp::NumericMatrix hpp_HMAX (const Rcpp::NumericMatrix img,
 //' Mask connected component of pixels whose values are lower to their external boundaries neighborhood.
 //' @param img, a NumericMatrix.
 //' @param n_lev, an int determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.
-//' @param range, a NumericVector. Default is R_NilValue, to use 'img' range.\cr
-//' Otherwise, desired range 'img' should cover and not the actual minimal/maximal value of 'img'.
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 //' Default is R_NilValue, for using all 'img' elements without masking anything.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
 //' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
-//' RMIN is defined as HMIN(img, -(1 + min(range)) / n_lev).
+//' RMIN is defined as img < HMIN(img, h_lev = 1).
 //' @return a NumericMatrix of regional minima of 'img'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_RMIN (const Rcpp::NumericMatrix img,
-                              const int n_lev = 65536,
-                              const Rcpp::Nullable<Rcpp::NumericVector> range = R_NilValue,
-                              const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
-                              const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue) {
-  Rcpp::NumericMatrix rimg = hpp_rescale(img, msk_, NA_REAL, n_lev, true);
-  Rcpp::NumericVector sca = rimg.attr("scale");
-  Rcpp::NumericVector ran = range.isNotNull() ? hpp_range(range.get()) : Rcpp::NumericVector::create(sca[0], sca[1]);
-  rimg = hpp_HMIN(rimg, -1.0 + ran[1], n_lev, range, kernel);
+                               const int n_lev = 65536,
+                               const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
+                               const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue) {
+  Rcpp::NumericMatrix rsc;
+  if(Rf_inherits(img, "IFCip_rescale")) { rsc = Rcpp::clone(img); } else { rsc = hpp_rescale(img, msk_, NA_REAL, n_lev, false, true);}
+  Rcpp::NumericMatrix rimg = hpp_HMIN(rsc, NA_REAL, 3, n_lev, kernel, msk_);
   Rcpp::LogicalMatrix out = Rcpp::no_init(img.nrow(), img.ncol());
-  for(R_len_t i = 0; i < img.size(); i++) out[i] = img[i] < rimg[i];
+  for(R_len_t i = 0; i < img.size(); i++) out[i] = rsc[i] < rimg[i];
   return out;
 }
 
@@ -301,30 +296,26 @@ Rcpp::LogicalMatrix hpp_RMIN (const Rcpp::NumericMatrix img,
 //' Mask connected component of pixels whose values are higher to their external boundaries neighborhood.
 //' @param img, a NumericMatrix.
 //' @param n_lev, an int determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.
-//' @param range, a NumericVector. Default is R_NilValue, to use 'img' range.\cr
-//' Otherwise, desired range 'img' should cover and not the actual minimal/maximal value of 'img'.
 //' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 //' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 //' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 //' Default is R_NilValue, for using all 'img' elements without masking anything.
 //' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
 //' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
-//' RMAX is defined as HMAX(img, (1 + min(range)) / n_lev).
+//' RMAX is defined as img > HMAX(img, h_lev = 1).
 //' @return a NumericMatrix of regional maxima of 'img'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_RMAX (const Rcpp::NumericMatrix img,
-                              const int n_lev = 65536,
-                              const Rcpp::Nullable<Rcpp::NumericVector> range = R_NilValue,
-                              const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
-                              const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue) {
-  Rcpp::NumericMatrix rimg = hpp_rescale(img, msk_, NA_REAL, n_lev, false);
-  Rcpp::NumericVector sca = rimg.attr("scale");
-  Rcpp::NumericVector ran = range.isNotNull() ? hpp_range(range.get()) : Rcpp::NumericVector::create(sca[0], sca[1]);
-  rimg = hpp_HMAX(rimg, 1.0 + ran[0], n_lev, ran, kernel);
+                               const int n_lev = 65536,
+                               const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
+                               const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue) {
+  Rcpp::NumericMatrix rsc;
+  if(Rf_inherits(img, "IFCip_rescale")) { rsc = Rcpp::clone(img); } else { rsc = hpp_rescale(img, msk_, NA_REAL, n_lev, false, true);}
+  Rcpp::NumericMatrix rimg = hpp_HMAX(rsc, NA_REAL, 1, n_lev, kernel, msk_);
   Rcpp::LogicalMatrix out = Rcpp::no_init(img.nrow(), img.ncol());
-  for(R_len_t i = 0; i < img.size(); i++) out[i] = img[i] > rimg[i];
+  for(R_len_t i = 0; i < img.size(); i++) out[i] = rsc[i] > rimg[i];
   return out;
 }
 

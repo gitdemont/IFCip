@@ -107,23 +107,37 @@ Rcpp::NumericVector hpp_range(const SEXP img,
 
 template <int RTYPE>
 void scalerev_T(Rcpp::Vector<RTYPE> img,
-                const Rcpp::NumericVector sca) {
+                const Rcpp::Nullable<Rcpp::NumericVector> sca_ = R_NilValue) {
+  Rcpp::NumericVector sca;
+  if(sca_.isNotNull()) {
+    sca = sca_.get();
+  } else {
+    Rcpp::Nullable<Rcpp::NumericVector> foo = img.attr("scale");
+    if(foo.isNotNull()) { 
+      sca = foo.get();
+    } else {
+      Rcpp::stop("hpp_scalerev: bad 'sca' attribute");
+    }
+  }
   if(sca.size() != 5) Rcpp::stop("hpp_scalerev: bad 'sca' argument");
   if(sca[3]) {
     for(R_len_t i = 0; i < img.size(); i++) if(img[i] != sca[4]) img[i] = sca[1] - img[i] / sca[2];
   } else {
     for(R_len_t i = 0; i < img.size(); i++) if(img[i] != sca[4]) img[i] = img[i] / sca[2] + sca[0];
   }
+  if(img.hasAttribute("scale")) img.attr("scale") = R_NilValue;
+  if(img.hasAttribute("msk")) img.attr("msk") = R_NilValue;
+  if(img.hasAttribute("levels")) img.attr("levels") = R_NilValue;
 }
 
 // [[Rcpp::export(rng = false)]]
 void hpp_scalerev(SEXP img,
-                  const Rcpp::NumericVector sca) {
+                  const Rcpp::Nullable<Rcpp::NumericVector> sca_ = R_NilValue) {
   switch( TYPEOF(img) ) {
-  case LGLSXP : return scalerev_T(as<Rcpp::LogicalVector>(img), sca);
-  case INTSXP : return scalerev_T(as<Rcpp::IntegerVector>(img), sca);
-  case REALSXP : return scalerev_T(as<Rcpp::NumericVector>(img), sca);
-  case RAWSXP : return scalerev_T(as<Rcpp::RawVector>(img), sca);
+  case LGLSXP : return scalerev_T(as<Rcpp::LogicalVector>(img), sca_);
+  case INTSXP : return scalerev_T(as<Rcpp::IntegerVector>(img), sca_);
+  case REALSXP : return scalerev_T(as<Rcpp::NumericVector>(img), sca_);
+  case RAWSXP : return scalerev_T(as<Rcpp::RawVector>(img), sca_);
   default : Rcpp::stop("hpp_scalerev: not supported SEXP in 'img'");
   }
 }

@@ -6,12 +6,11 @@
 \arguments{
 \item{img, }{a NumericMatrix.}
 
-\item{h, }{a double, specifying the minimal depth. Default is 0.0.}
+\item{h, }{a double, specifying the minimal depth. Default is \code{NA_REAL}. When not \code{NA/NaN} it will be used instead of 'h_lev'}
+
+\item{h_lev, }{an int, specifying the minimal depth normalized to n_lev (being h_lev out of n_lev). Default is \code{1}.}
 
 \item{n_lev, }{an unsigned short determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.}
-
-\item{range, }{a NumericVector. Default is R_NilValue, to use 'img' range.\cr
-Otherwise, desired range 'img' should cover and not the actual minimal/maximal value of 'img'.}
 
 \item{kernel, }{a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 Default is R_NilValue, resulting in 8-connected pixels neighbors computation.}
@@ -28,6 +27,6 @@ Mask the regional minima of the corresponding h-minima transformation.
 \details{
 see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
 IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
-EMIN is defined as RMIN(HMIN(img, h)).
+EMIN is defined as RMIN(HMIN(img, h_lev = 1)).
 }
 \keyword{internal}

@@ -53,6 +53,16 @@ NULL
 #' @keywords internal
 NULL
 
+#' @title Image Reverse Scaling
+#' @name cpp_scalerev
+#' @description
+#' This function is designed to revert scaling of a SEXP
+#' @param img, a SEXP (logical, raw, integer or numeric) vector or matrix containing image intensity values.
+#' @param sca, a Rcpp::NumericVector of length 5 containing scaling information. Default is R_NilValue to use attr(img, "scale").
+#' @return a SEXP of same type as 'img'
+#' @keywords internal
+NULL
+
 #' @title Haralick Co-occurrence Matrix
 #' @name cpp_cooc
 #' @description
@@ -724,17 +734,16 @@ NULL
 #' @description
 #' Keep deepest valleys from image.
 #' @param img, a NumericMatrix.
-#' @param h, a double, specifying the minimal depth. Default is 0.0.
-#' @param n_lev, an unsigned short determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.
-#' @param range, a NumericVector. Default is R_NilValue, to use 'img' range.\cr
-#' Otherwise, desired range 'img' should cover and not the actual minimal/maximal value of 'img'.
+#' @param h, a double, specifying the minimal depth. Default is \code{NA_REAL}. When not \code{NA/NaN} it will be used instead of 'h_lev'
+#' @param h_lev, an int, specifying the minimal depth normalized to n_lev (being h_lev out of n_lev). Default is \code{1}.
+#' @param n_lev, an int determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.
 #' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 #' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 #' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 #' Default is R_NilValue, for using all 'img' elements without masking anything.
 #' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
 #' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
-#' HMIN is the erosion reconstruction of (img + h) by kernel where img + h is clipped to img_max.
+#' HMIN is the erosion reconstruction of (img + h) by kernel.
 #' @return a NumericMatrix of H-Minima transformation of 'img'.
 #' @keywords internal
 NULL
@@ -744,17 +753,16 @@ NULL
 #' @description
 #' Keep highest peaks in image.
 #' @param img, a NumericMatrix.
-#' @param h, a double, specifying the minimal height. Default is 0.0, it should be positive.
-#' @param n_lev, an unsigned short determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.
-#' @param range, a NumericVector. Default is R_NilValue, to use 'img' range.\cr
-#' Otherwise, desired range 'img' should cover and not the actual minimal/maximal value of 'img'.
+#' @param h, a double, specifying the minimal height. Default is \code{NA_REAL}. When not \code{NA/NaN} it will be used instead of 'h_lev'
+#' @param h_lev, an int, specifying the minimal height normalized to n_lev (being h_lev out of n_lev). Default is \code{1}.
+#' @param n_lev, an int determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.
 #' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 #' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 #' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 #' Default is R_NilValue, for using all 'img' elements without masking anything.
 #' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
 #' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
-#' HMAX is the dilatation reconstruction of (img - h) by kernel where img - h is clipped to img_min.
+#' HMAX is the dilatation reconstruction of (img - h) by kernel.
 #' @return a NumericMatrix of H-Maxima transformation of 'img'.
 #' @keywords internal
 NULL
@@ -764,16 +772,14 @@ NULL
 #' @description
 #' Mask connected component of pixels whose values are lower to their external boundaries neighborhood.
 #' @param img, a NumericMatrix.
-#' @param n_lev, an unsigned short determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.
-#' @param range, a NumericVector. Default is R_NilValue, to use 'img' range.\cr
-#' Otherwise, desired range 'img' should cover and not the actual minimal/maximal value of 'img'.
+#' @param n_lev, an int determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.
 #' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 #' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 #' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 #' Default is R_NilValue, for using all 'img' elements without masking anything.
 #' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
 #' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
-#' RMIN is defined as HMIN(img, -(1 + min(range)) / n_lev).
+#' RMIN is defined as img < HMIN(img, h_lev = 1).
 #' @return a NumericMatrix of regional minima of 'img'.
 #' @keywords internal
 NULL
@@ -783,16 +789,14 @@ NULL
 #' @description
 #' Mask connected component of pixels whose values are higher to their external boundaries neighborhood.
 #' @param img, a NumericMatrix.
-#' @param n_lev, an unsigned short determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.
-#' @param range, a NumericVector. Default is R_NilValue, to use 'img' range.\cr
-#' Otherwise, desired range 'img' should cover and not the actual minimal/maximal value of 'img'.
+#' @param n_lev, an int determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.
 #' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 #' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 #' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 #' Default is R_NilValue, for using all 'img' elements without masking anything.
 #' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
 #' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
-#' RMAX is defined as HMAX(img, (1 + min(range)) / n_lev).
+#' RMAX is defined as img > HMAX(img, h_lev = 1).
 #' @return a NumericMatrix of regional maxima of 'img'.
 #' @keywords internal
 NULL
@@ -802,17 +806,16 @@ NULL
 #' @description
 #' Mask the regional minima of the corresponding h-minima transformation.
 #' @param img, a NumericMatrix.
-#' @param h, a double, specifying the minimal depth. Default is 0.0.
+#' @param h, a double, specifying the minimal depth. Default is \code{NA_REAL}. When not \code{NA/NaN} it will be used instead of 'h_lev'
+#' @param h_lev, an int, specifying the minimal depth normalized to n_lev (being h_lev out of n_lev). Default is \code{1}.
 #' @param n_lev, an unsigned short determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.
-#' @param range, a NumericVector. Default is R_NilValue, to use 'img' range.\cr
-#' Otherwise, desired range 'img' should cover and not the actual minimal/maximal value of 'img'.
 #' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 #' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 #' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 #' Default is R_NilValue, for using all 'img' elements without masking anything.
 #' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
 #' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
-#' EMIN is defined as RMIN(HMIN(img, h)).
+#' EMIN is defined as RMIN(HMIN(img, h_lev = 1)).
 #' @return a NumericMatrix of extended minima of 'img'.
 #' @keywords internal
 NULL
@@ -822,17 +825,16 @@ NULL
 #' @description
 #' Mask the regional maxima of the corresponding h-maxima transformation.
 #' @param img, a NumericMatrix.
-#' @param h, a double, specifying the minimal height. Default is 0.0.
+#' @param h, a double, specifying the minimal height. Default is \code{NA_REAL}. When not \code{NA/NaN} it will be used instead of 'h_lev'
+#' @param h_lev, an int, specifying the minimal height normalized to n_lev (being h_lev out of n_lev). Default is \code{1}.
 #' @param n_lev, an unsigned short determining the number levels used for 'img' rescaling. Default is 65536, should be at least 2.
-#' @param range, a NumericVector. Default is R_NilValue, to use 'img' range.\cr
-#' Otherwise, desired range 'img' should cover and not the actual minimal/maximal value of 'img'.
 #' @param kernel, a NumericMatrix; the structuring shape determining neighborhood. All non-zero elements will be considered as neighbors (except center).\cr
 #' Default is R_NilValue, resulting in 8-connected pixels neighbors computation.
 #' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
 #' Default is R_NilValue, for using all 'img' elements without masking anything.
 #' @details see 'Morphological grayscale reconstruction in image analysis: applications and efficient algorithms' from  L. Vincent.
 #' IEEE Transactions on Image Processing, 2(2):176-201, April 1993.\doi{10.1109/83.217222}\cr
-#' EMAX is defined as RMAX(HMAX(img, h)).
+#' EMAX is defined as RMAX(HMAX(img, h_lev = 1)).
 #' @return a NumericMatrix of extended maxima of 'img'.
 #' @keywords internal
 NULL
@@ -1145,6 +1147,10 @@ cpp_rescale <- function(img, msk_ = NULL, value = NA_real_, n_lev = 256L, invert
     .Call(`_IFCip_cpp_rescale`, img, msk_, value, n_lev, invert, bin)
 }
 
+cpp_scalerev <- function(img, sca_ = NULL) {
+    .Call(`_IFCip_cpp_scalerev`, img, sca_)
+}
+
 cpp_cooc <- function(img, delta) {
     .Call(`_IFCip_cpp_cooc`, img, delta)
 }
@@ -1349,28 +1355,28 @@ cpp_rec_erode <- function(markers, img, kernel = NULL) {
     .Call(`_IFCip_cpp_rec_erode`, markers, img, kernel)
 }
 
-cpp_HMIN <- function(img, h = 0.0, n_lev = 65536L, range = NULL, kernel = NULL, msk_ = NULL) {
-    .Call(`_IFCip_cpp_HMIN`, img, h, n_lev, range, kernel, msk_)
+cpp_HMIN <- function(img, h = NA_real_, h_lev = 1L, n_lev = 65536L, kernel = NULL, msk_ = NULL) {
+    .Call(`_IFCip_cpp_HMIN`, img, h, h_lev, n_lev, kernel, msk_)
 }
 
-cpp_HMAX <- function(img, h = 0.0, n_lev = 65536L, range = NULL, kernel = NULL, msk_ = NULL) {
-    .Call(`_IFCip_cpp_HMAX`, img, h, n_lev, range, kernel, msk_)
+cpp_HMAX <- function(img, h = NA_real_, h_lev = 1L, n_lev = 65536L, kernel = NULL, msk_ = NULL) {
+    .Call(`_IFCip_cpp_HMAX`, img, h, h_lev, n_lev, kernel, msk_)
 }
 
-cpp_RMIN <- function(img, n_lev = 65536L, range = NULL, kernel = NULL, msk_ = NULL) {
-    .Call(`_IFCip_cpp_RMIN`, img, n_lev, range, kernel, msk_)
+cpp_RMIN <- function(img, n_lev = 65536L, kernel = NULL, msk_ = NULL) {
+    .Call(`_IFCip_cpp_RMIN`, img, n_lev, kernel, msk_)
 }
 
-cpp_RMAX <- function(img, n_lev = 65536L, range = NULL, kernel = NULL, msk_ = NULL) {
-    .Call(`_IFCip_cpp_RMAX`, img, n_lev, range, kernel, msk_)
+cpp_RMAX <- function(img, n_lev = 65536L, kernel = NULL, msk_ = NULL) {
+    .Call(`_IFCip_cpp_RMAX`, img, n_lev, kernel, msk_)
 }
 
-cpp_EMIN <- function(img, h = 0.0, n_lev = 65536L, range = NULL, kernel = NULL, msk_ = NULL) {
-    .Call(`_IFCip_cpp_EMIN`, img, h, n_lev, range, kernel, msk_)
+cpp_EMAX <- function(img, h = NA_real_, h_lev = 1L, n_lev = 65536L, kernel = NULL, msk_ = NULL) {
+    .Call(`_IFCip_cpp_EMAX`, img, h, h_lev, n_lev, kernel, msk_)
 }
 
-cpp_EMAX <- function(img, h = 0.0, n_lev = 65536L, range = NULL, kernel = NULL, msk_ = NULL) {
-    .Call(`_IFCip_cpp_EMAX`, img, h, n_lev, range, kernel, msk_)
+cpp_EMIN <- function(img, h = NA_real_, h_lev = 1L, n_lev = 65536L, kernel = NULL, msk_ = NULL) {
+    .Call(`_IFCip_cpp_EMIN`, img, h, h_lev, n_lev, kernel, msk_)
 }
 
 cpp_geo_tophat_white <- function(img, kernel = NULL) {
