@@ -407,7 +407,7 @@ ExtractFeatures <- function(...,
                   hu = hu[1,]
                   ctl = cpp_ctl(msk, global = TRUE)
                   contours = ctl$contours
-                  contours = by(contours[, c(1,2,4,5)], contours[, 3], FUN =function(d) by(d[,c(1,2,3)], d[,4], FUN = function(dd) dd))
+                  contours = by(contours[, c(1,2,4,5), drop = FALSE], contours[, 3, drop = FALSE], FUN =function(d) by(d[,c(1,2,3), drop = FALSE], d[,4, drop = FALSE], FUN = function(dd) dd))
                   contours = contours[as.integer(names(contours)) > 0] 
                   contours = contours[[1]]
                   if(inherits(contours, what = "by")) contours = contours[[1]]

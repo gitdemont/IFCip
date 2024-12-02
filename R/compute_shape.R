@@ -48,7 +48,7 @@ compute_shape <- function(msk, mag = 40) {
   k = switch(mag, "20" = 1, "40" = 0.5, "60" = 0.3)
   hu = cpp_features_hu2(msk, switch(mag, "20" = 1, "40" = 4, "60" = 9))
   contours = ctl$contours
-  contours = by(contours[, c(1,2,4,5)], contours[, 3], FUN =function(d) by(d[,c(1,2,3)], d[,4], FUN = function(dd) dd))
+  contours = by(contours[, c(1,2,4,5), drop = FALSE], contours[, 3, drop = FALSE], FUN =function(d) by(d[,c(1,2,3), drop = FALSE], d[,4, drop = FALSE], FUN = function(dd) dd))
   contours = contours[as.integer(names(contours)) > 0] 
   contours = contours[[1]] # we only keep 1 object detected
   if(inherits(contours, what = "by")) contours = contours[[1]] # we remove internal contour if any
