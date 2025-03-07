@@ -16,6 +16,8 @@ Default is \code{0} to fill all sets of contours found.}
 \item{o_border}{a bool, to whether or draw external contours.}
 
 \item{o_fill}{a bool, to whether or not fill external contours.}
+
+\item{neg_border}{a bool, to whether or not border, if drawn, should be negated.}
 }
 \value{
 an IntegerMatrix.

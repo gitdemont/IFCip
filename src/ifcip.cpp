@@ -1491,6 +1491,7 @@ Rcpp::NumericMatrix cpp_polydraw (const Rcpp::IntegerMatrix poly,
 //' @param i_fill a bool, to whether or not fill inside contours if some were identified.
 //' @param o_border a bool, to whether or draw external contours.
 //' @param o_fill a bool, to whether or not fill external contours.
+//' @param neg_border a bool, to whether or not border, if drawn, should be negated.
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
@@ -1500,8 +1501,9 @@ Rcpp::IntegerMatrix cpp_fill(const List ctl,
                              const bool i_border = true,
                              const bool i_fill = true,
                              const bool o_border = true,
-                             const bool o_fill = true) {
-  return hpp_fill(ctl, label, i_border, i_fill, i_border, o_fill);
+                             const bool o_fill = true,
+                             const bool neg_border = false ) {
+  return hpp_fill(ctl, label, i_border, i_fill, i_border, o_fill, neg_border);
 }
 
 //' @title Contours Filling Outer Only
@@ -1511,14 +1513,16 @@ Rcpp::IntegerMatrix cpp_fill(const List ctl,
 //' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`.
 //' @param o_border a bool, to whether or draw external contours.
 //' @param o_fill a bool, to whether or not fill external contours.
+//' @param neg_border a bool, to whether or not border, if drawn, should be negated.
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix cpp_fill_out(const List ctl,
                                  const bool o_border = true,
-                                 const bool o_fill = true) {
-  return hpp_fill_out(ctl, o_border, o_fill);
+                                 const bool o_fill = true,
+                                 const bool neg_border = false) {
+  return hpp_fill_out(ctl, o_border, o_fill, neg_border);
 }
 
 //' @title Connected Region Flood Filling

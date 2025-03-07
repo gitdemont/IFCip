@@ -9,6 +9,8 @@
 \item{o_border}{a bool, to whether or draw external contours.}
 
 \item{o_fill}{a bool, to whether or not fill external contours.}
+
+\item{neg_border}{a bool, to whether or not border, if drawn, should be negated.}
 }
 \value{
 an IntegerMatrix.

@@ -524,7 +524,8 @@ Rcpp::NumericMatrix hpp_floodfill (const Rcpp::NumericMatrix img,
 //' @param i_fill a bool, to whether or not fill inside contours if some were identified.
 //' @param o_border a bool, to whether or draw external contours.
 //' @param o_fill a bool, to whether or not fill external contours.
-//' @return an IntegerMatrix.
+//' @param neg_border a bool, to whether or not border, if drawn, should be negated.
+//' @return a IntegerMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
@@ -533,7 +534,8 @@ Rcpp::IntegerMatrix hpp_fill (const List ctl,
                               const bool i_border = true,
                               const bool i_fill = true,
                               const bool o_border = true,
-                              const bool o_fill = true) {
+                              const bool o_fill = true,
+                              const bool neg_border = false) {
   if(!Rf_inherits(ctl, "IFCip_ctl")) Rcpp::stop("hpp_fill: 'ctl' should be of class `IFCip_ctl`");
   
   // retrieve max number of sets of contours identified by ctl
@@ -554,6 +556,7 @@ Rcpp::IntegerMatrix hpp_fill (const List ctl,
   bool o = o_fill || o_border;
   bool i = i_fill || i_border || o;
   Rcpp::IntegerMatrix out(dim[0], dim[1]);
+  int neg = neg_border ? -1 : +1;
   
   if((i || o) && (label_cur <= label_max)) {
     // fill contours with desired label(s)
@@ -573,7 +576,7 @@ Rcpp::IntegerMatrix hpp_fill (const List ctl,
                 poly[2 * poly.nrow() + j] = contours(p, 2);
                 poly[3 * poly.nrow() + j++] = contours(p, 3);
               }
-              polyvoid(poly, out, o_border ? label_cur : 0, o_fill ? label_cur : 0, 0.0, false, false, false);
+              polyvoid(poly, out, o_border ? neg * label_cur : 0, o_fill ? label_cur : 0, 0.0, false, false, false);
             }
           }
         }
@@ -592,7 +595,7 @@ Rcpp::IntegerMatrix hpp_fill (const List ctl,
                 poly[2 * poly.nrow() + j] = contours(p, 2);
                 poly[3 * poly.nrow() + j++] = contours(p, 3);
               }
-              polyvoid(poly, out, i_border ? label_cur : 0, i_fill ? label_cur : 0, 0.0, true, false, false);
+              polyvoid(poly, out, i_border ? neg * label_cur : 0, i_fill ? label_cur : 0, 0.0, true, false, false);
             }
           }
         }
@@ -610,13 +613,15 @@ Rcpp::IntegerMatrix hpp_fill (const List ctl,
 //' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`.
 //' @param o_border a bool, to whether or draw external contours.
 //' @param o_fill a bool, to whether or not fill external contours.
+//' @param neg_border a bool, to whether or not border, if drawn, should be negated.
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix hpp_fill_out (const List ctl,
                                   const bool o_border = true,
-                                  const bool o_fill = true) {
+                                  const bool o_fill = true,
+                                  const bool neg_border = false) {
   if(!Rf_inherits(ctl, "IFCip_ctl")) Rcpp::stop("hpp_fill_out: 'ctl' should be of class `IFCip_ctl`");
   
   // retrieve contours coordinates
@@ -627,6 +632,7 @@ Rcpp::IntegerMatrix hpp_fill_out (const List ctl,
   
   // create out 
   Rcpp::IntegerMatrix out(dim[0], dim[1]);
+  int neg = neg_border ? -1 : +1;
   if(!(o_fill || o_border)) return out;
   
   // fill every external contours with desired label(s)
@@ -646,7 +652,7 @@ Rcpp::IntegerMatrix hpp_fill_out (const List ctl,
             poly[2 * poly.nrow() + j] = contours(p, 2);
             poly[3 * poly.nrow() + j++] = contours(p, 3);
           }
-          polyvoid(poly, out, o_border ? label_cur : 0, o_fill ? label_cur : 0, 0.0, false, false, false);
+          polyvoid(poly, out, o_border ? neg * label_cur : 0, o_fill ? label_cur : 0, 0.0, false, false, false);
         }
       }
     }

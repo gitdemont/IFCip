@@ -847,8 +847,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_fill
-Rcpp::IntegerMatrix cpp_fill(const List ctl, const uint32_t label, const bool i_border, const bool i_fill, const bool o_border, const bool o_fill);
-RcppExport SEXP _IFCip_cpp_fill(SEXP ctlSEXP, SEXP labelSEXP, SEXP i_borderSEXP, SEXP i_fillSEXP, SEXP o_borderSEXP, SEXP o_fillSEXP) {
+Rcpp::IntegerMatrix cpp_fill(const List ctl, const uint32_t label, const bool i_border, const bool i_fill, const bool o_border, const bool o_fill, const bool neg_border);
+RcppExport SEXP _IFCip_cpp_fill(SEXP ctlSEXP, SEXP labelSEXP, SEXP i_borderSEXP, SEXP i_fillSEXP, SEXP o_borderSEXP, SEXP o_fillSEXP, SEXP neg_borderSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
@@ -857,19 +857,21 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const bool >::type i_fill(i_fillSEXP);
     Rcpp::traits::input_parameter< const bool >::type o_border(o_borderSEXP);
     Rcpp::traits::input_parameter< const bool >::type o_fill(o_fillSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_fill(ctl, label, i_border, i_fill, o_border, o_fill));
+    Rcpp::traits::input_parameter< const bool >::type neg_border(neg_borderSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_fill(ctl, label, i_border, i_fill, o_border, o_fill, neg_border));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_fill_out
-Rcpp::IntegerMatrix cpp_fill_out(const List ctl, const bool o_border, const bool o_fill);
-RcppExport SEXP _IFCip_cpp_fill_out(SEXP ctlSEXP, SEXP o_borderSEXP, SEXP o_fillSEXP) {
+Rcpp::IntegerMatrix cpp_fill_out(const List ctl, const bool o_border, const bool o_fill, const bool neg_border);
+RcppExport SEXP _IFCip_cpp_fill_out(SEXP ctlSEXP, SEXP o_borderSEXP, SEXP o_fillSEXP, SEXP neg_borderSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
     Rcpp::traits::input_parameter< const bool >::type o_border(o_borderSEXP);
     Rcpp::traits::input_parameter< const bool >::type o_fill(o_fillSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_fill_out(ctl, o_border, o_fill));
+    Rcpp::traits::input_parameter< const bool >::type neg_border(neg_borderSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_fill_out(ctl, o_border, o_fill, neg_border));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1073,8 +1075,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_dilate_ctl", (DL_FUNC) &_IFCip_cpp_dilate_ctl, 3},
     {"_IFCip_cpp_erode_ctl", (DL_FUNC) &_IFCip_cpp_erode_ctl, 3},
     {"_IFCip_cpp_polydraw", (DL_FUNC) &_IFCip_cpp_polydraw, 6},
-    {"_IFCip_cpp_fill", (DL_FUNC) &_IFCip_cpp_fill, 6},
-    {"_IFCip_cpp_fill_out", (DL_FUNC) &_IFCip_cpp_fill_out, 3},
+    {"_IFCip_cpp_fill", (DL_FUNC) &_IFCip_cpp_fill, 7},
+    {"_IFCip_cpp_fill_out", (DL_FUNC) &_IFCip_cpp_fill_out, 4},
     {"_IFCip_cpp_floodfill", (DL_FUNC) &_IFCip_cpp_floodfill, 2},
     {"_IFCip_cpp_threshold", (DL_FUNC) &_IFCip_cpp_threshold, 4},
     {"_IFCip_cpp_thinning_zs", (DL_FUNC) &_IFCip_cpp_thinning_zs, 1},

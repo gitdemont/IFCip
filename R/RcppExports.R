@@ -976,6 +976,7 @@ NULL
 #' @param i_fill a bool, to whether or not fill inside contours if some were identified.
 #' @param o_border a bool, to whether or draw external contours.
 #' @param o_fill a bool, to whether or not fill external contours.
+#' @param neg_border a bool, to whether or not border, if drawn, should be negated.
 #' @return an IntegerMatrix.
 #' @keywords internal
 NULL
@@ -987,6 +988,7 @@ NULL
 #' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`.
 #' @param o_border a bool, to whether or draw external contours.
 #' @param o_fill a bool, to whether or not fill external contours.
+#' @param neg_border a bool, to whether or not border, if drawn, should be negated.
 #' @return an IntegerMatrix.
 #' @keywords internal
 NULL
@@ -1411,12 +1413,12 @@ cpp_polydraw <- function(poly, border = 1.0, fill = 1.0, tol = 0.0, edge = FALSE
     .Call(`_IFCip_cpp_polydraw`, poly, border, fill, tol, edge, mat_)
 }
 
-cpp_fill <- function(ctl, label = 0L, i_border = TRUE, i_fill = TRUE, o_border = TRUE, o_fill = TRUE) {
-    .Call(`_IFCip_cpp_fill`, ctl, label, i_border, i_fill, o_border, o_fill)
+cpp_fill <- function(ctl, label = 0L, i_border = TRUE, i_fill = TRUE, o_border = TRUE, o_fill = TRUE, neg_border = FALSE) {
+    .Call(`_IFCip_cpp_fill`, ctl, label, i_border, i_fill, o_border, o_fill, neg_border)
 }
 
-cpp_fill_out <- function(ctl, o_border = TRUE, o_fill = TRUE) {
-    .Call(`_IFCip_cpp_fill_out`, ctl, o_border, o_fill)
+cpp_fill_out <- function(ctl, o_border = TRUE, o_fill = TRUE, neg_border = FALSE) {
+    .Call(`_IFCip_cpp_fill_out`, ctl, o_border, o_fill, neg_border)
 }
 
 cpp_floodfill <- function(img, markers) {
