@@ -93,23 +93,21 @@ Rcpp::IntegerMatrix chordset(const Rcpp::NumericMatrix kernel,
   }
   // compute chords
   Rcpp::IntegerMatrix out = Rcpp::no_init_matrix(o.ncol() + 1, 4);
-  R_len_t count = -1, k = 0, i = 0;
-  while(i < o.ncol()) {
+  R_len_t count = -1, k = 0;
+  while(k < o.ncol()) {
     count++;
-    i = k;
+    if(count >= out.nrow()) Rcpp::stop("chordset: buffer overrun");
     R_len_t n = 0;
-    out(count, 0) = o(0, i);     // x start
-    out(count, 1) = o(1, i);     // y start
-    while((out(count, 0) == o(0, k)) && (out(count, 1) == o(1, k) - n)) {
+    out(count, 0) = o(0, k);     // x start
+    out(count, 1) = o(1, k);     // y start
+    while(k < o.ncol() && (out(count, 0) == o(0, k)) && (out(count, 1) == o(1, k) - n)) {
       n++;
       k++;
-      if(k >= o.ncol()) break;
     }
-    if(count >= out.nrow()) Rcpp::stop("chordset: buff over while computing chordset");
     out(count, 2) = o(1, k - 1); // y stop
     out(count, 3) = n;           // length
   }
-  return out(Range(0, count - 1), Rcpp::_);
+  return out(Range(0, count), Rcpp::_);
 }
 
 // [[Rcpp::export(rng = false)]]

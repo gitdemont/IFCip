@@ -54,12 +54,12 @@ Rcpp::LogicalMatrix hpp_thinning_zs(const Rcpp::LogicalMatrix mat) {
   unsigned short j, N, T;
   
   // create output matrix with extra cols / rows
-  Rcpp::LogicalMatrix out(mat_r + 2, mat_c + 2);
+  Rcpp::LogicalMatrix out = Rcpp::no_init_matrix(mat_r + 2, mat_c + 2);
   // add padding
-  out(0, _) = Rcpp::LogicalMatrix(mat_c + 2, false);
-  out(mat_r + 1, _) = Rcpp::LogicalMatrix(mat_c + 2, false);
-  out(_, 0) = Rcpp::LogicalMatrix(mat_r + 2, false);
-  out(_, mat_c + 1) = Rcpp::LogicalMatrix(mat_r + 2, false);
+  out(0, _) = Rcpp::LogicalVector(mat_c + 2, false);
+  out(mat_r + 1, _) = Rcpp::LogicalVector(mat_c + 2, false);
+  out(_, 0) = Rcpp::LogicalVector(mat_r + 2, false);
+  out(_, mat_c + 1) = Rcpp::LogicalVector(mat_r + 2, false);
   for(i_col = 0; i_col < mat_c; i_col++) {
     i_out = (i_col + 1) * (mat_r + 2) + 1;
     for(i_row = 0; i_row < mat_r; i_row++) {
@@ -169,12 +169,12 @@ Rcpp::LogicalMatrix hpp_thinning_bst(const Rcpp::LogicalMatrix mat) {
   unsigned short j, N, T;
   
   // create output matrix with extra cols / rows
-  Rcpp::LogicalMatrix out(mat_r + 2, mat_c + 2);
+  Rcpp::LogicalMatrix out = Rcpp::no_init_matrix(mat_r + 2, mat_c + 2);
   // add padding
-  out(0, _) = Rcpp::LogicalMatrix(mat_c + 2, false);
-  out(mat_r + 1, _) = Rcpp::LogicalMatrix(mat_c + 2, false);
-  out(_, 0) = Rcpp::LogicalMatrix(mat_r + 2, false);
-  out(_, mat_c + 1) = Rcpp::LogicalMatrix(mat_r + 2, false);
+  out(0, _) = Rcpp::LogicalVector(mat_c + 2, false);
+  out(mat_r + 1, _) = Rcpp::LogicalVector(mat_c + 2, false);
+  out(_, 0) = Rcpp::LogicalVector(mat_r + 2, false);
+  out(_, mat_c + 1) = Rcpp::LogicalVector(mat_r + 2, false);
   for(i_col = 0; i_col < mat_c; i_col++) {
     i_out = (i_col + 1) * (mat_r + 2) + 1;
     for(i_row = 0; i_row < mat_r; i_row++) {
@@ -182,7 +182,7 @@ Rcpp::LogicalMatrix hpp_thinning_bst(const Rcpp::LogicalMatrix mat) {
     }
   }
   Rcpp::IntegerVector removal_col((mat_r + 2) * (mat_c + 2));
-  Rcpp::IntegerVector removal_row((mat_r + 2) * (mat_c + 2));              
+  Rcpp::IntegerVector removal_row((mat_r + 2) * (mat_c + 2));
   Rcpp::LogicalVector nbr(8);
   
   do {

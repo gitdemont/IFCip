@@ -73,7 +73,7 @@ Rcpp::NumericMatrix hpp_padding(const Rcpp::NumericMatrix mat,
   fin_width = mat_c + ori_c * 2;
   
   // create output matrix with expanded dimension
-  Rcpp::NumericMatrix out(fin_height, fin_width);
+  Rcpp::NumericMatrix out = Rcpp::no_init_matrix(fin_height, fin_width);
   
   switch(typ) {
   case 1: { // fill with constant

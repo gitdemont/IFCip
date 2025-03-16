@@ -58,17 +58,18 @@ static int ifcip_ctl_bk [8]={ 7, 7, 1, 1, 3, 3, 5, 5};
 Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
                    const bool global = false) {
   R_len_t mat_r = mat.nrow(), mat_c = mat.ncol();
-  R_len_t i_cont = 0, i_per = -1, new_l = 2, max_count = ((mat_r >> 1) + (mat_r % 2) + 1) * ((mat_c >> 1) + (mat_c % 2) + 1) * 10;
+  R_len_t i_cont = 0, i_per = -1, new_l = 2, max_count = ((mat_r >> 1) + (mat_r % 2) + 1) * ((mat_c >> 1) + (mat_c % 2) + 1) * 15;
   
   // create output matrix with extra cols / rows
   Rcpp::IntegerMatrix out(mat_r + 2, mat_c + 2);
   
   // create output contours vector
-  // we consider we max size is when we have only isolated points
+  // we consider that max size is when we have only isolated points
   // meaning that each point is separated by 1 background px
   // when recorded we store (5 + 5) values for each foreground px
+  // we also add 5 more extra slots
   // so maximal final length should be
-  // Rcpp::IntegerVector contours(((mat_r >> 1) + (mat_r % 2) + 1) * ((mat_c >> 1) + (mat_c % 2) + 1) * 10);
+  // Rcpp::IntegerVector contours(((mat_r >> 1) + (mat_r % 2) + 1) * ((mat_c >> 1) + (mat_c % 2) + 1) * 15);
   Rcpp::IntegerVector contours(max_count);
   
   // create output perimeter
