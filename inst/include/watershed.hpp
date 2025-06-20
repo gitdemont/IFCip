@@ -190,7 +190,7 @@ Rcpp::IntegerVector hpp_watershed_sv1(const Rcpp::NumericMatrix mat,
       offset_nbr(p, mat_r, mat_c, o, nbr, &count);
       for(R_len_t i = 1; i <= nbr[0]; i++) {
         if(out[nbr[i]] > wshed) {
-          d = std::abs(sca[nbr[i]] - sca[k]);
+          d = std::abs(sca[nbr[i]] - sca[p]);
           if(d > dmax) {
             out[p] = out[nbr[i]];
             dmax = d;
@@ -369,7 +369,7 @@ Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
       offset_nbr(p, mat_r, mat_c, o, nbr, &count);
       for(R_len_t i = 1; i <= nbr[0]; i++) {
         if(out[nbr[i]] > wshed) {
-          d = std::abs(sca[nbr[i]] - sca[k]);
+          d = std::abs(sca[nbr[i]] - sca[p]);
           if(d > dmax) {
             out[p] = out[nbr[i]];
             dmax = d;
