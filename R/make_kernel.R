@@ -43,60 +43,37 @@ make_kernel <- function(size = 3, type = "box", sigma = -0.3) {
                                                      "mean", "gaussian", "laplacian",
                                                      "sobelx", "sobely", "scharrx", "scharry",
                                                      "n4","n8"))
-  switch(type, 
-         "box" = {
-           ans = cpp_make_box(size) 
-         },
-         "cross" = {
-           ans = cpp_make_cross(size)
-         },
-         "plus" = {
-           ans = cpp_make_plus(size) 
-         },
-         "disc" = {
-           ans = cpp_make_disc(size) 
-         },
-         "diamond" = {
-           ans = cpp_make_diamond(size) 
-         },
-         "mean" = {
-           ans = matrix(1/(size*size), ncol = size, nrow = size)
-         },
-         "gaussian" = {
-           cpp_make_gaussian(size, sigma)
-         },
-         "laplacian" = {
-           cpp_make_laplacian(size, sigma)
-         },
-         "sobelx" = { 
-           ans = matrix(c( -1,  0,  1,
-                           -2,  0,  2,
-                           -1,  0,  1), ncol = 3, byrow = TRUE)
-         },
-         "sobely" = { 
-           ans = matrix(c( -1, -2, -1,
-                            0,  0,  0,
-                            1,  2,  1), ncol = 3, byrow = TRUE)
-         },
-         "scharrx" = {
-           ans = matrix(c( -3,  0,  3,
-                          -10,  0, 10,
-                           -3,  0,  3), ncol = 3, byrow = TRUE)
-         },
-         "scharry" = {
-           ans = matrix(c(  -3, -10, -3,
-                             0,   0,  0,
-                             3,  10,  3), ncol = 3, byrow = TRUE)
-         },
-         "n4" = {
-           ans = matrix(c(  0, -1,  0,
-                           -1,  4, -1,
-                            0, -1,  0), ncol = 3, byrow = TRUE)
-         },
-         "n8" = {
-           ans = matrix(c( -1, -1, -1,
-                           -1,  8, -1,
-                           -1, -1, -1), ncol = 3, byrow = TRUE)
-         })
-  return(ans)
+  return(switch(type, 
+                "box" = cpp_make_box(size),
+                "cross" =  cpp_make_cross(size),
+                "plus" = cpp_make_plus(size),
+                "disc" = cpp_make_disc(size),
+                "diamond" = cpp_make_diamond(size),
+                "mean" = matrix(1/(size*size), ncol = size, nrow = size),
+                "gaussian" = cpp_make_gaussian(size, sigma),
+                "laplacian" = cpp_make_laplacian(size, sigma),
+                "sobelx" = matrix(c( -1,  0,  1,
+                                     -2,  0,  2,
+                                     -1,  0,  1), ncol = 3, byrow = TRUE),
+                
+                "sobely" = matrix(c( -1, -2, -1,
+                                     0,  0,  0,
+                                     1,  2,  1), ncol = 3, byrow = TRUE),
+                
+                "scharrx" = matrix(c( -3,  0,  3,
+                                      -10,  0, 10,
+                                      -3,  0,  3), ncol = 3, byrow = TRUE),
+                
+                "scharry" = matrix(c(  -3, -10, -3,
+                                       0,   0,  0,
+                                       3,  10,  3), ncol = 3, byrow = TRUE),
+                
+                "n4" = matrix(c(  0, -1,  0,
+                                  -1,  4, -1,
+                                  0, -1,  0), ncol = 3, byrow = TRUE),
+                
+                "n8" = matrix(c( -1, -1, -1,
+                                 -1,  8, -1,
+                                 -1, -1, -1), ncol = 3, byrow = TRUE)
+  ))
 }
