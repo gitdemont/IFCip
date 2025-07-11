@@ -749,23 +749,45 @@ Rcpp::NumericMatrix cpp_padding(const Rcpp::NumericMatrix mat,
 }
 // END padding
 
-
 // FROM filter
+//' @title Image Filtering
+//' @name cpp_filter
+//' @description
+//' This function applies filtering on image.
+//' @param mat, a NumericMatrix.
+//' @param kernel, a NumericMatrix.
+//' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+//' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
+//' @param what, type of filtering, s std::string. Default is \code{""}.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix cpp_filter(const Rcpp::NumericMatrix mat,
+                               const Rcpp::NumericMatrix kernel,
+                               const uint8_t method = 5,
+                               const double k = NA_REAL,
+                               const std::string what = "") {
+  return hpp_filter(mat, kernel, method, k, what);
+}
+ 
 //' @title Image Standard Deviation Filtering
 //' @name cpp_sd
 //' @description
 //' This function applies standard deviation filtering on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
+//' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+//' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_sd(const Rcpp::NumericMatrix mat,
                            const Rcpp::NumericMatrix kernel,
-                           const uint8_t method = 5) {
-  return hpp_sd(mat, kernel, method);
+                           const uint8_t method = 5,
+                           const double k = NA_REAL) {
+  return hpp_filter(mat, kernel, method, k, "sd");
 }
 
 //' @title Image Mean Filtering
@@ -774,15 +796,17 @@ Rcpp::NumericMatrix cpp_sd(const Rcpp::NumericMatrix mat,
 //' This function applies mean filtering on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
+//' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+//' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_mean(const Rcpp::NumericMatrix mat,
                              const Rcpp::NumericMatrix kernel,
-                             const uint8_t method = 5) {
-  return hpp_mean(mat, kernel, method);
+                             const uint8_t method = 5,
+                             const double k = NA_REAL) {
+  return hpp_filter(mat, kernel, method, k, "mean");
 }
 
 //' @title Image Median Filtering
@@ -791,15 +815,17 @@ Rcpp::NumericMatrix cpp_mean(const Rcpp::NumericMatrix mat,
 //' This function applies median filtering on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
+//' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+//' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_median(const Rcpp::NumericMatrix mat,
                                const Rcpp::NumericMatrix kernel,
-                               const uint8_t method = 5) {
-  return hpp_median(mat, kernel, method);
+                               const uint8_t method = 5,
+                               const double k = NA_REAL) {
+  return hpp_filter(mat, kernel, method, k, "median");
 }
 
 //' @title Image Mode Filtering
@@ -808,15 +834,17 @@ Rcpp::NumericMatrix cpp_median(const Rcpp::NumericMatrix mat,
 //' This function applies mode filtering on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
+//' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+//' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_mode(const Rcpp::NumericMatrix mat,
                              const Rcpp::NumericMatrix kernel,
-                             const uint8_t method = 5) {
-  return hpp_mode(mat, kernel, method);
+                             const uint8_t method = 5,
+                             const double k = NA_REAL) {
+  return hpp_filter(mat, kernel, method, k, "mode");
 }
 
 //' @title Image Mid Filtering
@@ -825,15 +853,17 @@ Rcpp::NumericMatrix cpp_mode(const Rcpp::NumericMatrix mat,
 //' This function applies mid filtering on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
+//' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+//' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_mid(const Rcpp::NumericMatrix mat,
                             const Rcpp::NumericMatrix kernel,
-                            const uint8_t method = 5) {
-  return hpp_mid(mat, kernel, method);
+                            const uint8_t method = 5,
+                            const double k = NA_REAL) {
+  return hpp_filter(mat, kernel, method, k, "mid");
 }
 
 //' @title Image Filtering by Convolution
@@ -842,15 +872,17 @@ Rcpp::NumericMatrix cpp_mid(const Rcpp::NumericMatrix mat,
 //' This function applies 2D convolution filtering on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param method used for padding, a uint8_t. Default is 5 (with k = 0.0, see hpp_padding), allowed are [1-8].
+//' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+//' @param k, constant used for padding, a double. Default is \code{0.0}.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_convolve2d(const Rcpp::NumericMatrix mat,
                                    const Rcpp::NumericMatrix kernel,
-                                   const uint8_t method = 5) {
-  return hpp_convolve2d(mat, kernel, method);
+                                   const uint8_t method = 5,
+                                   const double k = 0.0) {
+  return hpp_filter(mat, kernel, method, k, "convolve");
 }
 
 //' @title Image Filtering by Correlation
@@ -859,15 +891,17 @@ Rcpp::NumericMatrix cpp_convolve2d(const Rcpp::NumericMatrix mat,
 //' This function applies 2D correlation filtering on image.
 //' @param mat, a NumericMatrix.
 //' @param kernel, a NumericMatrix.
-//' @param method used for padding, a uint8_t. Default is 5 (with k = 0.0, see hpp_padding), allowed are [1-8].
+//' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+//' @param k, constant used for padding, a double. Default is \code{0.0}.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_correlate2d(const Rcpp::NumericMatrix mat,
                                     const Rcpp::NumericMatrix kernel,
-                                    const uint8_t method = 5) {
-  return hpp_correlate2d(mat, kernel, method);
+                                    const uint8_t method = 5,
+                                    const double k = 0.0) {
+  return hpp_filter(mat, kernel, method, k, "correlate");
 }
 // END filter
 

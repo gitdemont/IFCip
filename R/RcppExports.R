@@ -479,13 +479,27 @@ NULL
 #' @keywords internal
 NULL
 
+#' @title Image Filtering
+#' @name cpp_filter
+#' @description
+#' This function applies filtering on image.
+#' @param mat, a NumericMatrix.
+#' @param kernel, a NumericMatrix.
+#' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+#' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
+#' @param what, type of filtering, s std::string. Default is \code{""}.
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
 #' @title Image Standard Deviation Filtering
 #' @name cpp_sd
 #' @description
 #' This function applies standard deviation filtering on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
+#' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+#' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -496,7 +510,8 @@ NULL
 #' This function applies mean filtering on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
+#' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+#' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -507,7 +522,8 @@ NULL
 #' This function applies median filtering on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
+#' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+#' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -518,7 +534,8 @@ NULL
 #' This function applies mode filtering on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
+#' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+#' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -529,7 +546,8 @@ NULL
 #' This function applies mid filtering on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param method used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].
+#' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+#' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -540,7 +558,8 @@ NULL
 #' This function applies 2D convolution filtering on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param method used for padding, a uint8_t. Default is 5 (with k = 0.0, see hpp_padding), allowed are [1-8].
+#' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+#' @param k, constant used for padding, a double. Default is \code{0.0}.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -551,7 +570,8 @@ NULL
 #' This function applies 2D correlation filtering on image.
 #' @param mat, a NumericMatrix.
 #' @param kernel, a NumericMatrix.
-#' @param method used for padding, a uint8_t. Default is 5 (with k = 0.0, see hpp_padding), allowed are [1-8].
+#' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
+#' @param k, constant used for padding, a double. Default is \code{0.0}.
 #' @return a NumericMatrix.
 #' @keywords internal
 NULL
@@ -1289,32 +1309,36 @@ cpp_padding <- function(mat, extra_rows = 0L, extra_cols = 0L, method = 1L, k = 
     .Call(`_IFCip_cpp_padding`, mat, extra_rows, extra_cols, method, k)
 }
 
-cpp_sd <- function(mat, kernel, method = 5L) {
-    .Call(`_IFCip_cpp_sd`, mat, kernel, method)
+cpp_filter <- function(mat, kernel, method = 5L, k = NA_real_, what = "") {
+    .Call(`_IFCip_cpp_filter`, mat, kernel, method, k, what)
 }
 
-cpp_mean <- function(mat, kernel, method = 5L) {
-    .Call(`_IFCip_cpp_mean`, mat, kernel, method)
+cpp_sd <- function(mat, kernel, method = 5L, k = NA_real_) {
+    .Call(`_IFCip_cpp_sd`, mat, kernel, method, k)
 }
 
-cpp_median <- function(mat, kernel, method = 5L) {
-    .Call(`_IFCip_cpp_median`, mat, kernel, method)
+cpp_mean <- function(mat, kernel, method = 5L, k = NA_real_) {
+    .Call(`_IFCip_cpp_mean`, mat, kernel, method, k)
 }
 
-cpp_mode <- function(mat, kernel, method = 5L) {
-    .Call(`_IFCip_cpp_mode`, mat, kernel, method)
+cpp_median <- function(mat, kernel, method = 5L, k = NA_real_) {
+    .Call(`_IFCip_cpp_median`, mat, kernel, method, k)
 }
 
-cpp_mid <- function(mat, kernel, method = 5L) {
-    .Call(`_IFCip_cpp_mid`, mat, kernel, method)
+cpp_mode <- function(mat, kernel, method = 5L, k = NA_real_) {
+    .Call(`_IFCip_cpp_mode`, mat, kernel, method, k)
 }
 
-cpp_convolve2d <- function(mat, kernel, method = 5L) {
-    .Call(`_IFCip_cpp_convolve2d`, mat, kernel, method)
+cpp_mid <- function(mat, kernel, method = 5L, k = NA_real_) {
+    .Call(`_IFCip_cpp_mid`, mat, kernel, method, k)
 }
 
-cpp_correlate2d <- function(mat, kernel, method = 5L) {
-    .Call(`_IFCip_cpp_correlate2d`, mat, kernel, method)
+cpp_convolve2d <- function(mat, kernel, method = 5L, k = 0.0) {
+    .Call(`_IFCip_cpp_convolve2d`, mat, kernel, method, k)
+}
+
+cpp_correlate2d <- function(mat, kernel, method = 5L, k = 0.0) {
+    .Call(`_IFCip_cpp_correlate2d`, mat, kernel, method, k)
 }
 
 cpp_uw <- function(mat, kernel, erode = TRUE) {

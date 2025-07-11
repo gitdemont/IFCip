@@ -33,7 +33,7 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-// retrieve kernel matrix or set it to default [[1,1,1],[1,1,1],[1,1,1]] if NULL
+// retrieve kernel matrix or set it to default [[1,1,1],[1,1,1],[1,1,1]] if NULL or of size 0
 Rcpp::NumericMatrix get_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue) {
   Rcpp::NumericMatrix kk;
   if(kernel.isNotNull()) {
@@ -47,16 +47,37 @@ Rcpp::NumericMatrix get_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kernel 
   return kk;
 }
 
+// [[Rcpp::export(rng = false)]]
+Rcpp::IntegerMatrix rev_mat(const Rcpp::IntegerMatrix mat,
+                            bool reverse = true) {
+  if(!reverse) return mat;
+  Rcpp::IntegerMatrix out = Rcpp::no_init_matrix(mat.nrow(), mat.ncol());
+  for(R_len_t i = 0; i < mat.size(); i++) out[i] = mat[mat.size() - 1 - i];
+  return out;
+}
+
+// [[Rcpp::export(rng = false)]]
+Rcpp::IntegerMatrix swap_mat(const Rcpp::IntegerMatrix mat,
+                             const bool swap = true) {
+  if(!swap) return mat;
+  Rcpp::IntegerMatrix out = Rcpp::no_init_matrix(mat.nrow(), mat.ncol());
+  for(R_len_t i = 0, j = 0; i < mat.ncol(); i++) out(Rcpp::_, j++) = mat(Rcpp::_, i);
+  return out;
+}
+
 // compute matrix of x, y, offsets relative to kernel center
 // nozero: according to non-zero kernel elements
 // center: including center
+// reverse: should matrix be reversed, this is useful to adjust center when kernel has even dimension depending on reading direction
 // NULL kernel will result in 8 connected neighbors offsets
-// return an IntegerMatrix whose rows are x, y, respectively and columns are elements
+// return an IntegerMatrix whose rows are [x, y, index], respectively and columns are elements
 // [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix offset_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
                                   bool nozero = true,
-                                  bool center = false) {
-  Rcpp::NumericMatrix kk = get_kernel(kernel);
+                                  bool center = false,
+                                  bool reverse = false) {
+  Rcpp::LogicalMatrix k = Rcpp::as<Rcpp::LogicalMatrix>(get_kernel(kernel));
+  Rcpp::IntegerMatrix kk = rev_mat(Rcpp::as<Rcpp::IntegerMatrix>(k), reverse);
   R_len_t rr = kk.nrow() >> 1;
   R_len_t rc = kk.ncol() >> 1;
   R_len_t kc = kk.ncol() % 2;
@@ -66,39 +87,41 @@ Rcpp::IntegerMatrix offset_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kern
   if(nozero) {
     R_len_t n = 0;
     for(R_len_t c = -rc, j = 0; c < rc_1; c++) {
-      for(R_len_t r = -rr; r < rr_1; r++) {
-        if(kk[j++]) {
+      for(R_len_t r = -rr; r < rr_1; r++, j++) {
+        if(kk[j] == 1) {
           if((r == 0) && (c == 0) && !center) continue;
           n++;
         }
       }
     }
-    Rcpp::IntegerMatrix out(2, n);
+    Rcpp::IntegerMatrix out(3, n);
     for(R_len_t c = -rc, i = 0, j = 0; c < rc_1; c++) {
-      for(R_len_t r = -rr; r < rr_1; r++) {
-        if(kk[j++]) {
+      for(R_len_t r = -rr; r < rr_1; r++, j++) {
+        if(kk[j] == 1) {
           if((r == 0) && (c == 0) && !center) continue;
           out[i++] = c;
           out[i++] = r;
+          out[i++] = j;
         }
       }
     }
-    return out;
+    return swap_mat(out, reverse);
   }
   R_len_t s = kk.size() - !center;
-  Rcpp::IntegerMatrix out(2, std::max(0, s));
-  for(R_len_t c = -rc, i = 0; c < rc_1; c++) {
-    for(R_len_t r = -rr; r < rr_1; r++) {
+  Rcpp::IntegerMatrix out(3, std::max(0, s));
+  for(R_len_t c = -rc, i = 0, j = 0; c < rc_1; c++) {
+    for(R_len_t r = -rr; r < rr_1; r++, j++) {
       if((r == 0) && (c == 0) && !center) continue;
       out[i++] = c;
       out[i++] = r;
+      out[i++] = j;
     }
   }
-  return out;
+  return swap_mat(out, reverse);
 }
 
-// determine x, y, offsets that are scanned before offset (kernel) center in raster order
-// return an IntegerMatrix whose rows are x, y, respectively and columns are elements
+// determine kernel [x, y, index] that are scanned before (kernel) center in raster order
+// return an IntegerMatrix whose rows are [x, y, index], respectively and columns are elements
 // [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix offset_backward(const Rcpp::IntegerMatrix offset) {
   if(offset.nrow() < 2) Rcpp::stop("offset_backward: 'offset' should be at least 2 rows");
@@ -109,8 +132,8 @@ Rcpp::IntegerMatrix offset_backward(const Rcpp::IntegerMatrix offset) {
   return out;
 }
 
-// determine x, y, offsets that are scanned after offset (kernel) center in raster order
-// return an IntegerMatrix whose rows are x, y, respectively and columns are elements
+// determine kernel [x, y, index] that are scanned after (kernel) center in raster order
+// return an IntegerMatrix whose rows are [x, y, index], respectively and columns are elements
 // [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix offset_forward(const Rcpp::IntegerMatrix offset) {
   if(offset.nrow() < 2) Rcpp::stop("offset_forward: 'offset' should be at least 2 rows");
@@ -120,7 +143,6 @@ Rcpp::IntegerMatrix offset_forward(const Rcpp::IntegerMatrix offset) {
   for(R_len_t i = offset.ncol() - 1, j = 0; i >= 0; i--) if(L[i]) out(Rcpp::_, j++) = offset(Rcpp::_, i);
   return out;
 }
-
 
 // neighbor position computation according to offset
 // Each time a neighbor is found, it is added to nbr vector starting at nbr[1]

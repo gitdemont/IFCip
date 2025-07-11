@@ -8,7 +8,9 @@
 
 \item{kernel, }{a NumericMatrix.}
 
-\item{method}{used for padding, a uint8_t. Default is 5 (with k = NA_REAL, see hpp_padding), allowed are [1-8].}
+\item{method}{used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].}
+
+\item{k, }{constant used for padding, a double. Default is \code{NA_REAL}.}
 }
 \value{
 a NumericMatrix.
