@@ -29,19 +29,20 @@
 #' @title Create a Kernel
 #' @description
 #' Create a kernel of the desired 'type'. 
-#' @param size the size of the desired kernel. Default is 3.\cr
-#' It does not apply to 'type' "sobelx", "sobely", "scharr", "n4" nor "n8" which are of 'size' 3.
+#' @param size the size of the desired kernel. Default is \code{3}.\cr
+#' It does not apply to 'type' "sobelx", "sobely", "scharr", "n4" nor "n8" which are of 'size' \code{3}.
 #' @param type a string indicating the type of the kernel Default is "box". Allowed are: 
-#' "box", "cross", "plus", "disc", "diamond", "mean", "gaussian", "laplacian", "sobelx", "sobely", "scharr", "n4", "n8".
-#' @param sigma standard deviation of the "gaussian" or "laplacian" 'type'. Default is 0.3.
+#' "box", "cross", "plus", "disc", "diamond", "mean", "gaussian", "laplacian", "sobelx", "sobely", "scharrx",  "scharry", "n4", "n8".
+#' @param sigma standard deviation of the "gaussian" or "laplacian" \code{'type'}. Default is \code{-0.3}. If negative, \code{'sigma'} will be determined using \code{-1.0 * sigma * ((size - 1) * 0.5)}.
 #' @details "box", "cross", "plus", "disc", "diamond" will result in a logical matrix whereas the other will produce numeric a matrix.
 #' @source 'gaussian' is from EBImage::makeBrush R package and 'Laplacian' adapted from 'gaussian'
 #' @return a kernel matrix.
-make_kernel <- function(size = 3, type = "box", sigma = 0.3) {
+make_kernel <- function(size = 3, type = "box", sigma = -0.3) {
   size = na.omit(as.integer(size)); assert(size, len = 1)
   type = tolower(type);assert(type, len = 1, alw = c("box", "cross", "plus", "disc", "diamond", 
-                                                     "mean", "gaussian", "laplacian", "sobelx",
-                                                     "sobely", "scharr", "n4","n8"))
+                                                     "mean", "gaussian", "laplacian",
+                                                     "sobelx", "sobely", "scharrx", "scharry",
+                                                     "n4","n8"))
   switch(type, 
          "box" = {
            ans = cpp_make_box(size) 
@@ -61,18 +62,11 @@ make_kernel <- function(size = 3, type = "box", sigma = 0.3) {
          "mean" = {
            ans = matrix(1/(size*size), ncol = size, nrow = size)
          },
-         "gaussian" = { # from EBImage::makeBrush
-           sigma = na.omit(as.numeric(sigma)); assert(sigma, len = 1)
-           x = seq(-(size - 1)/2, (size - 1)/2, length = size)
-           x = matrix(x, ncol = size, nrow = size)
-           ans = exp(-(x^2 + t(x)^2) / (2*sigma^2)) 
+         "gaussian" = {
+           cpp_make_gaussian(size, sigma)
          },
-         "laplacian" = { # TODO remains to be checked
-           sigma = na.omit(as.numeric(sigma)); assert(sigma, len = 1)
-           x = seq(-(size - 1)/2, (size - 1)/2, length = size)
-           x = matrix(x, ncol = size, nrow = size)
-           ans = -(x^2 + t(x)^2) / (2*sigma^2)
-           ans = -(1+ans)*exp(ans)/(sigma^4)
+         "laplacian" = {
+           cpp_make_laplacian(size, sigma)
          },
          "sobelx" = { 
            ans = matrix(c( -1,  0,  1,
@@ -84,10 +78,15 @@ make_kernel <- function(size = 3, type = "box", sigma = 0.3) {
                             0,  0,  0,
                             1,  2,  1), ncol = 3, byrow = TRUE)
          },
-         "scharr" = {
-           ans = matrix(c( -3,  0, -3,
-                          -10,  0,-10,
-                           -3,  0, -3), ncol = 3, byrow = TRUE)
+         "scharrx" = {
+           ans = matrix(c( -3,  0,  3,
+                          -10,  0, 10,
+                           -3,  0,  3), ncol = 3, byrow = TRUE)
+         },
+         "scharry" = {
+           ans = matrix(c(  -3, -10, -3,
+                             0,   0,  0,
+                             3,  10,  3), ncol = 3, byrow = TRUE)
          },
          "n4" = {
            ans = matrix(c(  0, -1,  0,

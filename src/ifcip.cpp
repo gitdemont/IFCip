@@ -1645,6 +1645,34 @@ double cpp_bright_similarity(const Rcpp::NumericMatrix img1,
 // END similarity
 
 // FROM kernel
+//' @title Create Gaussian Kernel
+//' @name cpp_make_gaussian
+//' @description
+//' This function is designed to create a gaussian kernel.
+//' @param size, a uint8_t of the desired kernel size.
+//' @param sigma, a double, deviation of the filter used. Default is \code{-0.3}. If negative, \code{'sigma'} will be determined using \code{-1.0 * sigma * ((size - 1) * 0.5)}.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix cpp_make_gaussian(const uint8_t size = 3,
+                                      const double sigma = -0.3) {
+  return hpp_make_gaussian(size, sigma);
+}
+//' @title Create Laplacian Kernel
+//' @name cpp_make_laplacian
+//' @description
+//' This function is designed to create a laplacian kernel.
+//' @param size, a uint8_t of the desired kernel size.
+//' @param sigma, a double, deviation of the filter used. Default is \code{-0.3}. If negative, \code{'sigma'} will be determined using \code{-1.0 * sigma * ((size - 1) * 0.5)}.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix cpp_make_laplacian(const uint8_t size = 3,
+                                       const double sigma = -0.3) {
+  return hpp_make_laplacian(size, sigma);
+}
 //' @title Create a Disc
 //' @name cpp_make_disc
 //' @description

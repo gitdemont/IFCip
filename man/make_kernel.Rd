@@ -7,16 +7,16 @@
 'gaussian' is from EBImage::makeBrush R package and 'Laplacian' adapted from 'gaussian'
 }
 \usage{
-make_kernel(size = 3, type = "box", sigma = 0.3)
+make_kernel(size = 3, type = "box", sigma = -0.3)
 }
 \arguments{
-\item{size}{the size of the desired kernel. Default is 3.\cr
-It does not apply to 'type' "sobelx", "sobely", "scharr", "n4" nor "n8" which are of 'size' 3.}
+\item{size}{the size of the desired kernel. Default is \code{3}.\cr
+It does not apply to 'type' "sobelx", "sobely", "scharr", "n4" nor "n8" which are of 'size' \code{3}.}
 
 \item{type}{a string indicating the type of the kernel Default is "box". Allowed are: 
-"box", "cross", "plus", "disc", "diamond", "mean", "gaussian", "laplacian", "sobelx", "sobely", "scharr", "n4", "n8".}
+"box", "cross", "plus", "disc", "diamond", "mean", "gaussian", "laplacian", "sobelx", "sobely", "scharrx",  "scharry", "n4", "n8".}
 
-\item{sigma}{standard deviation of the "gaussian" or "laplacian" 'type'. Default is 0.3.}
+\item{sigma}{standard deviation of the "gaussian" or "laplacian" \code{'type'}. Default is \code{-0.3}. If negative, \code{'sigma'} will be determined using \code{-1.0 * sigma * ((size - 1) * 0.5)}.}
 }
 \value{
 a kernel matrix.

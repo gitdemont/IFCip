@@ -943,6 +943,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_make_gaussian
+Rcpp::NumericMatrix cpp_make_gaussian(const uint8_t size, const double sigma);
+RcppExport SEXP _IFCip_cpp_make_gaussian(SEXP sizeSEXP, SEXP sigmaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const uint8_t >::type size(sizeSEXP);
+    Rcpp::traits::input_parameter< const double >::type sigma(sigmaSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_make_gaussian(size, sigma));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_make_laplacian
+Rcpp::NumericMatrix cpp_make_laplacian(const uint8_t size, const double sigma);
+RcppExport SEXP _IFCip_cpp_make_laplacian(SEXP sizeSEXP, SEXP sigmaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const uint8_t >::type size(sizeSEXP);
+    Rcpp::traits::input_parameter< const double >::type sigma(sigmaSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_make_laplacian(size, sigma));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_make_disc
 Rcpp::LogicalMatrix cpp_make_disc(const uint8_t size);
 RcppExport SEXP _IFCip_cpp_make_disc(SEXP sizeSEXP) {
@@ -1083,6 +1105,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_thinning_bst", (DL_FUNC) &_IFCip_cpp_thinning_bst, 1},
     {"_IFCip_cpp_similarity", (DL_FUNC) &_IFCip_cpp_similarity, 3},
     {"_IFCip_cpp_bright_similarity", (DL_FUNC) &_IFCip_cpp_bright_similarity, 3},
+    {"_IFCip_cpp_make_gaussian", (DL_FUNC) &_IFCip_cpp_make_gaussian, 2},
+    {"_IFCip_cpp_make_laplacian", (DL_FUNC) &_IFCip_cpp_make_laplacian, 2},
     {"_IFCip_cpp_make_disc", (DL_FUNC) &_IFCip_cpp_make_disc, 1},
     {"_IFCip_cpp_make_box", (DL_FUNC) &_IFCip_cpp_make_box, 1},
     {"_IFCip_cpp_make_plus", (DL_FUNC) &_IFCip_cpp_make_plus, 1},

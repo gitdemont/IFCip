@@ -153,8 +153,68 @@ void offset_nbr(const R_len_t idx,
 }
 
 // [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix hpp_make_sobel() {
+  Rcpp::NumericMatrix out = Rcpp::no_init_matrix(3,3);
+  out[0]=-1.0; out[3]=0.0; out[6]=1.0;
+  out[1]=-2.0; out[4]=0.0; out[7]=2.0;
+  out[2]=-1.0; out[5]=0.0; out[8]=1.0;
+  return out;
+}
+
+// [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix hpp_make_scharr() {
+  Rcpp::NumericMatrix out = Rcpp::no_init_matrix(3,3);
+  out[0]= -3.0; out[3]=0.0; out[6]= 3.0;
+  out[1]=-10.0; out[4]=0.0; out[7]=10.0;
+  out[2]= -3.0; out[5]=0.0; out[8]= 3.0;
+  return out;
+}
+
+// [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix hpp_make_gaussian(const uint8_t size,
+                                      const double sigma = -0.3) {
+  double s = sigma < 0 ? -1.0 * sigma * ((size - 1) * 0.5) : sigma;
+  R_len_t h = size >> 1;
+  double c = size % 2 ? (2.0 * h) : (2.0 * h - 1);
+  c *= 0.5;
+  double k = s * s;
+  k *= 2.0;
+  Rcpp::NumericMatrix out = Rcpp::no_init_matrix(size, size);
+  for(R_len_t i_col = 0; i_col < size; i_col++) {
+    double x = i_col - c;
+    for(R_len_t i_row = 0; i_row < size; i_row++) {
+      double y = i_row - c;  
+      out(i_row, i_col) = std::exp(-1.0 * (x * x + y * y) / k);
+    }
+  }
+  return out;
+}
+
+// [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix hpp_make_laplacian(const uint8_t size,
+                                       const double sigma = -0.3) {
+  double s = sigma < 0 ? -1.0 * sigma * ((size - 1) * 0.5) : sigma;
+  R_len_t h = size >> 1;
+  double c = size % 2 ? (2.0 * h) : (2.0 * h - 1);
+  c *= 0.5;
+  double k = s * s;
+  double kk = k * k;
+  k *= 2.0;
+  Rcpp::NumericMatrix out = Rcpp::no_init_matrix(size, size);
+  for(R_len_t i_col = 0; i_col < size; i_col++) {
+    double x = i_col - c;
+    for(R_len_t i_row = 0; i_row < size; i_row++) {
+      double y = i_row - c; 
+      double foo = -1.0 * (x * x + y * y) / k;
+      out(i_row, i_col) = -(1.0 + foo) * std::exp(foo) / kk;
+    }
+  }
+  return out;
+}
+
+// [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_make_disc(const uint8_t size = 3) {
-  Rcpp::LogicalMatrix out(size, size);
+  Rcpp::LogicalMatrix out = Rcpp::no_init_matrix(size, size);
   if(size == 0) return out;
   double half = size % 2 ? size / 2 : size / 2 - 0.5;
   for(R_len_t i_col = 0; i_col < size; i_col++) {
@@ -171,7 +231,7 @@ Rcpp::LogicalMatrix hpp_make_disc(const uint8_t size = 3) {
 
 // [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_make_box(const uint8_t size = 3) {
-  Rcpp::LogicalMatrix out(size, size);
+  Rcpp::LogicalMatrix out = Rcpp::no_init_matrix(size, size);
   out.fill(true);
   return out;
 }
@@ -189,7 +249,7 @@ Rcpp::LogicalMatrix hpp_make_plus(const uint8_t size = 3) {
 
 // [[Rcpp::export(rng = false)]]
 Rcpp::LogicalMatrix hpp_make_cross(const uint8_t size = 3) {
-  Rcpp::LogicalMatrix out(size, size);
+  Rcpp::LogicalMatrix out = Rcpp::no_init_matrix(size, size);
   for(R_len_t i_col = 0; i_col < size; i_col++) {
     for(R_len_t i_row = 0; i_row < size; i_row++) {
       out(i_row, i_col) = i_row == i_col || i_row == (size - 1 - i_col);
@@ -199,7 +259,7 @@ Rcpp::LogicalMatrix hpp_make_cross(const uint8_t size = 3) {
 }
 
 // [[Rcpp::export(rng = false)]]
-Rcpp::LogicalMatrix hpp_make_diamond(uint8_t size = 3) {
+Rcpp::LogicalMatrix hpp_make_diamond(const uint8_t size = 3) {
   Rcpp::LogicalMatrix out(size, size);
   if(size >= 1) {
     double half = size >> 1;
@@ -211,7 +271,6 @@ Rcpp::LogicalMatrix hpp_make_diamond(uint8_t size = 3) {
           out[i++] = (abs(i_col) + abs(i_row)) <= half;
         }
       }
-      
     } else {
       for(R_len_t i_col = -half; i_col <= half; i_col++) {
         if(i_col == 0) i_col++;
@@ -225,4 +284,5 @@ Rcpp::LogicalMatrix hpp_make_diamond(uint8_t size = 3) {
   }
   return out;
 }
+
 #endif

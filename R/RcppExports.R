@@ -1074,6 +1074,26 @@ NULL
 #' @keywords internal
 NULL
 
+#' @title Create Gaussian Kernel
+#' @name cpp_make_gaussian
+#' @description
+#' This function is designed to create a gaussian kernel.
+#' @param size, a uint8_t of the desired kernel size.
+#' @param sigma, a double, deviation of the filter used. Default is \code{-0.3}. If negative, \code{'sigma'} will be determined using \code{-1.0 * sigma * ((size - 1) * 0.5)}.
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
+#' @title Create Laplacian Kernel
+#' @name cpp_make_laplacian
+#' @description
+#' This function is designed to create a laplacian kernel.
+#' @param size, a uint8_t of the desired kernel size.
+#' @param sigma, a double, deviation of the filter used. Default is \code{-0.3}. If negative, \code{'sigma'} will be determined using \code{-1.0 * sigma * ((size - 1) * 0.5)}.
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
 #' @title Create a Disc
 #' @name cpp_make_disc
 #' @description
@@ -1443,6 +1463,14 @@ cpp_similarity <- function(img1, img2, msk) {
 
 cpp_bright_similarity <- function(img1, img2, msk) {
     .Call(`_IFCip_cpp_bright_similarity`, img1, img2, msk)
+}
+
+cpp_make_gaussian <- function(size = 3L, sigma = -0.3) {
+    .Call(`_IFCip_cpp_make_gaussian`, size, sigma)
+}
+
+cpp_make_laplacian <- function(size = 3L, sigma = -0.3) {
+    .Call(`_IFCip_cpp_make_laplacian`, size, sigma)
 }
 
 cpp_make_disc <- function(size = 3L) {
