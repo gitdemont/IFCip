@@ -7,8 +7,6 @@
 \item{ctl}{a List, containing contour tracing labeling, object of class `IFCip_ctl`}
 
 \item{kernel, }{a NumericMatrix.}
-
-\item{iter, }{an uint8_t, number of time erode should be iterated. Default is 0.}
 }
 \value{
 a NumericMatrix.

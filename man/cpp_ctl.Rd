@@ -4,7 +4,7 @@
 \alias{cpp_ctl}
 \title{Contour Tracing Connected Component Labeling}
 \arguments{
-\item{mat}{a LogicalMatrix, containing mask.}
+\item{mat}{a Matrix, converted to LogicalMatrix, where finite non zero values will be considered as mask.}
 
 \item{global}{whether to compute the perimeter globally or to evaluate the perimeter of each non 8-connected objects. Default is false.
 When true pixels of overlapping extra borders of objects are counted only once.}

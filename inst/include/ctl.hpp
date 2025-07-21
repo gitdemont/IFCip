@@ -31,32 +31,16 @@
 #define IFCIP_CTL_HPP
 
 #include <Rcpp.h>
-#include "padding.hpp"
 using namespace Rcpp;
 
 static int ifcip_ctl_dx [8]={ 1, 1, 0,-1,-1,-1, 0, 1};
 static int ifcip_ctl_dy [8]={ 0, 1, 1, 1, 0,-1,-1,-1};
 static int ifcip_ctl_bk [8]={ 7, 7, 1, 1, 3, 3, 5, 5};
 
-//' @title Contour Tracing Connected Component Labeling
-//' @name cpp_ctl
-//' @description
-//' This function is designed to identify connected component.
-//' @param mat a LogicalMatrix, containing mask.
-//' @param global whether to compute the perimeter globally or to evaluate the perimeter of each non 8-connected objects. Default is false.
-//' When true pixels of overlapping extra borders of objects are counted only once.
-//' @details adaptation of 'A linear-time component-labeling algorithm using contour tracing technique' from F. Chang, CJ. Chen and CJ Lu.
-//' Computer Vision and Image Understanding Volume 93, Issue 2, February 2004, Pages 206-220.\doi{10.1016/j.cviu.2003.09.002}
-//' @return a list whose members are:\cr
-//' -matrix: an IntegerMatrix with connected component labels.\cr
-//' -contours: an IntegerMatrix of identified contours, whose columns are x, y, label, direction and type.\cr
-//' -nb_lab: the total number of components identified.
-//' -perimeter: the number of pixels outside contours.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
-                   const bool global = false) {
+//' ctl template
+template <int RTYPE>
+Rcpp::List ctl_T (Rcpp::Matrix<RTYPE> mat,
+                  const bool global = false) {
   R_len_t mat_r = mat.nrow(), mat_c = mat.ncol();
   R_len_t i_cont = 0, i_per = -1, new_l = 2, max_count = ((mat_r >> 1) + (mat_r % 2) + 1) * ((mat_c >> 1) + (mat_c % 2) + 1) * 15;
   
@@ -77,7 +61,8 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
     R_len_t i_out = (i_col + 1) * (mat_r + 2) + 1;
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
-      out[i_out++] = mat(i_row, i_col);
+      int v = mat(i_row, i_col);
+      out[i_out++] = (v != 0) && (v != NA_INTEGER);
     }
   }
   
@@ -138,8 +123,8 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
               break; // isolated point
             }
             if(//(contours[len + 0]== ori_c) && (contours[len + 1]== ori_r) &&
-               (contours[len + 5] == nbr_x) && (contours[len + 6] == nbr_y) &&
-               (i_row == ori_r) && (i_col == ori_c)) break; // escape contour
+              (contours[len + 5] == nbr_x) && (contours[len + 6] == nbr_y) &&
+                (i_row == ori_r) && (i_col == ori_c)) break; // escape contour
             
             // record current contour point coordinates + its label
             if(max_count - i_cont < 5) {
@@ -194,8 +179,8 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
               }
             }
             if(//(contours[len + 0]== ori_c) && (contours[len + 1]== ori_r) && 
-               (contours[len + 5] == nbr_x) && (contours[len + 6] == nbr_y) &&
-               (i_row == ori_r) && (i_col == ori_c)) break; // escape contour
+              (contours[len + 5] == nbr_x) && (contours[len + 6] == nbr_y) &&
+                (i_row == ori_r) && (i_col == ori_c)) break; // escape contour
             
             // record current contour point coordinates + its label
             if(max_count - i_cont < 5) { // safer
@@ -231,7 +216,6 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
       foo(i_row, i_col) = contours[i_cont++];
     }
   }
-  
   colnames(foo) = Rcpp::CharacterVector::create("x","y","label","direction","type");
   Rcpp::List ret = Rcpp::List::create(_["matrix"] = out(Rcpp::Range(1, mat_r), Rcpp::Range(1, mat_c)),
                                       _["dim"] = Rcpp::IntegerVector::create(_["nrow"] = mat_r, _["ncol"] = mat_c), 
@@ -242,100 +226,32 @@ Rcpp::List hpp_ctl(const Rcpp::LogicalMatrix mat,
   return ret;
 }
 
-//' @title Contours Dilatation
-//' @name cpp_dilate_ctl
+//' @title Contour Tracing Connected Component Labeling
+//' @name cpp_ctl
 //' @description
-//' This function applies contours dilatation.
-//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-//' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
-//' @return a NumericMatrix.
+//' This function is designed to identify connected component.
+//' @param mat a Matrix, converted to LogicalMatrix, where finite non zero values will be considered as mask.
+//' @param global whether to compute the perimeter globally or to evaluate the perimeter of each non 8-connected objects. Default is false.
+//' When true pixels of overlapping extra borders of objects are counted only once.
+//' @details adaptation of 'A linear-time component-labeling algorithm using contour tracing technique' from F. Chang, CJ. Chen and CJ Lu.
+//' Computer Vision and Image Understanding Volume 93, Issue 2, February 2004, Pages 206-220.\doi{10.1016/j.cviu.2003.09.002}
+//' @return a list whose members are:\cr
+//' -matrix: an IntegerMatrix with connected component labels.\cr
+//' -contours: an IntegerMatrix of identified contours, whose columns are x, y, label, direction and type.\cr
+//' -nb_lab: the total number of components identified.
+//' -perimeter: the number of pixels outside contours.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_dilate_ctl(const List ctl,
-                                   const Rcpp::NumericMatrix kernel,
-                                   const uint8_t iter = 0) {
-  if(!Rf_inherits(ctl, "IFCip_ctl")) {
-    Rcpp::stop("hpp_fill: 'ctl' should be of class `IFCip_ctl`");
+Rcpp::List hpp_ctl(SEXP mat,
+                   const bool global = false) {
+  switch( TYPEOF(mat) ) {
+  case RAWSXP : return ctl_T(as<Rcpp::IntegerMatrix>(mat), global);
+  case LGLSXP : return ctl_T(as<Rcpp::LogicalMatrix>(mat), global);
+  case INTSXP : return ctl_T(as<Rcpp::IntegerMatrix>(mat), global);
+  case REALSXP : return ctl_T(as<Rcpp::NumericMatrix>(mat), global);
+  default : Rcpp::stop("hpp_ctl: not supported SEXP in 'mat'");
   }
-  R_len_t pad_c = kernel.ncol() >> 1;
-  R_len_t pad_r = kernel.nrow() >> 1;
-  R_len_t kc = kernel.ncol() % 2;
-  R_len_t kr = kernel.nrow() % 2;
-  R_len_t pad_c_1 = pad_c + kc;
-  R_len_t pad_r_1 = pad_r + kr;
-  if(kr == kc) kr = kc = !kc;
-  Rcpp::NumericMatrix out = hpp_padding(as<Rcpp::NumericMatrix>(ctl["matrix"]), pad_r + kc, pad_c + kr, 5, 0.0);
-  
-  uint8_t i_iter = 0;
-  while(i_iter <= iter) {
-    i_iter++;
-    Rcpp::NumericMatrix foo = clone(out);
-    for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
-      for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
-        double K = foo(i_row, i_col);
-        for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col < i_col + pad_c_1; f_col++) {
-          for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
-            if(kernel[i_ker++]) {
-              if(foo(f_row, f_col) == 0) {
-                out(f_row, f_col) = K;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
-}
-
-//' @title Contours Erosion
-//' @name cpp_erode_ctl
-//' @description
-//' This function applies contours erosion.
-//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-//' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time erode should be iterated. Default is 0.
-//' @return a NumericMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_erode_ctl(const List ctl,
-                                  const Rcpp::NumericMatrix kernel,
-                                  const uint8_t iter = 0) {
-  if(!Rf_inherits(ctl, "IFCip_ctl")) {
-    Rcpp::stop("hpp_fill: 'ctl' should be of class `IFCip_ctl`");
-  }
-  R_len_t pad_c = kernel.ncol() >> 1;
-  R_len_t pad_r = kernel.nrow() >> 1;
-  R_len_t kc = kernel.ncol() % 2;
-  R_len_t kr = kernel.nrow() % 2;
-  R_len_t pad_c_1 = pad_c + kc;
-  R_len_t pad_r_1 = pad_r + kr;
-  if(kr == kc) kr = kc = !kc;
-  Rcpp::NumericMatrix out = hpp_padding(as<Rcpp::NumericMatrix>(ctl["matrix"]), pad_r + kc, pad_c + kr, 5, 0.0);
-  
-  uint8_t i_iter = 0;
-  while(i_iter <= iter) {
-    i_iter++;
-    Rcpp::NumericMatrix foo = clone(out);
-    for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
-      for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
-        double K = foo(i_row, i_col);
-        for(R_len_t f_col = i_col - pad_c, i_ker = 0; f_col < i_col + pad_c_1; f_col++) {
-          for(R_len_t f_row = i_row - pad_r; f_row < i_row + pad_r_1; f_row++) {
-            if(kernel[i_ker++]) {
-              if(foo(f_row, f_col) != 0) {
-                out(f_row, f_col) = K;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
 }
 
 #endif

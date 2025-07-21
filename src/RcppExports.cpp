@@ -655,6 +655,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_dilate_ctl
+Rcpp::NumericMatrix cpp_dilate_ctl(const List ctl, const Rcpp::NumericMatrix kernel);
+RcppExport SEXP _IFCip_cpp_dilate_ctl(SEXP ctlSEXP, SEXP kernelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_dilate_ctl(ctl, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_erode_ctl
+Rcpp::NumericMatrix cpp_erode_ctl(const List ctl, const Rcpp::NumericMatrix kernel);
+RcppExport SEXP _IFCip_cpp_erode_ctl(SEXP ctlSEXP, SEXP kernelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_erode_ctl(ctl, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_rec_dilate
 Rcpp::NumericMatrix cpp_rec_dilate(const Rcpp::NumericMatrix markers, const Rcpp::NumericMatrix img, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
 RcppExport SEXP _IFCip_cpp_rec_dilate(SEXP markersSEXP, SEXP imgSEXP, SEXP kernelSEXP) {
@@ -825,30 +847,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Rcpp::LogicalMatrix >::type mat(matSEXP);
     Rcpp::traits::input_parameter< const bool >::type global(globalSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_ctl(mat, global));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_dilate_ctl
-Rcpp::NumericMatrix cpp_dilate_ctl(const List ctl, const Rcpp::NumericMatrix kernel, const uint8_t iter);
-RcppExport SEXP _IFCip_cpp_dilate_ctl(SEXP ctlSEXP, SEXP kernelSEXP, SEXP iterSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
-    Rcpp::traits::input_parameter< const uint8_t >::type iter(iterSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_dilate_ctl(ctl, kernel, iter));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_erode_ctl
-Rcpp::NumericMatrix cpp_erode_ctl(const List ctl, const Rcpp::NumericMatrix kernel, const uint8_t iter);
-RcppExport SEXP _IFCip_cpp_erode_ctl(SEXP ctlSEXP, SEXP kernelSEXP, SEXP iterSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
-    Rcpp::traits::input_parameter< const uint8_t >::type iter(iterSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_erode_ctl(ctl, kernel, iter));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1105,6 +1103,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_laplacian", (DL_FUNC) &_IFCip_cpp_laplacian, 2},
     {"_IFCip_cpp_erode_old", (DL_FUNC) &_IFCip_cpp_erode_old, 4},
     {"_IFCip_cpp_dilate_old", (DL_FUNC) &_IFCip_cpp_dilate_old, 4},
+    {"_IFCip_cpp_dilate_ctl", (DL_FUNC) &_IFCip_cpp_dilate_ctl, 2},
+    {"_IFCip_cpp_erode_ctl", (DL_FUNC) &_IFCip_cpp_erode_ctl, 2},
     {"_IFCip_cpp_rec_dilate", (DL_FUNC) &_IFCip_cpp_rec_dilate, 3},
     {"_IFCip_cpp_rec_erode", (DL_FUNC) &_IFCip_cpp_rec_erode, 3},
     {"_IFCip_cpp_HMIN", (DL_FUNC) &_IFCip_cpp_HMIN, 6},
@@ -1118,8 +1118,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_watershed_sv1", (DL_FUNC) &_IFCip_cpp_watershed_sv1, 6},
     {"_IFCip_cpp_watershed_sv2", (DL_FUNC) &_IFCip_cpp_watershed_sv2, 6},
     {"_IFCip_cpp_ctl", (DL_FUNC) &_IFCip_cpp_ctl, 2},
-    {"_IFCip_cpp_dilate_ctl", (DL_FUNC) &_IFCip_cpp_dilate_ctl, 3},
-    {"_IFCip_cpp_erode_ctl", (DL_FUNC) &_IFCip_cpp_erode_ctl, 3},
     {"_IFCip_cpp_polydraw", (DL_FUNC) &_IFCip_cpp_polydraw, 6},
     {"_IFCip_cpp_fill", (DL_FUNC) &_IFCip_cpp_fill, 8},
     {"_IFCip_cpp_fill_out", (DL_FUNC) &_IFCip_cpp_fill_out, 5},

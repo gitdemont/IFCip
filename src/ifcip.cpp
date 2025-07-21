@@ -1122,6 +1122,42 @@ Rcpp::NumericMatrix cpp_dilate_old(const Rcpp::NumericMatrix mat,
                                    const Rcpp::Nullable<Rcpp::NumericMatrix> msk_ = R_NilValue) {
   return hpp_dilate_old(mat, kernel, iter, msk_);
 }
+
+//' @title Contours Dilatation
+//' @name cpp_dilate_ctl
+//' @description
+//' This function applies contours dilatation.
+//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
+//' @param kernel, a NumericMatrix.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix cpp_dilate_ctl(const List ctl,
+                                   const Rcpp::NumericMatrix kernel) {
+  if(!Rf_inherits(ctl, "IFCip_ctl")) {
+    Rcpp::stop("hpp_dilate_ctl: 'ctl' should be of class `IFCip_ctl`");
+  }
+  return hpp_dilate(as<Rcpp::NumericMatrix>(ctl["matrix"]), kernel);
+}
+
+//' @title Contours Erosion
+//' @name cpp_erode_ctl
+//' @description
+//' This function applies contours erosion.
+//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
+//' @param kernel, a NumericMatrix.
+//' @return a NumericMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix cpp_erode_ctl(const List ctl,
+                                  const Rcpp::NumericMatrix kernel) {
+  if(!Rf_inherits(ctl, "IFCip_ctl")) {
+    Rcpp::stop("hpp_erode_ctl: 'ctl' should be of class `IFCip_ctl`");
+  }
+  return hpp_erode(as<Rcpp::NumericMatrix>(ctl["matrix"]), kernel);
+}
 // END morphology
 
 // FROM geodesic
@@ -1436,7 +1472,7 @@ Rcpp::IntegerVector cpp_watershed_sv2(const Rcpp::NumericMatrix mat,
 //' @name cpp_ctl
 //' @description
 //' This function is designed to identify connected component.
-//' @param mat a LogicalMatrix, containing mask.
+//' @param mat a Matrix, converted to LogicalMatrix, where finite non zero values will be considered as mask.
 //' @param global whether to compute the perimeter globally or to evaluate the perimeter of each non 8-connected objects. Default is false.
 //' When true pixels of overlapping extra borders of objects are counted only once.
 //' @details adaptation of 'A linear-time component-labeling algorithm using contour tracing technique' from F. Chang, C.J. Chen and C.J. Lu.
@@ -1452,39 +1488,6 @@ Rcpp::IntegerVector cpp_watershed_sv2(const Rcpp::NumericMatrix mat,
 Rcpp::List cpp_ctl(const Rcpp::LogicalMatrix mat,
                    const bool global = false) {
   return hpp_ctl(mat, global);
-}
-//' @title Contours Dilatation
-//' @name cpp_dilate_ctl
-//' @description
-//' This function applies contours dilatation.
-//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-//' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
-//' @return a NumericMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_dilate_ctl(const List ctl,
-                                   const Rcpp::NumericMatrix kernel,
-                                   const uint8_t iter = 0) {
-  return hpp_dilate_ctl(ctl, kernel, iter);
-}
-
-//' @title Contours Erosion
-//' @name cpp_erode_ctl
-//' @description
-//' This function applies contours erosion.
-//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-//' @param kernel, a NumericMatrix.
-//' @param iter, an uint8_t, number of time erode should be iterated. Default is 0.
-//' @return a NumericMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_erode_ctl(const List ctl,
-                                  const Rcpp::NumericMatrix kernel,
-                                  const uint8_t iter = 0) {
-  return hpp_erode_ctl(ctl, kernel, iter);
 }
 // END ctl
 

@@ -721,6 +721,26 @@ NULL
 #' @keywords internal
 NULL
 
+#' @title Contours Dilatation
+#' @name cpp_dilate_ctl
+#' @description
+#' This function applies contours dilatation.
+#' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
+#' @param kernel, a NumericMatrix.
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
+#' @title Contours Erosion
+#' @name cpp_erode_ctl
+#' @description
+#' This function applies contours erosion.
+#' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
+#' @param kernel, a NumericMatrix.
+#' @return a NumericMatrix.
+#' @keywords internal
+NULL
+
 #' @title Dilatation Reconstruction
 #' @name cpp_rec_dilate
 #' @description
@@ -934,7 +954,7 @@ NULL
 #' @name cpp_ctl
 #' @description
 #' This function is designed to identify connected component.
-#' @param mat a LogicalMatrix, containing mask.
+#' @param mat a Matrix, converted to LogicalMatrix, where finite non zero values will be considered as mask.
 #' @param global whether to compute the perimeter globally or to evaluate the perimeter of each non 8-connected objects. Default is false.
 #' When true pixels of overlapping extra borders of objects are counted only once.
 #' @details adaptation of 'A linear-time component-labeling algorithm using contour tracing technique' from F. Chang, C.J. Chen and C.J. Lu.
@@ -944,28 +964,6 @@ NULL
 #' -contours: an IntegerMatrix of identified contours, whose columns are x, y, label, direction and type.\cr
 #' -nb_lab: the total number of components identified.
 #' -perimeter: the number of pixels outside contours.
-#' @keywords internal
-NULL
-
-#' @title Contours Dilatation
-#' @name cpp_dilate_ctl
-#' @description
-#' This function applies contours dilatation.
-#' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-#' @param kernel, a NumericMatrix.
-#' @param iter, an uint8_t, number of time dilate should be iterated. Default is 0.
-#' @return a NumericMatrix.
-#' @keywords internal
-NULL
-
-#' @title Contours Erosion
-#' @name cpp_erode_ctl
-#' @description
-#' This function applies contours erosion.
-#' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-#' @param kernel, a NumericMatrix.
-#' @param iter, an uint8_t, number of time erode should be iterated. Default is 0.
-#' @return a NumericMatrix.
 #' @keywords internal
 NULL
 
@@ -1396,6 +1394,14 @@ cpp_dilate_old <- function(mat, kernel, iter = 0L, msk_ = NULL) {
     .Call(`_IFCip_cpp_dilate_old`, mat, kernel, iter, msk_)
 }
 
+cpp_dilate_ctl <- function(ctl, kernel) {
+    .Call(`_IFCip_cpp_dilate_ctl`, ctl, kernel)
+}
+
+cpp_erode_ctl <- function(ctl, kernel) {
+    .Call(`_IFCip_cpp_erode_ctl`, ctl, kernel)
+}
+
 cpp_rec_dilate <- function(markers, img, kernel = NULL) {
     .Call(`_IFCip_cpp_rec_dilate`, markers, img, kernel)
 }
@@ -1446,14 +1452,6 @@ cpp_watershed_sv2 <- function(mat, n_lev = 256L, draw_lines = TRUE, invert = FAL
 
 cpp_ctl <- function(mat, global = FALSE) {
     .Call(`_IFCip_cpp_ctl`, mat, global)
-}
-
-cpp_dilate_ctl <- function(ctl, kernel, iter = 0L) {
-    .Call(`_IFCip_cpp_dilate_ctl`, ctl, kernel, iter)
-}
-
-cpp_erode_ctl <- function(ctl, kernel, iter = 0L) {
-    .Call(`_IFCip_cpp_erode_ctl`, ctl, kernel, iter)
 }
 
 cpp_polydraw <- function(poly, border = 1.0, fill = 1.0, tol = 0.0, edge = FALSE, mat_ = NULL) {
