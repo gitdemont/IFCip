@@ -39,13 +39,14 @@ double filter_fun(const Rcpp::NumericVector x, int what_n, std::string what) {
   switch(what_n) {
   case 1: return x.size() == 0 ? NA_REAL : Rcpp::sum(x);
   case 2: return x.size() == 0 ? NA_REAL : Rcpp::sum(x);
-  case 3: return x.size() == 0 ? NA_REAL : Rcpp::mean(x);
-  case 4: return x.size() == 0 ? NA_REAL : Rcpp::median(x);
-  case 5: return x.size() == 0 ? NA_REAL : Rcpp::sd(x);
-  case 6: return x.size() == 0 ? NA_REAL : (Rcpp::max(x) - Rcpp::min(x)) / 2;
-  case 7: return x.size() == 0 ? NA_REAL : 3 * Rcpp::median(x) - 2 * Rcpp::mean(x);
-  case 8: return x.size() == 0 ? NA_REAL : Rcpp::min(x);
-  case 9: return x.size() == 0 ? NA_REAL : Rcpp::max(x);
+  case 3: return x.size() == 0 ? NA_REAL : Rcpp::sum(x);
+  case 4: return x.size() == 0 ? NA_REAL : Rcpp::mean(x);
+  case 5: return x.size() == 0 ? NA_REAL : Rcpp::median(x);
+  case 6: return x.size() == 0 ? NA_REAL : Rcpp::sd(x);
+  case 7: return x.size() == 0 ? NA_REAL : (Rcpp::max(x) - Rcpp::min(x)) / 2;
+  case 8: return x.size() == 0 ? NA_REAL : 3 * Rcpp::median(x) - 2 * Rcpp::mean(x);
+  case 9: return x.size() == 0 ? NA_REAL : Rcpp::min(x);
+  case 10: return x.size() == 0 ? NA_REAL : Rcpp::max(x);
   default: Rcpp::stop("hpp_filter: filter function['%s']is not supported", what);
   }
 }
@@ -86,7 +87,7 @@ Rcpp::NumericMatrix hpp_filter(const Rcpp::NumericMatrix mat,
   }
   
   // match filter function
-  int fun = Rcpp::match(Rcpp::CharacterVector::create(what), Rcpp::CharacterVector::create("correlate", "convolve", "mean", "median", "sd", "mid", "mode", "min", "max"))[0];
+  int fun = Rcpp::match(Rcpp::CharacterVector::create(what), Rcpp::CharacterVector::create("correlate", "convolve", "convolve0", "mean", "median", "sd", "mid", "mode", "min", "max"))[0];
   
   // initialize out that will be padded using method and k
   // 0.0 is important to allow removal of extra values from final result (multiply by 0.0) for correlate and convolve
@@ -118,19 +119,6 @@ Rcpp::NumericMatrix hpp_filter(const Rcpp::NumericMatrix mat,
           }
         }
       }
-      // not super fast
-      // Rcpp::IntegerMatrix o = offset_kernel(kernel, true, true, true);
-      // R_len_t ker_c = o.ncol();
-      // Rcpp::NumericVector K(ker_c, NA_REAL);
-      // for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
-      //   for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
-      //     for(R_len_t i_k = 0; i_k < ker_c ; i_k++) {
-      //       R_len_t m_col = o[3 * i_k] + i_col, m_row = o[3 * i_k + 1] + i_row;
-      //       K[i_k] = kernel[kernel.size() - 1 - (o[3 * i_k + 2])] * foo(m_row, m_col);
-      //     }
-      //     out(i_row, i_col) = filter_fun(Rcpp::na_omit(K), fun, what);
-      //   }
-      // }
     } else { // here we apply filtering
       foo = hpp_padding(mat, pad_r + kc, pad_c + kr, method, k);
       out = Rcpp::clone(foo);
