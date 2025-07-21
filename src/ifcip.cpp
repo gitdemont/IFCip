@@ -1519,25 +1519,27 @@ Rcpp::NumericMatrix cpp_polydraw (const Rcpp::IntegerMatrix poly,
 //' @description
 //' This function is designed to fill contours.
 //' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-//' @param label an int corresponding to the label of desired set of contour to be filled.
+//' @param label a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
 //' Default is \code{0} to fill all sets of contours found.
-//' @param i_border a bool, to whether or not draw inside contours if some were identified.
-//' @param i_fill a bool, to whether or not fill inside contours if some were identified.
-//' @param o_border a bool, to whether or draw external contours.
-//' @param o_fill a bool, to whether or not fill external contours.
-//' @param neg_border a bool, to whether or not border, if drawn, should be negated.
+//' @param i_border a bool, to whether or not draw inside contours if some were identified. Default is \code{true}.
+//' @param i_fill a bool, to whether or not fill inside contours if some were identified. Default is \code{true}.
+//' @param i_neg_border a bool, to whether or not inside border, if drawn, should be negated. Default is \code{false}.
+//' @param o_border a bool, to whether or not draw external contours. Default is \code{true}.
+//' @param o_fill a bool, to whether or not fill external contours. Default is \code{true}.
+//' @param o_neg_border a bool, to whether or not external border, if drawn, should be negated. Default is \code{false}.
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix cpp_fill(const List ctl,
-                             const uint32_t label = 0,
+                             const Rcpp::Nullable<Rcpp::IntegerVector> label = Rcpp::IntegerVector::create(0),
                              const bool i_border = true,
                              const bool i_fill = true,
+                             const bool i_neg_border = false,
                              const bool o_border = true,
                              const bool o_fill = true,
-                             const bool neg_border = false ) {
-  return hpp_fill(ctl, label, i_border, i_fill, i_border, o_fill, neg_border);
+                             const bool o_neg_border = false ) {
+  return hpp_fill(ctl, label, i_border, i_fill, i_neg_border, o_border, o_fill, o_neg_border);
 }
 
 //' @title Contours Filling Outer Only
@@ -1545,18 +1547,21 @@ Rcpp::IntegerMatrix cpp_fill(const List ctl,
 //' @description
 //' This function is designed to fill the most external contours.
 //' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`.
-//' @param o_border a bool, to whether or draw external contours.
-//' @param o_fill a bool, to whether or not fill external contours.
-//' @param neg_border a bool, to whether or not border, if drawn, should be negated.
+//' @param label a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
+//' Default is \code{0} to fill all sets of contours found.
+//' @param o_border a bool, to whether or not draw external contours. Default is \code{true}.
+//' @param o_fill a bool, to whether or not fill external contours. Default is \code{true}.
+//' @param o_neg_border a bool, to whether or not external border, if drawn, should be negated. Default is \code{false}.
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix cpp_fill_out(const List ctl,
+                                 const Rcpp::Nullable<Rcpp::IntegerVector> label = Rcpp::IntegerVector::create(0),
                                  const bool o_border = true,
                                  const bool o_fill = true,
-                                 const bool neg_border = false) {
-  return hpp_fill_out(ctl, o_border, o_fill, neg_border);
+                                 const bool o_neg_border = false) {
+  return hpp_fill(ctl, label, o_border, o_fill, o_neg_border);
 }
 
 //' @title Connected Region Flood Filling

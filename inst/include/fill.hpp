@@ -518,31 +518,40 @@ Rcpp::NumericMatrix hpp_floodfill (const Rcpp::NumericMatrix img,
 //' @description
 //' This function is designed to fill contours.
 //' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-//' @param label an int corresponding to the label of desired set of contour to be filled.
+//' @param label a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
 //' Default is \code{0} to fill all sets of contours found.
-//' @param i_border a bool, to whether or not draw inside contours if some were identified.
-//' @param i_fill a bool, to whether or not fill inside contours if some were identified.
-//' @param o_border a bool, to whether or draw external contours.
-//' @param o_fill a bool, to whether or not fill external contours.
-//' @param neg_border a bool, to whether or not border, if drawn, should be negated.
+//' @param i_border a bool, to whether or not draw inside contours if some were identified. Default is \code{true}.
+//' @param i_fill a bool, to whether or not fill inside contours if some were identified. Default is \code{true}.
+//' @param i_neg_border a bool, to whether or not inside border, if drawn, should be negated. Default is \code{false}.
+//' @param o_border a bool, to whether or not draw external contours. Default is \code{true}.
+//' @param o_fill a bool, to whether or not fill external contours. Default is \code{true}.
+//' @param o_neg_border a bool, to whether or not external border, if drawn, should be negated. Default is \code{false}.
 //' @return a IntegerMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix hpp_fill (const List ctl,
-                              const int label = 0,
+                              const Rcpp::Nullable<Rcpp::IntegerVector> label = Rcpp::IntegerVector::create(0),
                               const bool i_border = true,
                               const bool i_fill = true,
+                              const bool i_neg_border = false,
                               const bool o_border = true,
                               const bool o_fill = true,
-                              const bool neg_border = false) {
+                              const bool o_neg_border = false) {
   if(!Rf_inherits(ctl, "IFCip_ctl")) Rcpp::stop("hpp_fill: 'ctl' should be of class `IFCip_ctl`");
   
   // retrieve max number of sets of contours identified by ctl
   int label_max = ctl["nb_lab"];
   
-  // check whether to fill only one set or every sets of contours
-  int label_cur = label <= 0 ? label_max : label;
+  // check whether to fill user-defined set(s) of contours or every sets of contours
+  Rcpp::IntegerVector labs;
+  if(label.isNotNull()) {
+    Rcpp::IntegerVector ll(label.get());
+    labs = (ll.size() == 0) ? Rcpp::IntegerVector::create(-1) : ((ll.size() == 1) && (ll[0] == 0)) ? seq_len(label_max) : Rcpp::clone(ll);
+  } else {
+    labs = Rcpp::IntegerVector::create(-1);
+  }
+  labs.sort(true);
   
   // retrieve contours coordinates
   Rcpp::IntegerMatrix contours = as<Rcpp::IntegerMatrix>(ctl["contours"]);
@@ -556,12 +565,13 @@ Rcpp::IntegerMatrix hpp_fill (const List ctl,
   bool o = o_fill || o_border;
   bool i = i_fill || i_border || o;
   Rcpp::IntegerMatrix out(dim[0], dim[1]);
-  int neg = neg_border ? -1 : +1;
+  int i_neg = i_neg_border ? -1 : +1;
+  int o_neg = o_neg_border ? -1 : +1;
   
-  if((i || o) && (label_cur <= label_max)) {
-    // fill contours with desired label(s)
-    label_max = label_cur == label ? label : 1;
-    while(label_cur >= label_max) {
+  for(R_len_t i_lab = 0; i_lab < labs.size(); i_lab++) {
+    int label_cur = labs[i_lab];
+    if((i || o) && (label_cur > 0) && (label_cur <= label_max)) {
+      // fill contours with desired label(s)
       if(o) {
         for(R_len_t k = contours.nrow() - 1; k >= 0; k--) {
           if((contours(k, 2) == label_cur) && (contours(k, 4) == 1)) {
@@ -576,7 +586,7 @@ Rcpp::IntegerMatrix hpp_fill (const List ctl,
                 poly[2 * poly.nrow() + j] = contours(p, 2);
                 poly[3 * poly.nrow() + j++] = contours(p, 3);
               }
-              polyvoid(poly, out, o_border ? neg * label_cur : 0, o_fill ? label_cur : 0, 0.0, false, false, false);
+              polyvoid(poly, out, o_border ? o_neg * label_cur : 0, o_fill ? label_cur : 0, 0.0, false, false, false);
             }
           }
         }
@@ -595,13 +605,12 @@ Rcpp::IntegerMatrix hpp_fill (const List ctl,
                 poly[2 * poly.nrow() + j] = contours(p, 2);
                 poly[3 * poly.nrow() + j++] = contours(p, 3);
               }
-              polyvoid(poly, out, i_border ? neg * label_cur : 0, i_fill ? label_cur : 0, 0.0, true, false, false);
+              polyvoid(poly, out, i_border ? i_neg * label_cur : 0, i_fill ? label_cur : 0, 0.0, true, false, false);
             }
           }
         }
       }
-      label_cur--;
-    }
+    }   
   }
   return out;
 }
@@ -611,18 +620,34 @@ Rcpp::IntegerMatrix hpp_fill (const List ctl,
 //' @description
 //' This function is designed to fill the most external contours.
 //' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`.
-//' @param o_border a bool, to whether or draw external contours.
-//' @param o_fill a bool, to whether or not fill external contours.
-//' @param neg_border a bool, to whether or not border, if drawn, should be negated.
+//' @param label a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
+//' Default is \code{0} to fill all sets of contours found.
+//' @param o_border a bool, to whether or not draw external contours. Default is \code{true}.
+//' @param o_fill a bool, to whether or not fill external contours. Default is \code{true}.
+//' @param o_neg_border a bool, to whether or not external border, if drawn, should be negated. Default is \code{false}.
 //' @return an IntegerMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix hpp_fill_out (const List ctl,
+                                  const Rcpp::Nullable<Rcpp::IntegerVector> label = Rcpp::IntegerVector::create(0),
                                   const bool o_border = true,
                                   const bool o_fill = true,
-                                  const bool neg_border = false) {
+                                  const bool o_neg_border = false) {
   if(!Rf_inherits(ctl, "IFCip_ctl")) Rcpp::stop("hpp_fill_out: 'ctl' should be of class `IFCip_ctl`");
+  
+  // retrieve max number of sets of contours identified by ctl
+  int label_max = ctl["nb_lab"];
+  
+  // check whether to fill user-defined set(s) of contours or every sets of contours
+  Rcpp::IntegerVector labs;
+  if(label.isNotNull()) {
+    Rcpp::IntegerVector ll(label.get());
+    labs = (ll.size() == 0) ? Rcpp::IntegerVector::create(-1) : ((ll.size() == 1) && (ll[0] == 0)) ? seq_len(label_max) : Rcpp::clone(ll);
+  } else {
+    labs = Rcpp::IntegerVector::create(-1);
+  }
+  labs.sort();
   
   // retrieve contours coordinates
   Rcpp::IntegerMatrix contours = as<Rcpp::IntegerMatrix>(ctl["contours"]);
@@ -632,31 +657,67 @@ Rcpp::IntegerMatrix hpp_fill_out (const List ctl,
   
   // create out 
   Rcpp::IntegerMatrix out(dim[0], dim[1]);
-  int neg = neg_border ? -1 : +1;
+  int o_neg = o_neg_border ? -1 : +1;
   if(!(o_fill || o_border)) return out;
-  
-  // fill every external contours with desired label(s)
   Rcpp::IntegerVector Q = queue_create();
-  int label_cur = ctl["nb_lab"];
-  while(label_cur >= 1) {
-    for(R_len_t k = contours.nrow() - 1; k >= 0; k--) {
-      if((contours(k, 2) == label_cur) && (contours(k, 4) == 1)) {
-        queue_push(Q, k);
-        if(contours(k, 3) > 7) {
-          Rcpp::IntegerMatrix poly = Rcpp::no_init_matrix(Q[0], 4);
-          R_len_t j = 0;
-          while(Q[0] != 0) {
-            R_len_t p = queue_pop(Q);
-            poly[j] = contours(p, 0);
-            poly[poly.nrow() + j] = contours(p, 1);
-            poly[2 * poly.nrow() + j] = contours(p, 2);
-            poly[3 * poly.nrow() + j++] = contours(p, 3);
+  Rcpp::IntegerVector K = queue_create(labs.size());
+  
+  // 1st round, fill contour whatever o_fill is.
+  // This allows for skipping already filled contour (see ***)
+  for(R_len_t i_lab = 0; i_lab < labs.size(); i_lab++) {
+    int label_cur = labs[i_lab];
+    if((label_cur > 0) && (label_cur <= label_max)) {
+      for(R_len_t k = contours.nrow() - 1; k >= 0; k--) {
+        if((contours(k, 2) == label_cur) && (contours(k, 4) == 1)) {
+          queue_push(Q, k);
+          if(contours(k, 3) > 7) {
+            Rcpp::IntegerMatrix poly = Rcpp::no_init_matrix(Q[0], 4);
+            R_len_t j = 0;
+            while(Q[0] != 0) {
+              R_len_t p = queue_pop(Q);
+              poly[j] = contours(p, 0);
+              poly[poly.nrow() + j] = contours(p, 1);
+              poly[2 * poly.nrow() + j] = contours(p, 2);
+              poly[3 * poly.nrow() + j++] = contours(p, 3);
+            }
+            // *** check if contour has never been filled yet.
+            // If not already filled then we fill it and store label_cur
+            if(poly.size() && out(poly(0, 1) - 1, poly(0, 0) - 1) == 0) {
+              queue_push(K, label_cur);
+              polyvoid(poly, out, o_border ? o_neg * label_cur : 0, label_cur, 0.0, false, false, false); 
+            }
           }
-          polyvoid(poly, out, o_border ? neg * label_cur : 0, o_fill ? label_cur : 0, 0.0, false, false, false);
         }
       }
     }
-    label_cur--;
+  }
+  // 2nd round, only applied when o_fill was set to false.
+  // We repeat 1st round on the label_cur(s) that have been previously stored to only draw border but without filling.
+  if(!o_fill) {
+    out.fill(0);
+    while(K[0] != 0) {
+      int label_cur = queue_pop(K);
+      for(R_len_t k = contours.nrow() - 1; k >= 0; k--) {
+        if((contours(k, 2) == label_cur) && (contours(k, 4) == 1)) {
+          queue_push(Q, k);
+          if(contours(k, 3) > 7) {
+            Rcpp::IntegerMatrix poly = Rcpp::no_init_matrix(Q[0], 4);
+            R_len_t j = 0;
+            while(Q[0] != 0) {
+              R_len_t p = queue_pop(Q);
+              poly[j] = contours(p, 0);
+              poly[poly.nrow() + j] = contours(p, 1);
+              poly[2 * poly.nrow() + j] = contours(p, 2);
+              poly[3 * poly.nrow() + j++] = contours(p, 3);
+            }
+            if(poly.size() && out(poly(0, 1) - 1, poly(0, 0) - 1) == 0) {
+              queue_push(K, label_cur);
+              polyvoid(poly, out, o_border ? o_neg * label_cur : 0, 0, 0.0, false, false, false); 
+            }
+          }
+        }
+      }
+    }
   }
   return out;
 }

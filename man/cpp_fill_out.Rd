@@ -6,11 +6,14 @@
 \arguments{
 \item{ctl}{a List, containing contour tracing labeling, object of class `IFCip_ctl`.}
 
-\item{o_border}{a bool, to whether or draw external contours.}
+\item{label}{a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
+Default is \code{0} to fill all sets of contours found.}
 
-\item{o_fill}{a bool, to whether or not fill external contours.}
+\item{o_border}{a bool, to whether or not draw external contours. Default is \code{true}.}
 
-\item{neg_border}{a bool, to whether or not border, if drawn, should be negated.}
+\item{o_fill}{a bool, to whether or not fill external contours. Default is \code{true}.}
+
+\item{o_neg_border}{a bool, to whether or not external border, if drawn, should be negated. Default is \code{false}.}
 }
 \value{
 an IntegerMatrix.
