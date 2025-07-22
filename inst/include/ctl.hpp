@@ -58,14 +58,16 @@ Rcpp::List ctl_T (Rcpp::Matrix<RTYPE> mat,
   
   // create output perimeter
   Rcpp::IntegerVector perimeter;
-  for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
+  
+  // fill out
+  for(R_len_t i_col = 0, i = 0; i_col < mat_c; i_col++) {
     R_len_t i_out = (i_col + 1) * (mat_r + 2) + 1;
-    for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
-      int v = mat(i_row, i_col);
-      out[i_out++] = (v != 0) && (v != NA_INTEGER);
+    for(R_len_t i_row = 0; i_row < mat_r; i_row++, i++) {
+      out[i_out++] = (mat[i] != 0) && Rcpp::traits::is_finite<RTYPE>(mat[i]);
     }
   }
   
+  // start contours tracing labeling
   for(R_len_t i_col = 1; i_col <= mat_c; i_col++) {
     for(R_len_t i_row = 1; i_row <= mat_r; i_row++) {
       if(out(i_row, i_col) >= 1) {
