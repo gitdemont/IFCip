@@ -463,7 +463,7 @@ NULL
 #' @name cpp_padding
 #' @description
 #' This function creates a new matrix with extra rows / cols according to input mat, kernel
-#' @param mat, a NumericMatrix.
+#' @param mat, a Matrix.
 #' @param extra_rows,extra_cols number of extra rows and/or columns to add. Default is 0.
 #' @param method, a uint8_t. Default is 1, allowed are [1-8].\cr
 #' -1, extra cols / rows will be filled with 'k', returned 'out' will not be filled.\cr
@@ -475,7 +475,7 @@ NULL
 #' -7, extra cols / rows will be filled mirroring neighbor cols / rows, returned 'out' will be filled with mat.\cr
 #' -8, extra cols / rows will be filled repeating neighbor cols / rows, returned 'out' will be filled with mat.
 #' @param k, a double, constant used when method is 1 or 5. Default is 0.0.
-#' @return a NumericMatrix, with extra cols / rows
+#' @return a Matrix of same type as 'mat', with extra cols / rows
 #' @keywords internal
 NULL
 
@@ -483,8 +483,8 @@ NULL
 #' @name cpp_filter
 #' @description
 #' This function applies filtering on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
 #' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 #' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 #' @param what, type of filtering, s std::string. Default is \code{""}.
@@ -496,8 +496,8 @@ NULL
 #' @name cpp_sd
 #' @description
 #' This function applies standard deviation filtering on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
 #' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 #' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 #' @return a NumericMatrix.
@@ -508,8 +508,8 @@ NULL
 #' @name cpp_mean
 #' @description
 #' This function applies mean filtering on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
 #' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 #' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 #' @return a NumericMatrix.
@@ -520,8 +520,8 @@ NULL
 #' @name cpp_median
 #' @description
 #' This function applies median filtering on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
 #' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 #' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 #' @return a NumericMatrix.
@@ -532,8 +532,8 @@ NULL
 #' @name cpp_mode
 #' @description
 #' This function applies mode filtering on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
 #' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 #' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 #' @return a NumericMatrix.
@@ -544,8 +544,8 @@ NULL
 #' @name cpp_mid
 #' @description
 #' This function applies mid filtering on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a NUllable Matrix.
 #' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 #' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 #' @return a NumericMatrix.
@@ -556,8 +556,8 @@ NULL
 #' @name cpp_convolve2d
 #' @description
 #' This function applies 2D convolution filtering on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
 #' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 #' @param k, constant used for padding, a double. Default is \code{0.0}.
 #' @return a NumericMatrix.
@@ -568,8 +568,8 @@ NULL
 #' @name cpp_correlate2d
 #' @description
 #' This function applies 2D correlation filtering on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
 #' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 #' @param k, constant used for padding, a double. Default is \code{0.0}.
 #' @return a NumericMatrix.
@@ -580,12 +580,12 @@ NULL
 #' @name cpp_uw
 #' @description
 #' This function applies erosion or dilatation on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
 #' @param erode, a bool. whether to do image erosion or dilatation. Default is true to perform erosion.
 #' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
 #' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
-#' @return a NumericMatrix.
+#' @return a Matrix of same type as 'mat'.
 #' @keywords internal
 NULL
 
@@ -593,11 +593,11 @@ NULL
 #' @name cpp_erode
 #' @description
 #' This function applies erosion on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
 #' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
 #' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
-#' @return a NumericMatrix.
+#' @return a Matrix of same type as 'mat'.
 #' @keywords internal
 NULL
 
@@ -605,11 +605,11 @@ NULL
 #' @name cpp_dilate
 #' @description
 #' This function applies dilatation on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
 #' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
 #' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
-#' @return a NumericMatrix.
+#' @return a Matrix of same type as 'mat'.
 #' @keywords internal
 NULL
 
@@ -617,9 +617,9 @@ NULL
 #' @name cpp_opening
 #' @description
 #' This function applies opening on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
-#' @return a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
+#' @return a Matrix of same type as 'mat'.
 #' @keywords internal
 NULL
 
@@ -627,9 +627,9 @@ NULL
 #' @name cpp_closing
 #' @description
 #' This function applies closing on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
-#' @return a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
+#' @return a Matrix of same type as 'mat'.
 #' @keywords internal
 NULL
 
@@ -637,9 +637,9 @@ NULL
 #' @name cpp_gradient
 #' @description
 #' This function applies morphological gradient on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
-#' @return a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
+#' @return a Matrix of same type as 'mat'.
 #' @keywords internal
 NULL
 
@@ -647,9 +647,9 @@ NULL
 #' @name cpp_tophat_white
 #' @description
 #' This function applies white top hat on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
-#' @return a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
+#' @return a Matrix of same type as 'mat'.
 #' @keywords internal
 NULL
 
@@ -657,9 +657,9 @@ NULL
 #' @name cpp_tophat_black
 #' @description
 #' This function applies black top hat on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
-#' @return a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
+#' @return a Matrix of same type as 'mat'.
 #' @keywords internal
 NULL
 
@@ -667,9 +667,9 @@ NULL
 #' @name cpp_tophat_self
 #' @description
 #' This function applies self complementary on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
-#' @return a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
+#' @return a Matrix of same type as 'mat'.
 #' @keywords internal
 NULL
 
@@ -677,9 +677,9 @@ NULL
 #' @name cpp_cont
 #' @description
 #' This function applies contrast enhancement on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
-#' @return a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
+#' @return a Matrix of same type as 'mat'.
 #' @keywords internal
 NULL
 
@@ -687,9 +687,9 @@ NULL
 #' @name cpp_laplacian
 #' @description
 #' This function applies Laplacian morphology on image.
-#' @param mat, a NumericMatrix.
-#' @param kernel, a NumericMatrix.
-#' @return a NumericMatrix.
+#' @param mat, a Matrix.
+#' @param kernel, a Nullable Matrix.
+#' @return a Matrix of same type as 'mat'.
 #' @keywords internal
 NULL
 

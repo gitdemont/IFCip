@@ -4,14 +4,14 @@
 \alias{cpp_uw}
 \title{Urbach-Wilkinson Algorithm for Image Erosion and Dilation}
 \arguments{
-\item{mat, }{a NumericMatrix.}
+\item{mat, }{a Matrix.}
 
-\item{kernel, }{a NumericMatrix.}
+\item{kernel, }{a Nullable Matrix.}
 
 \item{erode, }{a bool. whether to do image erosion or dilatation. Default is true to perform erosion.}
 }
 \value{
-a NumericMatrix.
+a Matrix of same type as 'mat'.
 }
 \description{
 This function applies erosion or dilatation on image.

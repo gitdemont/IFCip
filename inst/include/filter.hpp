@@ -51,27 +51,16 @@ double filter_fun(const Rcpp::NumericVector x, int what_n, std::string what) {
   }
 }
 
-//' @title Image Filtering
-//' @name cpp_filter
-//' @description
-//' This function applies filtering on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @param method used for padding, a uint8_t. Default is 5, allowed are [1-8].
-//' @param k, constant used for padding, a double. Default is NA_REAL.
-//' @param what, type of filtering, s std::string. Default is "".
-//' @return a NumericMatrix.
-//' @keywords internal
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_filter(const Rcpp::NumericMatrix mat,
-                               const Rcpp::NumericMatrix kernel,
-                               const uint8_t method = 5,
-                               const double k = NA_REAL,
-                               const std::string what = "") {
+template <int RTYPE, int RTYPEk>
+Rcpp::NumericMatrix filter_T(Rcpp::Matrix<RTYPE> mat,
+                             Rcpp::Matrix<RTYPEk> kernel,
+                             const uint8_t method = 5,
+                             const double k = NA_REAL,
+                             const std::string what = "") {
   R_len_t mat_r = mat.nrow();  
   R_len_t mat_c = mat.ncol();
   R_len_t ks = kernel.size();
-  if(mat_r == 0 || mat_c == 0 || ks == 0) return mat;
+  if(mat_r == 0 || mat_c == 0 || ks == 0) return Rcpp::as<Rcpp::NumericMatrix>(mat);
   
   // get kernel dimension 
   R_len_t pad_c = kernel.ncol() >> 1;
@@ -95,7 +84,7 @@ Rcpp::NumericMatrix hpp_filter(const Rcpp::NumericMatrix mat,
   // R_NegInf/R_PosInf eventually for max/min 
   Rcpp::NumericMatrix out, foo;
   if(what == "correlate") {
-    foo = hpp_padding(mat, pad_r + kc, pad_c + kr, method, k);
+    foo = padding_T(mat, pad_r + kc, pad_c + kr, method, k);
     out = Rcpp::NumericMatrix(foo.nrow(), foo.ncol());
     for(R_len_t i_col = out.ncol() - pad_c - 1; i_col >= pad_c; i_col--) {
       for(R_len_t i_row = out.nrow() - pad_r - 1; i_row >= pad_r; i_row--) {
@@ -108,7 +97,7 @@ Rcpp::NumericMatrix hpp_filter(const Rcpp::NumericMatrix mat,
     }
   } else {
     if(what == "convolve") {
-      foo = hpp_padding(mat, pad_r + kc, pad_c + kr, method, k);
+      foo = padding_T(mat, pad_r + kc, pad_c + kr, method, k);
       out = Rcpp::NumericMatrix(foo.nrow(), foo.ncol());
       for(R_len_t i_col = pad_c; i_col < out.ncol() - pad_c; i_col++) {
         for(R_len_t i_row = pad_r; i_row < out.nrow() - pad_r; i_row++) {
@@ -120,7 +109,7 @@ Rcpp::NumericMatrix hpp_filter(const Rcpp::NumericMatrix mat,
         }
       }
     } else { // here we apply filtering
-      foo = hpp_padding(mat, pad_r + kc, pad_c + kr, method, k);
+      foo = padding_T(mat, pad_r + kc, pad_c + kr, method, k);
       out = Rcpp::clone(foo);
       // matrix of offsets in reverse raster order to allow to improve speed with when there are FALSE values in kernel
       Rcpp::IntegerMatrix o = offset_kernel(kernel, true, true, true);
@@ -140,6 +129,33 @@ Rcpp::NumericMatrix hpp_filter(const Rcpp::NumericMatrix mat,
     }
   }
   return out(Rcpp::Range(pad_r + kc * 2, out.nrow() - 1 - pad_r), Rcpp::Range(pad_c + kr * 2, out.ncol() - 1 - pad_c));
+}
+
+//' @title Image Filtering
+//' @name cpp_filter
+//' @description
+//' This function applies filtering on image.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
+//' @param method used for padding, a uint8_t. Default is 5, allowed are [1-8].
+//' @param k, constant used for padding, a double. Default is NA_REAL.
+//' @param what, type of filtering, s std::string. Default is "".
+//' @return a NumericMatrix.
+//' @keywords internal
+// [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix hpp_filter (SEXP mat,
+                                SEXP kernel,
+                                const uint8_t method = 5,
+                                const double k = NA_REAL,
+                                const std::string what = "") {
+  switch( TYPEOF(mat) ) {
+  // case NILSXP : return R_NilValue; // prefer throwing error on NILSXP
+  case LGLSXP : return filter_T(Rcpp::as<NumericMatrix>(mat), get_kernel(kernel), method, k, what);
+  case RAWSXP : return filter_T(Rcpp::as<NumericMatrix>(mat), get_kernel(kernel), method, k, what);
+  case INTSXP : return filter_T(Rcpp::as<NumericMatrix>(mat), get_kernel(kernel), method, k, what);
+  case REALSXP : return filter_T(Rcpp::as<NumericMatrix>(mat), get_kernel(kernel), method, k, what);
+  default : Rcpp::stop("hpp_filter: not supported SEXP[%i] in 'mat'", TYPEOF(mat));
+  }
 }
 
 # endif

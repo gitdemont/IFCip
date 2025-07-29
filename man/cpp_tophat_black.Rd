@@ -4,12 +4,12 @@
 \alias{cpp_tophat_black}
 \title{Image Black Top Hat}
 \arguments{
-\item{mat, }{a NumericMatrix.}
+\item{mat, }{a Matrix.}
 
-\item{kernel, }{a NumericMatrix.}
+\item{kernel, }{a Nullable Matrix.}
 }
 \value{
-a NumericMatrix.
+a Matrix of same type as 'mat'.
 }
 \description{
 This function applies black top hat on image.

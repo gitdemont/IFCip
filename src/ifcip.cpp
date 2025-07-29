@@ -724,7 +724,7 @@ Rcpp::NumericMatrix cpp_flip(const Rcpp::NumericMatrix mat, const bool which = t
 //' @name cpp_padding
 //' @description
 //' This function creates a new matrix with extra rows / cols according to input mat, kernel
-//' @param mat, a NumericMatrix.
+//' @param mat, a Matrix.
 //' @param extra_rows,extra_cols number of extra rows and/or columns to add. Default is 0.
 //' @param method, a uint8_t. Default is 1, allowed are [1-8].\cr
 //' -1, extra cols / rows will be filled with 'k', returned 'out' will not be filled.\cr
@@ -736,15 +736,15 @@ Rcpp::NumericMatrix cpp_flip(const Rcpp::NumericMatrix mat, const bool which = t
 //' -7, extra cols / rows will be filled mirroring neighbor cols / rows, returned 'out' will be filled with mat.\cr
 //' -8, extra cols / rows will be filled repeating neighbor cols / rows, returned 'out' will be filled with mat.
 //' @param k, a double, constant used when method is 1 or 5. Default is 0.0.
-//' @return a NumericMatrix, with extra cols / rows
+//' @return a Matrix of same type as 'mat', with extra cols / rows
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_padding(const Rcpp::NumericMatrix mat,
-                                const R_len_t extra_rows = 0,
-                                const R_len_t extra_cols = 0,
-                                const uint8_t method = 1,
-                                const double k = 0.0) {
+SEXP cpp_padding(const SEXP mat,
+                 const R_len_t extra_rows = 0,
+                 const R_len_t extra_cols = 0,
+                 const uint8_t method = 1,
+                 const double k = 0.0) {
   return hpp_padding(mat, extra_rows, extra_cols, method, k);
 }
 // END padding
@@ -754,8 +754,8 @@ Rcpp::NumericMatrix cpp_padding(const Rcpp::NumericMatrix mat,
 //' @name cpp_filter
 //' @description
 //' This function applies filtering on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
 //' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 //' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 //' @param what, type of filtering, s std::string. Default is \code{""}.
@@ -763,8 +763,8 @@ Rcpp::NumericMatrix cpp_padding(const Rcpp::NumericMatrix mat,
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_filter(const Rcpp::NumericMatrix mat,
-                               const Rcpp::NumericMatrix kernel,
+Rcpp::NumericMatrix cpp_filter(const SEXP mat,
+                               const Rcpp::Nullable<Rcpp::NumericMatrix> kernel,
                                const uint8_t method = 5,
                                const double k = NA_REAL,
                                const std::string what = "") {
@@ -775,16 +775,16 @@ Rcpp::NumericMatrix cpp_filter(const Rcpp::NumericMatrix mat,
 //' @name cpp_sd
 //' @description
 //' This function applies standard deviation filtering on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
 //' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 //' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_sd(const Rcpp::NumericMatrix mat,
-                           const Rcpp::NumericMatrix kernel,
+Rcpp::NumericMatrix cpp_sd(const SEXP mat,
+                           const Rcpp::Nullable<Rcpp::NumericMatrix> kernel,
                            const uint8_t method = 5,
                            const double k = NA_REAL) {
   return hpp_filter(mat, kernel, method, k, "sd");
@@ -794,16 +794,16 @@ Rcpp::NumericMatrix cpp_sd(const Rcpp::NumericMatrix mat,
 //' @name cpp_mean
 //' @description
 //' This function applies mean filtering on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
 //' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 //' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_mean(const Rcpp::NumericMatrix mat,
-                             const Rcpp::NumericMatrix kernel,
+Rcpp::NumericMatrix cpp_mean(const SEXP mat,
+                             const Rcpp::Nullable<Rcpp::NumericMatrix> kernel,
                              const uint8_t method = 5,
                              const double k = NA_REAL) {
   return hpp_filter(mat, kernel, method, k, "mean");
@@ -813,16 +813,16 @@ Rcpp::NumericMatrix cpp_mean(const Rcpp::NumericMatrix mat,
 //' @name cpp_median
 //' @description
 //' This function applies median filtering on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
 //' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 //' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_median(const Rcpp::NumericMatrix mat,
-                               const Rcpp::NumericMatrix kernel,
+Rcpp::NumericMatrix cpp_median(const SEXP mat,
+                               const Rcpp::Nullable<Rcpp::NumericMatrix> kernel,
                                const uint8_t method = 5,
                                const double k = NA_REAL) {
   return hpp_filter(mat, kernel, method, k, "median");
@@ -832,16 +832,16 @@ Rcpp::NumericMatrix cpp_median(const Rcpp::NumericMatrix mat,
 //' @name cpp_mode
 //' @description
 //' This function applies mode filtering on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
 //' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 //' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_mode(const Rcpp::NumericMatrix mat,
-                             const Rcpp::NumericMatrix kernel,
+Rcpp::NumericMatrix cpp_mode(const SEXP mat,
+                             const Rcpp::Nullable<Rcpp::NumericMatrix> kernel,
                              const uint8_t method = 5,
                              const double k = NA_REAL) {
   return hpp_filter(mat, kernel, method, k, "mode");
@@ -851,16 +851,16 @@ Rcpp::NumericMatrix cpp_mode(const Rcpp::NumericMatrix mat,
 //' @name cpp_mid
 //' @description
 //' This function applies mid filtering on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a NUllable Matrix.
 //' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 //' @param k, constant used for padding, a double. Default is \code{NA_REAL}.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_mid(const Rcpp::NumericMatrix mat,
-                            const Rcpp::NumericMatrix kernel,
+Rcpp::NumericMatrix cpp_mid(const SEXP mat,
+                            const Rcpp::Nullable<Rcpp::NumericMatrix> kernel,
                             const uint8_t method = 5,
                             const double k = NA_REAL) {
   return hpp_filter(mat, kernel, method, k, "mid");
@@ -870,16 +870,16 @@ Rcpp::NumericMatrix cpp_mid(const Rcpp::NumericMatrix mat,
 //' @name cpp_convolve2d
 //' @description
 //' This function applies 2D convolution filtering on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
 //' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 //' @param k, constant used for padding, a double. Default is \code{0.0}.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_convolve2d(const Rcpp::NumericMatrix mat,
-                                   const Rcpp::NumericMatrix kernel,
+Rcpp::NumericMatrix cpp_convolve2d(const SEXP mat,
+                                   const Rcpp::Nullable<Rcpp::NumericMatrix> kernel,
                                    const uint8_t method = 5,
                                    const double k = 0.0) {
   return hpp_filter(mat, kernel, method, k, "convolve");
@@ -889,16 +889,16 @@ Rcpp::NumericMatrix cpp_convolve2d(const Rcpp::NumericMatrix mat,
 //' @name cpp_correlate2d
 //' @description
 //' This function applies 2D correlation filtering on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
 //' @param method used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].
 //' @param k, constant used for padding, a double. Default is \code{0.0}.
 //' @return a NumericMatrix.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_correlate2d(const Rcpp::NumericMatrix mat,
-                                    const Rcpp::NumericMatrix kernel,
+Rcpp::NumericMatrix cpp_correlate2d(const SEXP mat,
+                                    const Rcpp::Nullable<Rcpp::NumericMatrix> kernel,
                                     const uint8_t method = 5,
                                     const double k = 0.0) {
   return hpp_filter(mat, kernel, method, k, "correlate");
@@ -910,18 +910,18 @@ Rcpp::NumericMatrix cpp_correlate2d(const Rcpp::NumericMatrix mat,
 //' @name cpp_uw
 //' @description
 //' This function applies erosion or dilatation on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
 //' @param erode, a bool. whether to do image erosion or dilatation. Default is true to perform erosion.
 //' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
 //' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
-//' @return a NumericMatrix.
+//' @return a Matrix of same type as 'mat'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericVector cpp_uw(const Rcpp::NumericMatrix mat,
-                           const Rcpp::NumericMatrix kernel,
-                           const bool erode = true) {
+SEXP cpp_uw(const SEXP mat,
+            const Rcpp::Nullable<Rcpp::NumericMatrix> kernel,
+            const bool erode = true) {
   return hpp_uw(mat, kernel, erode);
 }
 // END uw
@@ -931,16 +931,16 @@ Rcpp::NumericVector cpp_uw(const Rcpp::NumericMatrix mat,
 //' @name cpp_erode
 //' @description
 //' This function applies erosion on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
 //' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
 //' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
-//' @return a NumericMatrix.
+//' @return a Matrix of same type as 'mat'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_erode(const Rcpp::NumericMatrix mat,
-                              const Rcpp::NumericMatrix kernel) {
+SEXP cpp_erode(const SEXP mat,
+               const Rcpp::Nullable<Rcpp::NumericMatrix> kernel) {
   return hpp_erode(mat, kernel);
 }
 
@@ -948,16 +948,16 @@ Rcpp::NumericMatrix cpp_erode(const Rcpp::NumericMatrix mat,
 //' @name cpp_dilate
 //' @description
 //' This function applies dilatation on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
 //' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
 //' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
-//' @return a NumericMatrix.
+//' @return a Matrix of same type as 'mat'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_dilate(const Rcpp::NumericMatrix mat,
-                               const Rcpp::NumericMatrix kernel) {
+SEXP cpp_dilate(const SEXP mat,
+                const Rcpp::Nullable<Rcpp::NumericMatrix> kernel) {
   return hpp_dilate(mat, kernel);
 }
 
@@ -965,14 +965,14 @@ Rcpp::NumericMatrix cpp_dilate(const Rcpp::NumericMatrix mat,
 //' @name cpp_opening
 //' @description
 //' This function applies opening on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
+//' @return a Matrix of same type as 'mat'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_opening(const Rcpp::NumericMatrix mat,
-                                const Rcpp::NumericMatrix kernel) {
+SEXP cpp_opening(const SEXP mat,
+                 const Rcpp::Nullable<Rcpp::NumericMatrix> kernel) {
   return hpp_opening(mat, kernel);
 }
 
@@ -980,14 +980,14 @@ Rcpp::NumericMatrix cpp_opening(const Rcpp::NumericMatrix mat,
 //' @name cpp_closing
 //' @description
 //' This function applies closing on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
+//' @return a Matrix of same type as 'mat'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_closing(const Rcpp::NumericMatrix mat,
-                                const Rcpp::NumericMatrix kernel) {
+SEXP cpp_closing(const SEXP mat,
+                 const Rcpp::Nullable<Rcpp::NumericMatrix> kernel) {
   return hpp_closing(mat, kernel);
 }
 
@@ -995,14 +995,14 @@ Rcpp::NumericMatrix cpp_closing(const Rcpp::NumericMatrix mat,
 //' @name cpp_gradient
 //' @description
 //' This function applies morphological gradient on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
+//' @return a Matrix of same type as 'mat'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_gradient(const Rcpp::NumericMatrix mat,
-                                 const Rcpp::NumericMatrix kernel) {
+SEXP cpp_gradient(const SEXP mat,
+                  const Rcpp::Nullable<Rcpp::NumericMatrix> kernel) {
   return hpp_gradient(mat, kernel);
 }
 
@@ -1010,14 +1010,14 @@ Rcpp::NumericMatrix cpp_gradient(const Rcpp::NumericMatrix mat,
 //' @name cpp_tophat_white
 //' @description
 //' This function applies white top hat on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
+//' @return a Matrix of same type as 'mat'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_tophat_white(const Rcpp::NumericMatrix mat,
-                                     const Rcpp::NumericMatrix kernel) {
+SEXP cpp_tophat_white(SEXP mat,
+                      const Rcpp::Nullable<Rcpp::NumericMatrix> kernel) {
   return hpp_tophat_white(mat, kernel);
 }
 
@@ -1025,14 +1025,14 @@ Rcpp::NumericMatrix cpp_tophat_white(const Rcpp::NumericMatrix mat,
 //' @name cpp_tophat_black
 //' @description
 //' This function applies black top hat on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
+//' @return a Matrix of same type as 'mat'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_tophat_black(const Rcpp::NumericMatrix mat,
-                                     const Rcpp::NumericMatrix kernel) {
+SEXP cpp_tophat_black(SEXP mat,
+                      const Rcpp::Nullable<Rcpp::NumericMatrix> kernel) {
   return hpp_tophat_black(mat, kernel);
 }
 
@@ -1040,14 +1040,14 @@ Rcpp::NumericMatrix cpp_tophat_black(const Rcpp::NumericMatrix mat,
 //' @name cpp_tophat_self
 //' @description
 //' This function applies self complementary on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
+//' @return a Matrix of same type as 'mat'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_tophat_self(const Rcpp::NumericMatrix mat,
-                                    const Rcpp::NumericMatrix kernel) {
+SEXP cpp_tophat_self(SEXP mat,
+                     const Rcpp::Nullable<Rcpp::NumericMatrix> kernel) {
   return hpp_tophat_self(mat, kernel);
 }
 
@@ -1055,14 +1055,14 @@ Rcpp::NumericMatrix cpp_tophat_self(const Rcpp::NumericMatrix mat,
 //' @name cpp_cont
 //' @description
 //' This function applies contrast enhancement on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
+//' @return a Matrix of same type as 'mat'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_cont(const Rcpp::NumericMatrix mat,
-                             const Rcpp::NumericMatrix kernel) {
+SEXP cpp_cont(const SEXP mat,
+              const Rcpp::Nullable<Rcpp::NumericMatrix> kernel) {
   return hpp_cont(mat, kernel);
 }
 
@@ -1070,14 +1070,14 @@ Rcpp::NumericMatrix cpp_cont(const Rcpp::NumericMatrix mat,
 //' @name cpp_laplacian
 //' @description
 //' This function applies Laplacian morphology on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
+//' @return a Matrix of same type as 'mat'.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix cpp_laplacian(const Rcpp::NumericMatrix mat,
-                                  const Rcpp::NumericMatrix kernel) {
+SEXP cpp_laplacian(const SEXP mat,
+                   const Rcpp::Nullable<Rcpp::NumericMatrix> kernel) {
   return hpp_laplacian(mat, kernel);
 }
 
@@ -1134,7 +1134,7 @@ Rcpp::NumericMatrix cpp_dilate_old(const Rcpp::NumericMatrix mat,
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_dilate_ctl(const List ctl,
-                                   const Rcpp::NumericMatrix kernel) {
+                                   const Rcpp::Nullable<Rcpp::NumericMatrix> kernel) {
   if(!Rf_inherits(ctl, "IFCip_ctl")) {
     Rcpp::stop("hpp_dilate_ctl: 'ctl' should be of class `IFCip_ctl`");
   }
@@ -1152,7 +1152,7 @@ Rcpp::NumericMatrix cpp_dilate_ctl(const List ctl,
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_erode_ctl(const List ctl,
-                                  const Rcpp::NumericMatrix kernel) {
+                                  const Rcpp::Nullable<Rcpp::NumericMatrix> kernel) {
   if(!Rf_inherits(ctl, "IFCip_ctl")) {
     Rcpp::stop("hpp_erode_ctl: 'ctl' should be of class `IFCip_ctl`");
   }

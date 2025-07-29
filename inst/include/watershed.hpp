@@ -241,7 +241,6 @@ Rcpp::IntegerMatrix hpp_watershed_sv2(const Rcpp::NumericMatrix mat,
   if(MAX_SIZ >= (std::pow(2.0,31.0) - 3)) Rcpp::stop("'mat' is too large");
   if(n_lev < 2) Rcpp::stop("'n_lev' should be at least >= 2");
   int MAX_LEV = n_lev;
-  Rcpp::NumericMatrix kk = get_kernel(kernel);
   
   // create scaled image
   Rcpp::NumericMatrix img = Rcpp::clone(mat);

@@ -4,9 +4,9 @@
 \alias{cpp_median}
 \title{Image Median Filtering}
 \arguments{
-\item{mat, }{a NumericMatrix.}
+\item{mat, }{a Matrix.}
 
-\item{kernel, }{a NumericMatrix.}
+\item{kernel, }{a Nullable Matrix.}
 
 \item{method}{used for padding, a uint8_t. Default is \code{5}, allowed are [1-8].}
 

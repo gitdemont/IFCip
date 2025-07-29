@@ -36,179 +36,141 @@
 #include "uw.hpp"
 using namespace Rcpp;
 
-//' @title Image Erosion
-//' @name cpp_erode
-//' @description
-//' This function applies erosion on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
-//' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
-//' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_erode(const Rcpp::NumericMatrix mat,
-                              const Rcpp::NumericMatrix kernel) {
+template <int RTYPE, int RTYPEk>
+Rcpp::Matrix<RTYPE> erode_T (Rcpp::Matrix<RTYPE> mat,
+                             Rcpp::Matrix<RTYPEk> kernel) {
   return hpp_uw(mat, kernel, true);
 }
 
-//' @title Image Dilatation
-//' @name cpp_dilate
-//' @description
-//' This function applies dilatation on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
-//' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
-//' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_dilate(const Rcpp::NumericMatrix mat,
-                               const Rcpp::NumericMatrix kernel) {
+template <int RTYPE, int RTYPEk>
+Rcpp::Matrix<RTYPE> dilate_T (Rcpp::Matrix<RTYPE> mat,
+                              Rcpp::Matrix<RTYPEk> kernel) {
   return hpp_uw(mat, kernel, false);
 }
 
-//' @title Image Opening
-//' @name cpp_opening
-//' @description
-//' This function applies opening on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_opening(const Rcpp::NumericMatrix mat,
-                                const Rcpp::NumericMatrix kernel) {
+template <int RTYPE, int RTYPEk>
+Rcpp::Matrix<RTYPE> opening_T (Rcpp::Matrix<RTYPE> mat,
+                               Rcpp::Matrix<RTYPEk> kernel) {
   Rcpp::NumericMatrix rev_kernel = Rcpp::no_init_matrix(kernel.nrow(), kernel.ncol());
   for(R_len_t i = kernel.size() - 1, k = 0; i >= 0; i--) rev_kernel[k++] = kernel[i];
-  return hpp_dilate(hpp_erode(mat, kernel), rev_kernel);
+  return dilate_T(erode_T(mat, kernel), rev_kernel);
 }
 
-//' @title Image Closing
-//' @name cpp_closing
-//' @description
-//' This function applies closing on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_closing(const Rcpp::NumericMatrix mat,
-                                const Rcpp::NumericMatrix kernel) {
+template <int RTYPE, int RTYPEk>
+Rcpp::Matrix<RTYPE> closing_T (Rcpp::Matrix<RTYPE> mat,
+                               Rcpp::Matrix<RTYPEk> kernel) {
   Rcpp::NumericMatrix rev_kernel = Rcpp::no_init_matrix(kernel.nrow(), kernel.ncol());
   for(R_len_t i = kernel.size() - 1, k = 0; i >= 0; i--) rev_kernel[k++] = kernel[i];
-  return hpp_erode(hpp_dilate(mat, kernel), rev_kernel);
+  return erode_T(dilate_T(mat, kernel), rev_kernel);
 }
 
-//' @title Image Morphological Gradient
-//' @name cpp_gradient
-//' @description
-//' This function applies morphological gradient on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_gradient(const Rcpp::NumericMatrix mat,
-                                 const Rcpp::NumericMatrix kernel) {
-  Rcpp::NumericMatrix dil = hpp_dilate(mat, kernel);
-  Rcpp::NumericMatrix ero = hpp_erode(mat, kernel);
+template <int RTYPE, int RTYPEk>
+Rcpp::Matrix<RTYPE> gradient_T (Rcpp::Matrix<RTYPE> mat,
+                                Rcpp::Matrix<RTYPEk> kernel) {
+  Rcpp::Matrix<RTYPE> dil = dilate_T(mat, kernel);
+  Rcpp::Matrix<RTYPE> ero = erode_T(mat, kernel);
   for(R_len_t i = 0; i < mat.size(); i++) dil[i] -= ero[i];
   return dil;
 }
 
-//' @title Image White Top Hat
-//' @name cpp_tophat_white
-//' @description
-//' This function applies white top hat on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_tophat_white(const Rcpp::NumericMatrix mat,
-                                     const Rcpp::NumericMatrix kernel) {
-  Rcpp::NumericMatrix ope = hpp_opening(mat, kernel);
+template <int RTYPE, int RTYPEk>
+Rcpp::Matrix<RTYPE> tophat_white_T (Rcpp::Matrix<RTYPE> mat,
+                                    Rcpp::Matrix<RTYPEk> kernel) {
+  Rcpp::Matrix<RTYPE> ope = opening_T(mat, kernel);
   for(R_len_t i = 0; i < mat.size(); i++) ope[i] = mat[i] - ope[i];
   return ope;
 }
 
-//' @title Image Black Top Hat
-//' @name cpp_tophat_black
-//' @description
-//' This function applies black top hat on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_tophat_black(const Rcpp::NumericMatrix mat,
-                                     const Rcpp::NumericMatrix kernel) {
-  Rcpp::NumericMatrix clo = hpp_closing(mat, kernel);
+template <int RTYPE, int RTYPEk>
+Rcpp::Matrix<RTYPE> tophat_black_T (Rcpp::Matrix<RTYPE> mat,
+                                    Rcpp::Matrix<RTYPEk> kernel) {
+  Rcpp::Matrix<RTYPE> clo = closing_T(mat, kernel);
   for(R_len_t i = 0; i < mat.size(); i++) clo[i] -= mat[i];
   return clo;
 }
 
-//' @title Image Self Complementary Top Hat
-//' @name cpp_tophat_self
-//' @description
-//' This function applies self complementary on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_tophat_self(const Rcpp::NumericMatrix mat,
-                                    const Rcpp::NumericMatrix kernel) {
-  Rcpp::NumericMatrix clo = hpp_opening(mat, kernel);
-  Rcpp::NumericMatrix ope = hpp_closing(mat, kernel);
+template <int RTYPE, int RTYPEk>
+Rcpp::Matrix<RTYPE> tophat_self_T (Rcpp::Matrix<RTYPE> mat,
+                                   Rcpp::Matrix<RTYPEk> kernel) {
+  Rcpp::Matrix<RTYPE> clo = opening_T(mat, kernel);
+  Rcpp::Matrix<RTYPE> ope = closing_T(mat, kernel);
   for(R_len_t i = 0; i < mat.size(); i++) clo[i] -= ope[i];
   return clo;
 }
 
-//' @title Image Contrast Enhancement
-//' @name cpp_cont
-//' @description
-//' This function applies contrast enhancement on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_cont(const Rcpp::NumericMatrix mat,
-                             const Rcpp::NumericMatrix kernel) {
-  Rcpp::NumericMatrix ope = hpp_closing(mat, kernel);
-  Rcpp::NumericMatrix clo = hpp_opening(mat, kernel);
+template <int RTYPE, int RTYPEk>
+Rcpp::Matrix<RTYPE> cont_T (Rcpp::Matrix<RTYPE> mat,
+                            Rcpp::Matrix<RTYPEk> kernel) {
+  Rcpp::Matrix<RTYPE> ope = closing_T(mat, kernel);
+  Rcpp::Matrix<RTYPE> clo = opening_T(mat, kernel);
   for(R_len_t i = 0; i < mat.size(); i++) ope[i] = 3 * mat[i] - clo[i] - ope[i];
   return ope;
 }
 
-//' @title Image Laplacian
-//' @name cpp_laplacian
-//' @description
-//' This function applies Laplacian morphology on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @return a NumericMatrix.
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_laplacian(const Rcpp::NumericMatrix mat,
-                                  const Rcpp::NumericMatrix kernel) {
-  Rcpp::NumericMatrix dil = hpp_dilate(mat, kernel);
-  Rcpp::NumericMatrix ero = hpp_erode(mat, kernel);
+template <int RTYPE, int RTYPEk>
+Rcpp::Matrix<RTYPE> laplacian_T (Rcpp::Matrix<RTYPE> mat,
+                                 Rcpp::Matrix<RTYPEk> kernel) {
+  Rcpp::Matrix<RTYPE> dil = dilate_T(mat, kernel);
+  Rcpp::Matrix<RTYPE> ero = erode_T(mat, kernel);
   for(R_len_t i = 0; i < mat.size(); i++) dil[i] += ero[i] - 2 * mat[i];
   return dil;
 }
+
+template <int RTYPE, int RTYPEk>
+Rcpp::Matrix<RTYPE> fun_T(Rcpp::Matrix<RTYPE> mat, Rcpp::Matrix<RTYPEk> kernel, int what_n, std::string what) {
+  switch(what_n) {
+  case 1: return dilate_T(mat, kernel);
+  case 2: return erode_T(mat, kernel);
+  case 3: return opening_T(mat, kernel);
+  case 4: return closing_T(mat, kernel);
+  case 5: return tophat_white_T(mat, kernel);
+  case 6: return tophat_black_T(mat, kernel);
+  case 7: return tophat_self_T(mat, kernel);
+  case 8: return gradient_T(mat, kernel);
+  case 9: return cont_T(mat, kernel);
+  case 10: return laplacian_T(mat, kernel);
+  default: Rcpp::stop("hpp_mopho: morpho function['%s'] is not supported", what);
+  }
+}
+
+// [[Rcpp::export(rng = false)]]
+SEXP hpp_morpho(SEXP mat,
+                SEXP kernel,
+                const std::string what = "") {
+  // match morpho function
+  int fun = Rcpp::match(Rcpp::CharacterVector::create(what),
+                        Rcpp::CharacterVector::create("dilate", "erode", "opening", "closing", "tophat_white", "tophat_black", "tophat_self", "gradient", "contrast", "laplacian"))[0];
+
+  switch( TYPEOF(mat) ) {
+  // case NILSXP : return R_NilValue; // prefer throwing error on NILSXP
+  case LGLSXP : return fun_T(as<Rcpp::LogicalMatrix>(mat), get_kernel(kernel), fun, what);
+  case RAWSXP : return fun_T(as<Rcpp::RawMatrix>(mat), get_kernel(kernel), fun, what);
+  case INTSXP : return fun_T(as<Rcpp::IntegerMatrix>(mat), get_kernel(kernel), fun, what);
+  case REALSXP :return fun_T(as<Rcpp::NumericMatrix>(mat), get_kernel(kernel), fun, what);
+  default : Rcpp::stop("hpp_morpho: not supported SEXP[%i] in 'mat'", TYPEOF(mat));
+  }
+}
+
+// [[Rcpp::export(rng = false)]]
+SEXP hpp_dilate(SEXP mat, SEXP kernel) { return hpp_morpho(mat, kernel, "dilate"); }
+// [[Rcpp::export(rng = false)]]
+SEXP hpp_erode(SEXP mat, SEXP kernel) { return hpp_morpho(mat, kernel, "erode"); }
+// [[Rcpp::export(rng = false)]]
+SEXP hpp_opening(SEXP mat, SEXP kernel) { return hpp_morpho(mat, kernel, "opening"); }
+// [[Rcpp::export(rng = false)]]
+SEXP hpp_closing(SEXP mat, SEXP kernel) { return hpp_morpho(mat, kernel, "closing"); }
+// [[Rcpp::export(rng = false)]]
+SEXP hpp_tophat_white(SEXP mat, SEXP kernel) { return hpp_morpho(mat, kernel, "tophat_white"); }
+// [[Rcpp::export(rng = false)]]
+SEXP hpp_tophat_black(SEXP mat, SEXP kernel) { return hpp_morpho(mat, kernel, "tophat_black"); }
+// [[Rcpp::export(rng = false)]]
+SEXP hpp_tophat_self(SEXP mat, SEXP kernel) { return hpp_morpho(mat, kernel, "tophat_self"); }
+// [[Rcpp::export(rng = false)]]
+SEXP hpp_gradient(SEXP mat, SEXP kernel) { return hpp_morpho(mat, kernel, "gradient"); }
+// [[Rcpp::export(rng = false)]]
+SEXP hpp_cont(SEXP mat, SEXP kernel) { return hpp_morpho(mat, kernel, "contrast"); }
+// [[Rcpp::export(rng = false)]]
+SEXP hpp_laplacian(SEXP mat, SEXP kernel) { return hpp_morpho(mat, kernel, "laplacian"); }
 
 //' @title Brute Force Image Erosion
 //' @name cpp_erode_old
@@ -246,7 +208,7 @@ Rcpp::NumericMatrix hpp_erode_old(const Rcpp::NumericMatrix mat,
     Rcpp::NumericMatrix m(msk_.get());
     if(m.size() != 0) {
       if((m.nrow() != mat_r) || (m.ncol() != mat_c)) {
-        Rcpp::stop("hpp_erode: when 'msk' is provided 'img' and 'msk' should have same dimensions");
+        Rcpp::stop("hpp_erode_old: when 'msk' is provided 'img' and 'msk' should have same dimensions");
       }
       Rcpp::NumericMatrix msk = hpp_padding(m, pad_r + kc, pad_c + kr, 5, 1.0);
       uint8_t i_iter = 0;
@@ -326,7 +288,7 @@ Rcpp::NumericMatrix hpp_dilate_old(const Rcpp::NumericMatrix mat,
     Rcpp::NumericMatrix m(msk_.get());
     if(m.size() != 0) {
       if((m.nrow() != mat_r) || (m.ncol() != mat_c)) {
-        Rcpp::stop("hpp_dilate: when 'msk' is provided 'img' and 'msk' should have same dimensions");
+        Rcpp::stop("hpp_dilate_old: when 'msk' is provided 'img' and 'msk' should have same dimensions");
       }
       Rcpp::NumericMatrix msk = hpp_padding(m, pad_r + kc, pad_c + kr, 5, 1.0);
       uint8_t i_iter = 0;

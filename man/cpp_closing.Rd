@@ -4,12 +4,12 @@
 \alias{cpp_closing}
 \title{Image Closing}
 \arguments{
-\item{mat, }{a NumericMatrix.}
+\item{mat, }{a Matrix.}
 
-\item{kernel, }{a NumericMatrix.}
+\item{kernel, }{a Nullable Matrix.}
 }
 \value{
-a NumericMatrix.
+a Matrix of same type as 'mat'.
 }
 \description{
 This function applies closing on image.

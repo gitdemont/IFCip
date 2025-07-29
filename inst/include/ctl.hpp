@@ -219,7 +219,7 @@ Rcpp::List ctl_T (Rcpp::Matrix<RTYPE> mat,
     }
   }
   colnames(foo) = Rcpp::CharacterVector::create("x","y","label","direction","type");
-  Rcpp::List ret = Rcpp::List::create(_["matrix"] = out(Rcpp::Range(1, mat_r), Rcpp::Range(1, mat_c)),
+  Rcpp::List ret = Rcpp::List::create(_["matrix"] = mat_r == 0 || mat_c == 0 ? Rcpp::IntegerMatrix(mat_r, mat_c) : out(Rcpp::Range(1, mat_r), Rcpp::Range(1, mat_c)),
                                       _["dim"] = Rcpp::IntegerVector::create(_["nrow"] = mat_r, _["ncol"] = mat_c), 
                                       _["contours"] = foo,
                                       _["nb_lab"] = new_l - 2,

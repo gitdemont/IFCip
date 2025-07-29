@@ -4,7 +4,7 @@
 \alias{cpp_padding}
 \title{Image Padding}
 \arguments{
-\item{mat, }{a NumericMatrix.}
+\item{mat, }{a Matrix.}
 
 \item{extra_rows, extra_cols}{number of extra rows and/or columns to add. Default is 0.}
 
@@ -21,7 +21,7 @@
 \item{k, }{a double, constant used when method is 1 or 5. Default is 0.0.}
 }
 \value{
-a NumericMatrix, with extra cols / rows
+a Matrix of same type as 'mat', with extra cols / rows
 }
 \description{
 This function creates a new matrix with extra rows / cols according to input mat, kernel

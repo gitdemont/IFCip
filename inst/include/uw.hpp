@@ -31,6 +31,7 @@
 #define IFCIP_UW_HPP
 
 #include <Rcpp.h>
+#include "kernel.hpp"
 using namespace Rcpp;
 
 // [[Rcpp::export(rng = false)]]
@@ -40,15 +41,15 @@ Rcpp::IntegerMatrix kernel_coords(const Rcpp::NumericMatrix kernel,
   double kcy = (kernel.nrow() - 1) / 2;
   
   R_len_t n = 0;
-  for(R_len_t j = 0; j < kernel.size(); j++) if(kernel[j]) n++;
+  for(R_len_t j = 0; j < kernel.size(); j++) if(kernel[j] && R_finite(kernel[j])) n++;
   Rcpp::IntegerMatrix out = Rcpp::no_init_matrix(2, n);
   
   if(erode) {
     R_len_t kc_x = std::floor(kcx);
     R_len_t kc_y = std::floor(kcy);
     for(R_len_t c = 0, i = 0, j = 0; c < kernel.ncol(); c++) {
-      for(R_len_t r = 0; r < kernel.nrow(); r++) {
-        if(kernel[j++]) {
+      for(R_len_t r = 0; r < kernel.nrow(); r++, j++) {
+        if(kernel[j] && R_finite(kernel[j])) {
           out[i++] = c - kc_x;
           out[i++] = r - kc_y;
         }
@@ -58,8 +59,8 @@ Rcpp::IntegerMatrix kernel_coords(const Rcpp::NumericMatrix kernel,
     R_len_t kc_x = std::ceil(kcx);
     R_len_t kc_y = std::ceil(kcy);
     for(R_len_t c = 0, i = 0, j = kernel.size() - 1; c < kernel.ncol(); c++) {
-      for(R_len_t r = 0; r < kernel.nrow(); r++) {
-        if(kernel[j--]) {
+      for(R_len_t r = 0; r < kernel.nrow(); r++, j--) {
+        if(kernel[j] && R_finite(kernel[j])) {
           out[i++] = c - kc_x;
           out[i++] = r - kc_y;
         }
@@ -135,17 +136,17 @@ Rcpp::IntegerVector chordset_R(const IntegerMatrix C) {
   return out[Range(0, count - 1)];
 }
 
-// [[Rcpp::export(rng = false)]]
-void LUT(Rcpp::NumericVector T,
-         const Rcpp::IntegerVector O,
-         const Rcpp::IntegerVector R,
-         const Rcpp::NumericMatrix mat,
-         const R_len_t coln,
-         const R_len_t xoff,
-         const R_len_t xmin,
-         const R_len_t ymax,
-         const R_len_t ymin,
-         const bool erode = true) {
+template <int RTYPE, typename TYPE>
+void LUT_erode_T (Rcpp::Vector<RTYPE> T,
+                  const Rcpp::IntegerVector O,
+                  const Rcpp::IntegerVector R,
+                  const Rcpp::Matrix<RTYPE> mat,
+                  const R_len_t coln,
+                  const R_len_t xoff,
+                  const R_len_t xmin,
+                  const R_len_t ymax,
+                  const R_len_t ymin,
+                  const TYPE limit) {
   // Rcpp::checkUserInterrupt();
   R_len_t mat_r = mat.nrow(),
     d0 = mat_r + ymax - ymin + 1,
@@ -153,39 +154,57 @@ void LUT(Rcpp::NumericVector T,
     x = coln + xoff,
     rr = O[xoff - xmin];
   
-  double K = erode ? R_PosInf : R_NegInf;
-  
   // fill for R[0]
-  for(Rcpp::NumericVector::iterator T_it = T.begin() + rr; T_it != T.begin() + rr + d0 * d1; ++T_it) *T_it = K;
+  for(typename Rcpp::Vector<RTYPE>::iterator T_it = T.begin() + rr; T_it != T.begin() + rr + d0 * d1; ++T_it) *T_it = limit;
   if(x >= 0 && x < mat.ncol()) for(R_len_t y = 0, yy = rr - ymin; y < mat_r; y++, yy++) T[yy] = mat[y + x * mat_r];
-  
-  // fill for R[1-R.size()[
-  if(erode) {
-    for(R_len_t i = 1; i < d1; i++) {
-      R_len_t d = R[i] - R[i - 1];
-      for(R_len_t yy = i * d0 + rr; yy < i * d0 + rr + d0 - d; yy++) {
-        T[yy] = std::min(T[yy - d0], T[yy - d0 + d]);
-      }
-    }
-  } else {
-    for(R_len_t i = 1; i < d1; i++) {
-      R_len_t d = R[i] - R[i - 1];
-      for(R_len_t yy = i * d0 + rr; yy < i * d0 + rr + d0 - d; yy++) {
-        T[yy] = std::max(T[yy - d0], T[yy - d0 + d]);
-      }
+  for(R_len_t i = 1; i < d1; i++) {
+    R_len_t d = R[i] - R[i - 1];
+    for(R_len_t yy = i * d0 + rr; yy < i * d0 + rr + d0 - d; yy++) {
+      T[yy] = std::min(T[yy - d0], T[yy - d0 + d]);
     }
   }
 }
 
-// [[Rcpp::export(rng = false)]]
-void erode_column(Rcpp::NumericMatrix out,
-                  Rcpp::NumericVector T,
-                  Rcpp::IntegerVector idx,
-                  const R_len_t beg,
-                  const R_len_t coln) {
+template <int RTYPE, typename TYPE>
+void LUT_dilate_T (Rcpp::Vector<RTYPE> T,
+                   const Rcpp::IntegerVector O,
+                   const Rcpp::IntegerVector R,
+                   const Rcpp::Matrix<RTYPE> mat,
+                   const R_len_t coln,
+                   const R_len_t xoff,
+                   const R_len_t xmin,
+                   const R_len_t ymax,
+                   const R_len_t ymin,
+                   const TYPE limit) {
+  // Rcpp::checkUserInterrupt();
+  R_len_t mat_r = mat.nrow(),
+    d0 = mat_r + ymax - ymin + 1,
+    d1 = R.size(),
+    x = coln + xoff,
+    rr = O[xoff - xmin];
+  
+  // fill for R[0]
+  for(typename Rcpp::Vector<RTYPE>::iterator T_it = T.begin() + rr; T_it != T.begin() + rr + d0 * d1; ++T_it) *T_it = limit;
+  if(x >= 0 && x < mat.ncol()) for(R_len_t y = 0, yy = rr - ymin; y < mat_r; y++, yy++) T[yy] = mat[y + x * mat_r];
+  
+  // fill for R[1-R.size()[
+  for(R_len_t i = 1; i < d1; i++) {
+    R_len_t d = R[i] - R[i - 1];
+    for(R_len_t yy = i * d0 + rr; yy < i * d0 + rr + d0 - d; yy++) {
+      T[yy] = std::max(T[yy - d0], T[yy - d0 + d]);
+    }
+  }
+}
+
+template <int RTYPE>
+void erode_column_T(Rcpp::Matrix<RTYPE> out,
+                    Rcpp::Vector<RTYPE> T,
+                    Rcpp::IntegerVector idx,
+                    const R_len_t beg,
+                    const R_len_t coln) {
   // Rcpp::checkUserInterrupt();
   for(Rcpp::IntegerVector::iterator idx_it = idx.begin(); idx_it != idx.end(); ++idx_it) {
-    for(Rcpp::NumericVector::iterator T_it = T.begin() + (*idx_it + beg) % T.size(), out_it = out.begin() + coln * out.nrow();
+    for(typename Rcpp::Vector<RTYPE>::iterator T_it = T.begin() + (*idx_it + beg) % T.size(), out_it = out.begin() + coln * out.nrow();
         out_it != out.begin() + (coln + 1) * out.nrow();
         ++T_it, ++out_it) {
       *out_it = std::min(*out_it, *T_it);
@@ -193,15 +212,15 @@ void erode_column(Rcpp::NumericMatrix out,
   }
 }
 
-// [[Rcpp::export(rng = false)]]
-void dilate_column(Rcpp::NumericMatrix out,
-                   Rcpp::NumericVector T,
-                   Rcpp::IntegerVector idx,
-                   const R_len_t beg,
-                   const R_len_t coln) {
+template <int RTYPE>
+void dilate_column_T(Rcpp::Matrix<RTYPE> out,
+                     Rcpp::Vector<RTYPE> T,
+                     Rcpp::IntegerVector idx,
+                     const R_len_t beg,
+                     const R_len_t coln) {
   // Rcpp::checkUserInterrupt();
   for(Rcpp::IntegerVector::iterator idx_it = idx.begin(); idx_it != idx.end(); ++idx_it) {
-    for(Rcpp::NumericVector::iterator T_it = T.begin() + (*idx_it + beg) % T.size(), out_it = out.begin() + coln * out.nrow();
+    for(typename Rcpp::Vector<RTYPE>::iterator T_it = T.begin() + (*idx_it + beg) % T.size(), out_it = out.begin() + coln * out.nrow();
         out_it != out.begin() + (coln + 1) * out.nrow();
         ++T_it, ++out_it) {
       *out_it = std::max(*out_it, *T_it);
@@ -209,22 +228,11 @@ void dilate_column(Rcpp::NumericMatrix out,
   }
 }
 
-//' @title Urbach-Wilkinson Algorithm for Image Erosion and Dilation
-//' @name cpp_uw
-//' @description
-//' This function applies erosion or dilatation on image.
-//' @param mat, a NumericMatrix.
-//' @param kernel, a NumericMatrix.
-//' @param erode, a bool. whether to do image erosion or dilatation. Default is true to perform erosion.
-//' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
-//' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_uw (const Rcpp::NumericMatrix mat,
-                            const Rcpp::NumericMatrix kernel,
-                            const bool erode = true) {
-  Rcpp::IntegerMatrix C = chordset(kernel, erode);
+template <int RTYPE, int RTYPEk, typename TYPE>
+Rcpp::Matrix<RTYPE> uw_T(Rcpp::Matrix<RTYPE> mat,
+                         Rcpp::Matrix<RTYPEk> kernel,
+                         const TYPE limit) {
+  Rcpp::IntegerMatrix C = chordset(kernel, limit > 0);
   if(C.nrow() == 0) return mat;
   // compute R
   Rcpp::IntegerVector R = chordset_R(C);
@@ -240,42 +248,87 @@ Rcpp::NumericMatrix hpp_uw (const Rcpp::NumericMatrix mat,
     dd = d0 * d1;
   
   // declare LUT
-  Rcpp::NumericVector T = Rcpp::no_init_vector(d0 * d1 * d2);
+  Rcpp::Vector<RTYPE> T = Rcpp::no_init_vector(d0 * d1 * d2);
   Rcpp::IntegerVector O = dd * (seq_len(d2) - 1);
   
   // vector of idx offsets
   Rcpp::IntegerVector idx = Rcpp::no_init_vector(C.nrow());
   for(R_len_t i = 0; i < C.nrow(); i++) {
     R_len_t R_id = 0;
-    while(C(i, 3) != R[R_id]) if(++R_id >= R.size()) Rcpp::stop("hpp_uw: no matching chord length found");
+    while(C(i, 3) != R[R_id]) if(++R_id >= R.size()) Rcpp::stop("uw_T: no matching chord length found");
     idx[i] = C(i, 1) - ymin + R_id * d0 + (C(i, 0) - xmin) * dd;
   }
   
   // prepare returned image
-  Rcpp::NumericMatrix out = Rcpp::clone(mat);
+  Rcpp::Matrix<RTYPE> out = Rcpp::clone(mat);
   
-  // init LUT for column 0
-  for(R_len_t xoff = xmin; xoff <= xmax; xoff++) LUT(T, O, R, mat, 0, xoff, xmin, ymax, ymin, erode);
-  // erode column 0
-  if(erode) {
-    erode_column(out, T, idx, 0, 0); 
+  // erode / dilate
+  if(limit > 0) {
+    // init LUT for column 0
+    for(R_len_t xoff = xmin; xoff <= xmax; xoff++) LUT_erode_T(T, O, R, mat, 0, xoff, xmin, ymax, ymin, limit);
+    // erode column 0
+    erode_column_T(out, T, idx, 0, 0);
+    for(R_len_t coln = 1; coln < out.ncol(); coln++) {
+      // rotate offsets so that T(;;r) = T(;;r-1) for [xmin - xmax[
+      std::rotate(O.begin(), O.begin() + 1, O.end());
+      // compute LUT for xmax
+      LUT_erode_T(T, O, R, mat, coln, xmax, xmin, ymax, ymin, limit);
+      // erode column
+      erode_column_T(out, T, idx, O[0], coln); 
+    }
   } else {
-    dilate_column(out, T, idx, 0, 0);
-  }
-  
-  for(R_len_t coln = 1; coln < out.ncol(); coln++) {
-    // rotate offsets so that T(;;r) = T(;;r-1) for [xmin - xmax[
-    std::rotate(O.begin(), O.begin() + 1, O.end());
-    // compute LUT for xmax
-    LUT(T, O, R, mat, coln, xmax, xmin, ymax, ymin, erode);
-    // erode column
-    if(erode) {
-      erode_column(out, T, idx, O[0], coln); 
-    } else {
-      dilate_column(out, T, idx, O[0], coln);
+    // init LUT for column 0
+    for(R_len_t xoff = xmin; xoff <= xmax; xoff++) LUT_dilate_T(T, O, R, mat, 0, xoff, xmin, ymax, ymin, limit);
+    // dilate column 0
+    dilate_column_T(out, T, idx, 0, 0);
+    for(R_len_t coln = 1; coln < out.ncol(); coln++) {
+      // rotate offsets so that T(;;r) = T(;;r-1) for [xmin - xmax[
+      std::rotate(O.begin(), O.begin() + 1, O.end());
+      // compute LUT for xmax
+      LUT_dilate_T(T, O, R, mat, coln, xmax, xmin, ymax, ymin, limit);
+      // dilate column
+      dilate_column_T(out, T, idx, O[0], coln); 
     }
   }
   return out;
+}
+
+//' @title Urbach-Wilkinson Algorithm for Image Erosion and Dilation
+//' @name cpp_uw
+//' @description
+//' This function applies erosion or dilatation on image.
+//' @param mat, a Matrix.
+//' @param kernel, a Nullable Matrix.
+//' @param erode, a bool. whether to do image erosion or dilatation. Default is true to perform erosion.
+//' @details see 'Efficient 2-D grayscale morphological transformations with arbitrary flat structuring elements' from  E.R. Urbach, M.H.F. Wilkinson.
+//' IEEE Transactions on Image Processing, 17(1):1-8, January 2008.\doi{10.1109/tip.2007.912582}
+//' @return a Matrix of same type as 'mat'.
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+SEXP hpp_uw (SEXP mat,
+             SEXP kernel,
+             const bool erode = true) {
+  switch( TYPEOF(mat) ) {
+  // case NILSXP : return R_NilValue; // prefer throwing error on NILSXP
+  case LGLSXP : {
+    int limit = erode ? 1 : 0;
+    return uw_T(as<Rcpp::LogicalMatrix>(mat), get_kernel(kernel), limit);
+  }
+  case RAWSXP : {
+    int limit = erode ? 255 : 0;
+    return uw_T(as<Rcpp::RawMatrix>(mat), get_kernel(kernel), limit);
+  }
+  case INTSXP : {
+    int limit = erode ? 2147483647 : -2147483647;
+    return uw_T(as<Rcpp::IntegerMatrix>(mat), get_kernel(kernel), limit);
+  }
+  case REALSXP : {
+    double limit = erode ? R_PosInf : R_NegInf;
+    return uw_T(as<Rcpp::NumericMatrix>(mat), get_kernel(kernel), limit);
+  }
+  default : Rcpp::stop("hpp_uw: not supported SEXP[%i] in 'mat'", TYPEOF(mat));
+  }
 }
 
 #endif

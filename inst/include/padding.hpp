@@ -33,33 +33,14 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-//' @title Image Padding
-//' @name cpp_padding
-//' @description
-//' This function creates a new matrix with extra rows / cols according to input mat, extra_cols, extra_rows
-//' @param mat, a NumericMatrix.
-//' @param extra_rows,extra_cols number of extra rows and/or columns to add. Default is 0.
-//' @param method, a uint8_t. Default is 1, allowed are [1-8].\cr
-//' -1, extra cols / rows will be filled with 'k', returned 'out' will not be filled.\cr
-//' -2, extra cols / rows will be filled with the closest col / row, returned 'out' will not be filled.\cr
-//' -3, extra cols / rows will be filled mirroring neighbor cols / rows, returned 'out' will not be filled.\cr
-//' -4, extra cols / rows will be filled repeating neighbor cols / rows, returned 'out' will not be filled.\cr
-//' -5, extra cols / rows will be filled with 'k', returned 'out' will be filled with mat.\cr
-//' -6, extra cols / rows will be filled with the closest col / row, returned 'out' will be filled with mat.\cr
-//' -7, extra cols / rows will be filled mirroring neighbor cols / rows, returned 'out' will be filled with mat.\cr
-//' -8, extra cols / rows will be filled repeating neighbor cols / rows, returned 'out' will be filled with mat.
-//' @param k, a double, constant used when method is 1 or 5. Default is 0.0.
-//' @return a NumericMatrix, with extra cols / rows
-//' @keywords internal
-////' @export
-// [[Rcpp::export(rng = false)]]
-Rcpp::NumericMatrix hpp_padding(const Rcpp::NumericMatrix mat,
-                                const R_len_t extra_rows = 0,
-                                const R_len_t extra_cols = 0,
-                                const uint8_t method = 1,
-                                const double k = 0.0) {
+template <int RTYPE, typename TYPE>
+Rcpp::Matrix<RTYPE> padding_T(Rcpp::Matrix<RTYPE> mat,
+                              const R_len_t extra_rows = 0,
+                              const R_len_t extra_cols = 0,
+                              const uint8_t method = 1,
+                              const TYPE k = 0.0) {
   if((method < 1) || (method > 8)) {
-    Rcpp::stop("hpp_padding: not allowed 'method' value");
+    Rcpp::stop("padding_T: not allowed 'method' value");
   }
   uint8_t typ = (method > 4) ? (method - 4): method;
   // input dimension
@@ -73,16 +54,16 @@ Rcpp::NumericMatrix hpp_padding(const Rcpp::NumericMatrix mat,
   fin_width = mat_c + ori_c * 2;
   
   // create output matrix with expanded dimension
-  Rcpp::NumericMatrix out = Rcpp::no_init_matrix(fin_height, fin_width);
+  Rcpp::Matrix<RTYPE> out = Rcpp::no_init_matrix(fin_height, fin_width);
   
   switch(typ) {
   case 1: { // fill with constant
     // 1st cols
     for(R_len_t i_col = 0; i_col < ori_c; i_col++) {
-    for(R_len_t i_row = 0; i_row < fin_height; i_row++) {
-      out(i_row, i_col) = k;
+      for(R_len_t i_row = 0; i_row < fin_height; i_row++) {
+        out(i_row, i_col) = k;
+      }
     }
-  }
     // last cols
     for(R_len_t i_col = ori_c + mat_c; i_col < fin_width; i_col++) {
       for(R_len_t i_row = 0; i_row < fin_height; i_row++) {
@@ -106,13 +87,13 @@ Rcpp::NumericMatrix hpp_padding(const Rcpp::NumericMatrix mat,
   }
     break;
   case 2: { // fill with the closest row / col
-    if((mat_r < 1) || (mat_c < 1)) Rcpp::stop("hpp_padding: 'mat' should have at least 1 row and 1 column");
+    if((mat_r < 1) || (mat_c < 1)) Rcpp::stop("padding_T: 'mat' should have at least 1 row and 1 column");
     // add 1st extra rows
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-    for(R_len_t i_row = 0; i_row < ori_r; i_row++) {
-      out(i_row, ori_c + i_col) = mat(0, i_col);
+      for(R_len_t i_row = 0; i_row < ori_r; i_row++) {
+        out(i_row, ori_c + i_col) = mat(0, i_col);
+      }
     }
-  }
     // add last extra rows
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
       for(R_len_t i_row = 0; i_row < ori_r; i_row++) {
@@ -134,16 +115,16 @@ Rcpp::NumericMatrix hpp_padding(const Rcpp::NumericMatrix mat,
   }
     break;
   case 3: { // fill mirroring neighbor rows / cols
-    if((ori_c > mat_c) || (ori_r > mat_r)) Rcpp::stop("hpp_padding: can't add more rows/columns than 'mat' rows/columns");
+    if((ori_c > mat_c) || (ori_r > mat_r)) Rcpp::stop("padding_T: can't add more rows/columns than 'mat' rows/columns");
     // add 1st extra rows
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-    for(R_len_t i_row = 0; i_row < ori_r; i_row++) {
-      out(i_row, ori_c + i_col) = mat(ori_r - i_row - 1, i_col);
+      for(R_len_t i_row = 0; i_row < ori_r; i_row++) {
+        out(i_row, ori_c + i_col) = mat(ori_r - i_row - 1, i_col);
+      }
     }
-  }
     // add last extra rows
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-    for(R_len_t i_row = 0; i_row < ori_r; i_row++) {
+      for(R_len_t i_row = 0; i_row < ori_r; i_row++) {
         out(i_row + ori_r + mat_r, ori_c + i_col) = mat(mat_r - i_row - 1, i_col);
       }
     }
@@ -162,16 +143,16 @@ Rcpp::NumericMatrix hpp_padding(const Rcpp::NumericMatrix mat,
   }
     break;
   case 4: { // fill repeating neighbor rows / cols
-    if((ori_c > mat_c) || (ori_r > mat_r)) Rcpp::stop("hpp_padding: can't add more rows/columns than 'mat' rows/columns");
+    if((ori_c > mat_c) || (ori_r > mat_r)) Rcpp::stop("padding_T: can't add more rows/columns than 'mat' rows/columns");
     // add 1st extra rows
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-    for(R_len_t i_row = 0; i_row < ori_r; i_row++) {
-      out(i_row, ori_c + i_col) = mat(i_row, i_col);
-    }
-  } 
+      for(R_len_t i_row = 0; i_row < ori_r; i_row++) {
+        out(i_row, ori_c + i_col) = mat(i_row, i_col);
+      }
+    } 
     // add last extra rows
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-    for(R_len_t i_row = 0; i_row < ori_r; i_row++) {
+      for(R_len_t i_row = 0; i_row < ori_r; i_row++) {
         out(i_row + ori_r + mat_r, ori_c + i_col) = mat(mat_r - (ori_r - i_row), i_col);
       }
     }
@@ -192,7 +173,7 @@ Rcpp::NumericMatrix hpp_padding(const Rcpp::NumericMatrix mat,
   }
   
   // add corners
-  double cornerUL, cornerUR, cornerLL, cornerLR;
+  TYPE cornerUL, cornerUR, cornerLL, cornerLR;
   if(typ > 1) {
     cornerUL = mat(0, 0);
     cornerUR = mat(0, mat_c - 1);
@@ -221,7 +202,6 @@ Rcpp::NumericMatrix hpp_padding(const Rcpp::NumericMatrix mat,
     }
   }
   
-  
   if(method > 4) {
     // copy mat into out
     for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
@@ -232,6 +212,53 @@ Rcpp::NumericMatrix hpp_padding(const Rcpp::NumericMatrix mat,
     }
   }
   return out;
+}
+
+//' @title Image Padding
+//' @name cpp_padding
+//' @description
+//' This function creates a new matrix with extra rows / cols according to input mat, extra_cols, extra_rows
+//' @param mat, a Matrix.
+//' @param extra_rows,extra_cols number of extra rows and/or columns to add. Default is 0.
+//' @param method, a uint8_t. Default is 1, allowed are [1-8].\cr
+//' -1, extra cols / rows will be filled with 'k', returned 'out' will not be filled.\cr
+//' -2, extra cols / rows will be filled with the closest col / row, returned 'out' will not be filled.\cr
+//' -3, extra cols / rows will be filled mirroring neighbor cols / rows, returned 'out' will not be filled.\cr
+//' -4, extra cols / rows will be filled repeating neighbor cols / rows, returned 'out' will not be filled.\cr
+//' -5, extra cols / rows will be filled with 'k', returned 'out' will be filled with mat.\cr
+//' -6, extra cols / rows will be filled with the closest col / row, returned 'out' will be filled with mat.\cr
+//' -7, extra cols / rows will be filled mirroring neighbor cols / rows, returned 'out' will be filled with mat.\cr
+//' -8, extra cols / rows will be filled repeating neighbor cols / rows, returned 'out' will be filled with mat.
+//' @param k, a double, constant used when method is 1 or 5. Default is 0.0.
+//' @return a Matrix of same type as 'mat', with extra cols / rows
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+SEXP hpp_padding(SEXP mat,
+                 const R_len_t extra_rows = 0,
+                 const R_len_t extra_cols = 0,
+                 const uint8_t method = 1,
+                 const double k = 0.0) {
+  switch( TYPEOF(mat) ) {
+  // case NILSXP : return R_NilValue; // prefer throwing error on NILSXP
+  case LGLSXP : {
+    int kk = Rcpp::traits::is_na<REALSXP>(k) ? NA_LOGICAL : k != 0;
+    return padding_T(as<Rcpp::LogicalMatrix>(mat), extra_rows, extra_cols, method, kk);
+  }
+  case RAWSXP : {
+    if(Rcpp::traits::is_na<REALSXP>(k)) Rcpp::stop("hpp_padding: can't deal with 'k' = NA/NaN for RawMatrix");
+    int kk = (k >= 255.0 ? 255 : (k <= 0.0 ? 0 : k));
+    return padding_T(as<Rcpp::RawMatrix>(mat), extra_rows, extra_cols, method, kk);
+  }
+  case INTSXP : {
+    int kk = Rcpp::traits::is_na<REALSXP>(k) ? NA_INTEGER : (k >= 2147483647.0 ? 2147483647 : (k <= -2147483647.0 ? -2147483647 : k));
+    return padding_T(as<Rcpp::IntegerMatrix>(mat), extra_rows, extra_cols, method, kk);
+  }
+  case REALSXP : {
+    return padding_T(as<Rcpp::NumericMatrix>(mat), extra_rows, extra_cols, method, k);
+  }
+  default : Rcpp::stop("hpp_padding: not supported SEXP[%i] in 'mat'", TYPEOF(mat));
+  }
 }
 
 #endif

@@ -34,33 +34,41 @@
 using namespace Rcpp;
 
 // retrieve kernel matrix or set it to default [[1,1,1],[1,1,1],[1,1,1]] if NULL or of size 0
-Rcpp::NumericMatrix get_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue) {
-  Rcpp::NumericMatrix kk;
-  if(kernel.isNotNull()) {
-    Rcpp::NumericMatrix k(kernel.get());
-    kk = k;
-  }
-  if(kk.size() == 0) {
-    kk = Rcpp::NumericMatrix(3,3);
-    kk.fill(1.0);
-  }
-  return kk;
+template <int RTYPE>
+Rcpp::NumericMatrix get_kernel_T(Rcpp::Matrix<RTYPE> kernel) {
+  return kernel;
 }
 
 // [[Rcpp::export(rng = false)]]
-Rcpp::IntegerMatrix rev_mat(const Rcpp::IntegerMatrix mat,
-                            bool reverse = true) {
+Rcpp::NumericMatrix get_kernel(SEXP kernel) {
+  switch( TYPEOF(kernel) ) {
+  case NILSXP : {
+    Rcpp::NumericMatrix kk = Rcpp::no_init_matrix(3,3);
+    kk.fill(1.0);
+    return kk;
+  }
+  case LGLSXP : return get_kernel_T(as<Rcpp::NumericMatrix>(kernel));
+  case RAWSXP : return get_kernel_T(as<Rcpp::NumericMatrix>(kernel));
+  case INTSXP : return get_kernel_T(as<Rcpp::NumericMatrix>(kernel));
+  case REALSXP : return get_kernel_T(as<Rcpp::NumericMatrix>(kernel));
+  default : Rcpp::stop("get_kernel: not supported SEXP[%i] in 'kernel'", TYPEOF(kernel));
+  }
+}
+
+template <int RTYPE>
+Rcpp::Matrix<RTYPE> rev_mat_T(Rcpp::Matrix<RTYPE> mat,
+                              bool reverse = true) {
   if(!reverse) return mat;
-  Rcpp::IntegerMatrix out = Rcpp::no_init_matrix(mat.nrow(), mat.ncol());
+  Rcpp::NumericMatrix out = Rcpp::no_init_matrix(mat.nrow(), mat.ncol());
   for(R_len_t i = 0; i < mat.size(); i++) out[i] = mat[mat.size() - 1 - i];
   return out;
 }
 
-// [[Rcpp::export(rng = false)]]
-Rcpp::IntegerMatrix swap_mat(const Rcpp::IntegerMatrix mat,
-                             const bool swap = true) {
+template <int RTYPE>
+Rcpp::Matrix<RTYPE> swap_mat_T(Rcpp::Matrix<RTYPE> mat,
+                               const bool swap = true) {
   if(!swap) return mat;
-  Rcpp::IntegerMatrix out = Rcpp::no_init_matrix(mat.nrow(), mat.ncol());
+  Rcpp::Matrix<RTYPE> out = Rcpp::no_init_matrix(mat.nrow(), mat.ncol());
   for(R_len_t i = 0, j = 0; i < mat.ncol(); i++) out(Rcpp::_, j++) = mat(Rcpp::_, i);
   return out;
 }
@@ -71,13 +79,12 @@ Rcpp::IntegerMatrix swap_mat(const Rcpp::IntegerMatrix mat,
 // reverse: should matrix be reversed, this is useful to adjust center when kernel has even dimension depending on reading direction
 // NULL kernel will result in 8 connected neighbors offsets
 // return an IntegerMatrix whose rows are [x, y, index], respectively and columns are elements
-// [[Rcpp::export(rng = false)]]
-Rcpp::IntegerMatrix offset_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kernel = R_NilValue,
-                                  bool nozero = true,
-                                  bool center = false,
-                                  bool reverse = false) {
-  Rcpp::LogicalMatrix k = Rcpp::as<Rcpp::LogicalMatrix>(get_kernel(kernel));
-  Rcpp::IntegerMatrix kk = rev_mat(Rcpp::as<Rcpp::IntegerMatrix>(k), reverse);
+template <int RTYPE>
+Rcpp::IntegerMatrix offset_kernel_T(Rcpp::Matrix<RTYPE> kernel,
+                                    bool nozero = true,
+                                    bool center = false,
+                                    bool reverse = false) {
+  Rcpp::NumericMatrix kk = rev_mat_T(get_kernel_T(Rcpp::as<Rcpp::NumericMatrix>(kernel)), reverse);
   R_len_t rr = kk.nrow() >> 1;
   R_len_t rc = kk.ncol() >> 1;
   R_len_t kc = kk.ncol() % 2;
@@ -88,7 +95,7 @@ Rcpp::IntegerMatrix offset_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kern
     R_len_t n = 0;
     for(R_len_t c = -rc, j = 0; c < rc_1; c++) {
       for(R_len_t r = -rr; r < rr_1; r++, j++) {
-        if(kk[j] == 1) {
+        if(kk[j] != 0 && R_finite(kk[j])) {
           if((r == 0) && (c == 0) && !center) continue;
           n++;
         }
@@ -97,7 +104,7 @@ Rcpp::IntegerMatrix offset_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kern
     Rcpp::IntegerMatrix out(3, n);
     for(R_len_t c = -rc, i = 0, j = 0; c < rc_1; c++) {
       for(R_len_t r = -rr; r < rr_1; r++, j++) {
-        if(kk[j] == 1) {
+        if(kk[j] != 0 && R_finite(kk[j])) {
           if((r == 0) && (c == 0) && !center) continue;
           out[i++] = c;
           out[i++] = r;
@@ -105,7 +112,7 @@ Rcpp::IntegerMatrix offset_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kern
         }
       }
     }
-    return swap_mat(out, reverse);
+    return swap_mat_T(out, reverse);
   }
   R_len_t s = kk.size() - !center;
   Rcpp::IntegerMatrix out(3, std::max(0, s));
@@ -117,7 +124,22 @@ Rcpp::IntegerMatrix offset_kernel(const Rcpp::Nullable<Rcpp::NumericMatrix> kern
       out[i++] = j;
     }
   }
-  return swap_mat(out, reverse);
+  return swap_mat_T(out, reverse);
+}
+
+// [[Rcpp::export(rng = false)]]
+Rcpp::IntegerMatrix offset_kernel(SEXP kernel,
+                                  bool nozero = true,
+                                  bool center = false,
+                                  bool reverse = false) {
+  switch( TYPEOF(kernel) ) {
+  case NILSXP : return offset_kernel_T(get_kernel(kernel), nozero, center, reverse);
+  case LGLSXP : return offset_kernel_T(as<Rcpp::LogicalMatrix>(kernel), nozero, center, reverse);
+  case RAWSXP : return offset_kernel_T(as<Rcpp::RawMatrix>(kernel), nozero, center, reverse);
+  case INTSXP : return offset_kernel_T(as<Rcpp::IntegerMatrix>(kernel), nozero, center, reverse);
+  case REALSXP : return offset_kernel_T(as<Rcpp::NumericMatrix>(kernel), nozero, center, reverse);
+  default : Rcpp::stop("offset_kernel: not supported SEXP[%i] in 'kernel'", TYPEOF(kernel));
+  }
 }
 
 // determine kernel [x, y, index] that are scanned before (kernel) center in raster order

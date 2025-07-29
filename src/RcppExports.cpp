@@ -389,11 +389,11 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_padding
-Rcpp::NumericMatrix cpp_padding(const Rcpp::NumericMatrix mat, const R_len_t extra_rows, const R_len_t extra_cols, const uint8_t method, const double k);
+SEXP cpp_padding(const SEXP mat, const R_len_t extra_rows, const R_len_t extra_cols, const uint8_t method, const double k);
 RcppExport SEXP _IFCip_cpp_padding(SEXP matSEXP, SEXP extra_rowsSEXP, SEXP extra_colsSEXP, SEXP methodSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
     Rcpp::traits::input_parameter< const R_len_t >::type extra_rows(extra_rowsSEXP);
     Rcpp::traits::input_parameter< const R_len_t >::type extra_cols(extra_colsSEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type method(methodSEXP);
@@ -403,12 +403,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_filter
-Rcpp::NumericMatrix cpp_filter(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel, const uint8_t method, const double k, const std::string what);
+Rcpp::NumericMatrix cpp_filter(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel, const uint8_t method, const double k, const std::string what);
 RcppExport SEXP _IFCip_cpp_filter(SEXP matSEXP, SEXP kernelSEXP, SEXP methodSEXP, SEXP kSEXP, SEXP whatSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type method(methodSEXP);
     Rcpp::traits::input_parameter< const double >::type k(kSEXP);
     Rcpp::traits::input_parameter< const std::string >::type what(whatSEXP);
@@ -417,12 +417,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_sd
-Rcpp::NumericMatrix cpp_sd(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel, const uint8_t method, const double k);
+Rcpp::NumericMatrix cpp_sd(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel, const uint8_t method, const double k);
 RcppExport SEXP _IFCip_cpp_sd(SEXP matSEXP, SEXP kernelSEXP, SEXP methodSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type method(methodSEXP);
     Rcpp::traits::input_parameter< const double >::type k(kSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_sd(mat, kernel, method, k));
@@ -430,12 +430,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_mean
-Rcpp::NumericMatrix cpp_mean(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel, const uint8_t method, const double k);
+Rcpp::NumericMatrix cpp_mean(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel, const uint8_t method, const double k);
 RcppExport SEXP _IFCip_cpp_mean(SEXP matSEXP, SEXP kernelSEXP, SEXP methodSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type method(methodSEXP);
     Rcpp::traits::input_parameter< const double >::type k(kSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_mean(mat, kernel, method, k));
@@ -443,12 +443,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_median
-Rcpp::NumericMatrix cpp_median(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel, const uint8_t method, const double k);
+Rcpp::NumericMatrix cpp_median(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel, const uint8_t method, const double k);
 RcppExport SEXP _IFCip_cpp_median(SEXP matSEXP, SEXP kernelSEXP, SEXP methodSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type method(methodSEXP);
     Rcpp::traits::input_parameter< const double >::type k(kSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_median(mat, kernel, method, k));
@@ -456,12 +456,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_mode
-Rcpp::NumericMatrix cpp_mode(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel, const uint8_t method, const double k);
+Rcpp::NumericMatrix cpp_mode(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel, const uint8_t method, const double k);
 RcppExport SEXP _IFCip_cpp_mode(SEXP matSEXP, SEXP kernelSEXP, SEXP methodSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type method(methodSEXP);
     Rcpp::traits::input_parameter< const double >::type k(kSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_mode(mat, kernel, method, k));
@@ -469,12 +469,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_mid
-Rcpp::NumericMatrix cpp_mid(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel, const uint8_t method, const double k);
+Rcpp::NumericMatrix cpp_mid(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel, const uint8_t method, const double k);
 RcppExport SEXP _IFCip_cpp_mid(SEXP matSEXP, SEXP kernelSEXP, SEXP methodSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type method(methodSEXP);
     Rcpp::traits::input_parameter< const double >::type k(kSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_mid(mat, kernel, method, k));
@@ -482,12 +482,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_convolve2d
-Rcpp::NumericMatrix cpp_convolve2d(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel, const uint8_t method, const double k);
+Rcpp::NumericMatrix cpp_convolve2d(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel, const uint8_t method, const double k);
 RcppExport SEXP _IFCip_cpp_convolve2d(SEXP matSEXP, SEXP kernelSEXP, SEXP methodSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type method(methodSEXP);
     Rcpp::traits::input_parameter< const double >::type k(kSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_convolve2d(mat, kernel, method, k));
@@ -495,12 +495,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_correlate2d
-Rcpp::NumericMatrix cpp_correlate2d(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel, const uint8_t method, const double k);
+Rcpp::NumericMatrix cpp_correlate2d(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel, const uint8_t method, const double k);
 RcppExport SEXP _IFCip_cpp_correlate2d(SEXP matSEXP, SEXP kernelSEXP, SEXP methodSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     Rcpp::traits::input_parameter< const uint8_t >::type method(methodSEXP);
     Rcpp::traits::input_parameter< const double >::type k(kSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_correlate2d(mat, kernel, method, k));
@@ -508,123 +508,123 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_uw
-Rcpp::NumericVector cpp_uw(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel, const bool erode);
+SEXP cpp_uw(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel, const bool erode);
 RcppExport SEXP _IFCip_cpp_uw(SEXP matSEXP, SEXP kernelSEXP, SEXP erodeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     Rcpp::traits::input_parameter< const bool >::type erode(erodeSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_uw(mat, kernel, erode));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_erode
-Rcpp::NumericMatrix cpp_erode(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel);
+SEXP cpp_erode(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
 RcppExport SEXP _IFCip_cpp_erode(SEXP matSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_erode(mat, kernel));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_dilate
-Rcpp::NumericMatrix cpp_dilate(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel);
+SEXP cpp_dilate(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
 RcppExport SEXP _IFCip_cpp_dilate(SEXP matSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_dilate(mat, kernel));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_opening
-Rcpp::NumericMatrix cpp_opening(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel);
+SEXP cpp_opening(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
 RcppExport SEXP _IFCip_cpp_opening(SEXP matSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_opening(mat, kernel));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_closing
-Rcpp::NumericMatrix cpp_closing(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel);
+SEXP cpp_closing(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
 RcppExport SEXP _IFCip_cpp_closing(SEXP matSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_closing(mat, kernel));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_gradient
-Rcpp::NumericMatrix cpp_gradient(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel);
+SEXP cpp_gradient(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
 RcppExport SEXP _IFCip_cpp_gradient(SEXP matSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_gradient(mat, kernel));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_tophat_white
-Rcpp::NumericMatrix cpp_tophat_white(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel);
+SEXP cpp_tophat_white(SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
 RcppExport SEXP _IFCip_cpp_tophat_white(SEXP matSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_tophat_white(mat, kernel));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_tophat_black
-Rcpp::NumericMatrix cpp_tophat_black(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel);
+SEXP cpp_tophat_black(SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
 RcppExport SEXP _IFCip_cpp_tophat_black(SEXP matSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_tophat_black(mat, kernel));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_tophat_self
-Rcpp::NumericMatrix cpp_tophat_self(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel);
+SEXP cpp_tophat_self(SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
 RcppExport SEXP _IFCip_cpp_tophat_self(SEXP matSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_tophat_self(mat, kernel));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_cont
-Rcpp::NumericMatrix cpp_cont(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel);
+SEXP cpp_cont(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
 RcppExport SEXP _IFCip_cpp_cont(SEXP matSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_cont(mat, kernel));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_laplacian
-Rcpp::NumericMatrix cpp_laplacian(const Rcpp::NumericMatrix mat, const Rcpp::NumericMatrix kernel);
+SEXP cpp_laplacian(const SEXP mat, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
 RcppExport SEXP _IFCip_cpp_laplacian(SEXP matSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_laplacian(mat, kernel));
     return rcpp_result_gen;
 END_RCPP
@@ -656,23 +656,23 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_dilate_ctl
-Rcpp::NumericMatrix cpp_dilate_ctl(const List ctl, const Rcpp::NumericMatrix kernel);
+Rcpp::NumericMatrix cpp_dilate_ctl(const List ctl, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
 RcppExport SEXP _IFCip_cpp_dilate_ctl(SEXP ctlSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_dilate_ctl(ctl, kernel));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_erode_ctl
-Rcpp::NumericMatrix cpp_erode_ctl(const List ctl, const Rcpp::NumericMatrix kernel);
+Rcpp::NumericMatrix cpp_erode_ctl(const List ctl, const Rcpp::Nullable<Rcpp::NumericMatrix> kernel);
 RcppExport SEXP _IFCip_cpp_erode_ctl(SEXP ctlSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type kernel(kernelSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix> >::type kernel(kernelSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_erode_ctl(ctl, kernel));
     return rcpp_result_gen;
 END_RCPP
