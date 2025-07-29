@@ -1564,7 +1564,7 @@ Rcpp::IntegerMatrix cpp_fill_out(const List ctl,
                                  const bool o_border = true,
                                  const bool o_fill = true,
                                  const bool o_neg_border = false) {
-  return hpp_fill(ctl, label, o_border, o_fill, o_neg_border);
+  return hpp_fill_out(ctl, label, o_border, o_fill, o_neg_border);
 }
 
 //' @title Connected Region Flood Filling
