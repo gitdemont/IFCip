@@ -60,7 +60,11 @@ Rcpp::NumericMatrix filter_T(Rcpp::Matrix<RTYPE> mat,
   R_len_t mat_r = mat.nrow();  
   R_len_t mat_c = mat.ncol();
   R_len_t ks = kernel.size();
-  if(mat_r == 0 || mat_c == 0 || ks == 0) return Rcpp::as<Rcpp::NumericMatrix>(mat);
+  if(mat_r == 0 || mat_c == 0 || ks == 0) {
+    Rcpp::NumericMatrix out = Rcpp::no_init_matrix(mat_r, mat_c);
+    std::copy(mat.begin(), mat.end(), out.begin());
+    return out;
+  }
   
   // get kernel dimension 
   R_len_t pad_c = kernel.ncol() >> 1;

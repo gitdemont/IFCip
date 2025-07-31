@@ -658,7 +658,7 @@ Rcpp::IntegerMatrix hpp_fill_out (const List ctl,
   // create out 
   Rcpp::IntegerMatrix out(dim[0], dim[1]);
   int o_neg = o_neg_border ? -1 : +1;
-  if(!(o_fill || o_border)) return out;
+  if(!(o_fill || o_border) || (labs.size() == 0)) return out;
   Rcpp::IntegerVector Q = queue_create();
   Rcpp::IntegerVector K = queue_create(labs.size());
   

@@ -233,7 +233,9 @@ Rcpp::Matrix<RTYPE> uw_T(Rcpp::Matrix<RTYPE> mat,
                          Rcpp::Matrix<RTYPEk> kernel,
                          const TYPE limit) {
   Rcpp::IntegerMatrix C = chordset(kernel, limit > 0);
-  if(C.nrow() == 0) return mat;
+  Rcpp::Matrix<RTYPE> out = Rcpp::no_init_matrix(mat.nrow(), mat.ncol());
+  std::copy(mat.begin(), mat.end(), out.begin());
+  if(C.nrow() == 0) return out;
   // compute R
   Rcpp::IntegerVector R = chordset_R(C);
   
@@ -258,9 +260,6 @@ Rcpp::Matrix<RTYPE> uw_T(Rcpp::Matrix<RTYPE> mat,
     while(C(i, 3) != R[R_id]) if(++R_id >= R.size()) Rcpp::stop("uw_T: no matching chord length found");
     idx[i] = C(i, 1) - ymin + R_id * d0 + (C(i, 0) - xmin) * dd;
   }
-  
-  // prepare returned image
-  Rcpp::Matrix<RTYPE> out = Rcpp::clone(mat);
   
   // erode / dilate
   if(limit > 0) {
