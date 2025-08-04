@@ -152,7 +152,7 @@ Rcpp::NumericVector scale_T(Rcpp::Vector<RTYPE> img,
   if(std::abs(n_lev) < 2) Rcpp::stop("hpp_scale: abs(n_lev) should be at least 2.0");
   Rcpp::NumericVector out = Rcpp::NumericVector::create(_["min"]=R_PosInf, _["max"]=R_NegInf, _["factor"]=1.0, _["invert"]=invert, _["value"]=value);
   double MAX_LEV_SCA = bin + std::abs(n_lev) - 1;
-  int MAX_LEV_BIN = std::abs(n_lev) - 1;
+  double MAX_LEV_BIN = std::abs(n_lev) - 1;
   if(n_lev < 0) {
     MAX_LEV_SCA *= -1.0;
     MAX_LEV_BIN *= -1.0;
@@ -172,13 +172,13 @@ Rcpp::NumericVector scale_T(Rcpp::Vector<RTYPE> img,
   if(msk_.isNotNull()) {
     Rcpp::NumericVector msk = getmask_T(img, msk_);
     if(bin) {
-      for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? (img[i] == MX ? MAX_LEV_BIN : std::trunc(K * (img[i] - MN))) : value;
+      for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? (img[i] == MX ? MAX_LEV_BIN : std::min(MAX_LEV_BIN, std::trunc(K * (img[i] - MN)))) : value;
     } else {
       for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? K * (img[i] - MN) : value;
     }
   } else {
     if(bin) {
-      for(R_len_t i = 0; i < img.size(); i++) img[i] = img[i] == MX ? MAX_LEV_BIN : std::trunc(K * (img[i] - MN));
+      for(R_len_t i = 0; i < img.size(); i++) img[i] = img[i] == MX ? MAX_LEV_BIN : std::min(MAX_LEV_BIN, std::trunc(K * (img[i] - MN)));
     } else {
       for(R_len_t i = 0; i < img.size(); i++) img[i] = K * (img[i] - MN);
     }
