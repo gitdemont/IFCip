@@ -6,6 +6,8 @@
 \arguments{
 \item{img}{a NumericMatrix, containing image intensity values.}
 
+\item{msk}{a LogicalMatrix, containing msk.}
+
 \item{mag}{a double, magnification scale. Default is 1.0. Use:\cr
 -1.0 for 20x\cr
 -4.0 for 40x\cr

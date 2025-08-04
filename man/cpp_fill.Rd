@@ -6,7 +6,7 @@
 \arguments{
 \item{ctl}{a List, containing contour tracing labeling, object of class `IFCip_ctl`}
 
-\item{label}{a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
+\item{labels}{a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
 Default is \code{0} to fill all sets of contours found.}
 
 \item{i_border}{a bool, to whether or not draw inside contours if some were identified. Default is \code{true}.}

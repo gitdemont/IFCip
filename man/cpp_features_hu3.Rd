@@ -8,10 +8,10 @@
 
 \item{msk}{an IntegerMatrix, containing msk components.}
 
-\item{components}{an unsigned integer. Maximal component component number to retrieve features about.
-Default is 0 to retrieve  features for all components.}
+\item{labels}{a Nullable IntegerVector corresponding to the desired label(s) to retrieve features about.
+Default is \code{0} to retrieve features for all components.}
 
-\item{mag}{a double, magnification scale. Default is 1.0. Use:\cr
+\item{mag}{a double, magnification scale. Default is \code{1.0}. Use:\cr
 -1.0 for 20x\cr
 -4.0 for 40x\cr
 -9.0 for 60x.}
@@ -43,7 +43,7 @@ a NumericMatrix whose rows are component numbers and columns are:\cr
 -Raw Max Pixel, pixels intensity maximum of the component\cr
 -Std Dev, pixels intensity standard variation of the component\cr
 -skewness, component's skewness\cr
--kurtosis, component's kurtosis
+-kurtosis, component's kurtosis\cr
 -Centroid Y, scaled Y centroid\cr
 -Centroid X, scaled X centroid\cr
 -Centroid Y Intensity, intensity weighted scaled Y centroid\cr

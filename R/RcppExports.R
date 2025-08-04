@@ -176,6 +176,7 @@ NULL
 #' @description
 #' This function is designed to compute very basic features based on Hu's moments + intensities.
 #' @param img a NumericMatrix, containing image intensity values.
+#' @param msk a LogicalMatrix, containing msk.
 #' @param mag a double, magnification scale. Default is 1.0. Use:\cr
 #' -1.0 for 20x\cr
 #' -4.0 for 40x\cr
@@ -206,9 +207,9 @@ NULL
 #' This function is designed to compute image features.
 #' @param img a NumericMatrix, containing image intensity values.
 #' @param msk an IntegerMatrix, containing msk components.
-#' @param components an unsigned integer. Maximal component component number to retrieve features about.
-#' Default is 0 to retrieve  features for all components.
-#' @param mag a double, magnification scale. Default is 1.0. Use:\cr
+#' @param labels a Nullable IntegerVector corresponding to the desired label(s) to retrieve features about.
+#' Default is \code{0} to retrieve features for all components.
+#' @param mag a double, magnification scale. Default is \code{1.0}. Use:\cr
 #' -1.0 for 20x\cr
 #' -4.0 for 40x\cr
 #' -9.0 for 60x.
@@ -238,11 +239,40 @@ NULL
 #' -Raw Max Pixel, pixels intensity maximum of the component\cr
 #' -Std Dev, pixels intensity standard variation of the component\cr
 #' -skewness, component's skewness\cr
-#' -kurtosis, component's kurtosis
+#' -kurtosis, component's kurtosis\cr
 #' -Centroid Y, scaled Y centroid\cr
 #' -Centroid X, scaled X centroid\cr
 #' -Centroid Y Intensity, intensity weighted scaled Y centroid\cr
 #' -Centroid X Intensity. intensity weighted scaled X centroid.
+#' @keywords internal
+NULL
+
+#' @name cpp_features_hu4
+#' @description
+#' This function is designed to compute image features.
+#' @param msk an IntegerMatrix, containing msk components.
+#' @param labels a Nullable IntegerVector corresponding to the desired label(s) to retrieve features about.
+#' Default is \code{0} to retrieve features for all components.
+#' @param mag a double, magnification scale. Default is \code{1.0}. Use:\cr
+#' -1.0 for 20x\cr
+#' -4.0 for 40x\cr
+#' -9.0 for 60x.
+#' @return a NumericMatrix whose rows are component numbers and columns are:\cr
+#' -Area, area of the component\cr
+#' -circularity, circularity of the component\cr
+#' -Minor Axis, minor axis of the component\cr
+#' -Major Axis, major axis of the component\cr
+#' -Aspect Ratio, aspect ratio of the component\cr
+#' -Angle, angle of the component\cr
+#' -theta, theta of the component\cr
+#' -eccentricity, eccentricity of the component\cr
+#' -pix cx, x centroid of the component in pixels\cr
+#' -pix cy, y centroid of the component in pixels\cr
+#' -pix min axis, minor axis of the component in pixels\cr
+#' -pix maj axis, major axis of the component in pixels\cr
+#' -pix count, number of pixels occupied by the component\cr
+#' -Centroid Y, scaled Y centroid\cr
+#' -Centroid X, scaled X centroid.
 #' @keywords internal
 NULL
 
@@ -988,7 +1018,7 @@ NULL
 #' @description
 #' This function is designed to fill contours.
 #' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-#' @param label a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
+#' @param labels a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
 #' Default is \code{0} to fill all sets of contours found.
 #' @param i_border a bool, to whether or not draw inside contours if some were identified. Default is \code{true}.
 #' @param i_fill a bool, to whether or not fill inside contours if some were identified. Default is \code{true}.
@@ -1000,12 +1030,25 @@ NULL
 #' @keywords internal
 NULL
 
+#' @title Contours Default Filling
+#' @name cpp_fill_default
+#' @description
+#' This function is designed to apply default contours filling.
+#' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
+#' @param labels a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
+#' Default is \code{0} to fill all sets of contours found.
+#' @param i_neg_border a bool, to whether or not inside border, if drawn, should be negated. Default is \code{false}.
+#' @param o_neg_border a bool, to whether or not external border, if drawn, should be negated. Default is \code{false}.
+#' @return an IntegerMatrix.
+#' @keywords internal
+NULL
+
 #' @title Contours Filling Outer Only
 #' @name cpp_fill_out
 #' @description
 #' This function is designed to fill the most external contours.
 #' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`.
-#' @param label a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
+#' @param labels a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
 #' Default is \code{0} to fill all sets of contours found.
 #' @param o_border a bool, to whether or not draw external contours. Default is \code{true}.
 #' @param o_fill a bool, to whether or not fill external contours. Default is \code{true}.
@@ -1226,8 +1269,12 @@ cpp_basic <- function(img, msk, mag = 1.0) {
     .Call(`_IFCip_cpp_basic`, img, msk, mag)
 }
 
-cpp_features_hu3 <- function(img, msk, components = 0L, mag = 1.0) {
-    .Call(`_IFCip_cpp_features_hu3`, img, msk, components, mag)
+cpp_features_hu3 <- function(img, msk, labels = as.integer( c(0)), mag = 1.0) {
+    .Call(`_IFCip_cpp_features_hu3`, img, msk, labels, mag)
+}
+
+cpp_features_hu4 <- function(msk, labels = as.integer( c(0)), mag = 1.0) {
+    .Call(`_IFCip_cpp_features_hu4`, msk, labels, mag)
 }
 
 cpp_multi_otsu <- function(img, msk_ = NULL, n_comp = 2L, n_lev = 256L) {
@@ -1458,12 +1505,16 @@ cpp_polydraw <- function(poly, border = 1.0, fill = 1.0, tol = 0.0, edge = FALSE
     .Call(`_IFCip_cpp_polydraw`, poly, border, fill, tol, edge, mat_)
 }
 
-cpp_fill <- function(ctl, label = as.integer( c(0)), i_border = TRUE, i_fill = TRUE, i_neg_border = FALSE, o_border = TRUE, o_fill = TRUE, o_neg_border = FALSE) {
-    .Call(`_IFCip_cpp_fill`, ctl, label, i_border, i_fill, i_neg_border, o_border, o_fill, o_neg_border)
+cpp_fill <- function(ctl, labels = as.integer( c(0)), i_border = TRUE, i_fill = TRUE, i_neg_border = FALSE, o_border = TRUE, o_fill = TRUE, o_neg_border = FALSE) {
+    .Call(`_IFCip_cpp_fill`, ctl, labels, i_border, i_fill, i_neg_border, o_border, o_fill, o_neg_border)
 }
 
-cpp_fill_out <- function(ctl, label = as.integer( c(0)), o_border = TRUE, o_fill = TRUE, o_neg_border = FALSE) {
-    .Call(`_IFCip_cpp_fill_out`, ctl, label, o_border, o_fill, o_neg_border)
+cpp_fill_default <- function(ctl, labels = as.integer( c(0)), i_neg_border = FALSE, o_neg_border = FALSE) {
+    .Call(`_IFCip_cpp_fill_default`, ctl, labels, i_neg_border, o_neg_border)
+}
+
+cpp_fill_out <- function(ctl, labels = as.integer( c(0)), o_border = TRUE, o_fill = TRUE, o_neg_border = FALSE) {
+    .Call(`_IFCip_cpp_fill_out`, ctl, labels, o_border, o_fill, o_neg_border)
 }
 
 cpp_floodfill <- function(img, markers) {

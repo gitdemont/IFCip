@@ -380,6 +380,7 @@ Rcpp::NumericVector hpp_features_hu2(const Rcpp::NumericMatrix img,
 //' @description
 //' This function is designed to compute very basic features based on Hu's moments + intensities.
 //' @param img a NumericMatrix, containing image intensity values.
+//' @param msk a LogicalMatrix, containing msk.
 //' @param mag a double, magnification scale. Default is 1.0. Use:\cr
 //' -1.0 for 20x\cr
 //' -4.0 for 40x\cr
@@ -405,7 +406,7 @@ Rcpp::NumericVector hpp_features_hu2(const Rcpp::NumericMatrix img,
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector hpp_basic(const Rcpp::NumericMatrix img,
-                              const Rcpp::NumericMatrix msk,
+                              const Rcpp::LogicalMatrix msk,
                               const double mag = 1.0) {
   R_len_t mat_r = img.nrow(), mat_c = img.ncol();
   if(msk.ncol() != mat_c || msk.nrow() != mat_r) Rcpp::stop("hpp_basic: please extract 'img' with raw size");
@@ -495,9 +496,9 @@ Rcpp::NumericVector hpp_basic(const Rcpp::NumericMatrix img,
 //' This function is designed to compute image features.
 //' @param img a NumericMatrix, containing image intensity values.
 //' @param msk an IntegerMatrix, containing msk components.
-//' @param components an unsigned integer. Maximal component number to retrieve features about.
-//' Default is 0 to retrieve features for all components.
-//' @param mag a double, magnification scale. Default is 1.0. Use:\cr
+//' @param labels a Nullable IntegerVector corresponding to the desired label(s) to retrieve features about.
+//' Default is \code{0} to retrieve features for all components.
+//' @param mag a double, magnification scale. Default is \code{1.0}. Use:\cr
 //' -1.0 for 20x\cr
 //' -4.0 for 40x\cr
 //' -9.0 for 60x.
@@ -537,32 +538,47 @@ Rcpp::NumericVector hpp_basic(const Rcpp::NumericMatrix img,
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
                                      const Rcpp::IntegerMatrix msk,
-                                     const unsigned int components = 0,
+                                     const Rcpp::Nullable<Rcpp::IntegerVector> labels = Rcpp::IntegerVector::create(0),
                                      const double mag = 1.0) {
   R_len_t mat_r = img.nrow(), mat_c = img.ncol();
   if(mat_r != msk.nrow() || mat_c != msk.ncol()) {
     Rcpp::stop("hpp_features_hu3: 'img' and 'msk' should have same dimensions");
   }
+  R_len_t alw = ((mat_r >> 1) + (mat_r % 2) + 1) * ((mat_c >> 1) + (mat_c % 2) + 1);
   
-  R_len_t nC = components; // == 0 ? 1:components;
-  R_len_t alw = (std::ceil(mat_r / 2) + 1) * (std::ceil(mat_c / 2) + 1);
-  
-  if(nC == 0) {
-    for(R_len_t i_msk = 0; i_msk < mat_c * mat_r; i_msk++) {
-      if(msk[i_msk] < 0) Rcpp::stop("hpp_features_hu3: invalid negative value for 'msk'");
-      if(msk[i_msk] >= alw) Rcpp::stop("hpp_features_hu3: invalid max number of components for 'msk'");
-      nC = std::max(nC, msk[i_msk]); 
+  int label_max = 0;
+  for(R_len_t i_msk = 0; i_msk < mat_c * mat_r; i_msk++) {
+    if(msk[i_msk] < 0) {
+      if(msk[i_msk] == NA_INTEGER) Rcpp::stop("hpp_features_hu3: invalid non-finite value for 'msk'"); 
+      Rcpp::stop("hpp_features_hu3: invalid negative value for 'msk'");
     }
-  } else {
-    for(R_len_t i_msk = 0; i_msk < mat_c * mat_r; i_msk++) {
-      if(msk[i_msk] < 0) Rcpp::stop("hpp_features_hu3: invalid negative value for 'msk'");
-      if(msk[i_msk] >= alw) Rcpp::stop("hpp_features_hu3: invalid max number of components for 'msk'");
-    }
+    if(msk[i_msk] >= alw) Rcpp::stop("hpp_features_hu3: invalid max number of labels for 'msk'");
+    label_max = std::max(label_max, msk[i_msk]);
   }
   
-  // 32 values to return [00-31] 
+  Rcpp::IntegerVector labs;
+  if(labels.isNotNull()) {
+    Rcpp::IntegerVector ll(labels.get());
+    if(ll.size() == 0) {
+      labs = Rcpp::IntegerVector::create(0);
+    } else {
+      if((ll.size() == 1) && (ll[0] == 0)) {
+        labs = seq_len(label_max);
+      } else {
+        int c = 0;
+        for(R_len_t i = 0; i < ll.size(); i++) if((ll[i] > 0) && (ll[i] <= label_max)) c++;
+        labs = Rcpp::IntegerVector(c);
+        for(R_len_t i = 0, j = 0; i < ll.size(); i++) if((ll[i] > 0) && (ll[i] <= label_max)) labs[j++] = ll[i];
+      }
+    }
+  } else {
+    labs = Rcpp::IntegerVector(0);
+  }
+  int nC = labs.size();
+  
+  // 36 values to return [00-35] 
   // + 16 slots [40-55] for temporary computation
-  // +  8 extra slots for future computation ... [32-39]
+  // +  3 extra slots for future computation ... [36-39]
   
   // initialize matrix
   Rcpp::NumericMatrix foo(nC, 56);
@@ -584,10 +600,13 @@ Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
     "Centroid Y","Centroid X","Centroid Y Intensity","Centroid X Intensity"});
   
   if(nC == 0) {
-    Rcpp::NumericMatrix out(nC, 32);
+    Rcpp::NumericMatrix out(nC, 36);
     Rcpp::colnames(out) = N;
     return out;
   } 
+  
+  Rcpp::IntegerVector C(label_max + 1, NA_INTEGER);
+  for(R_len_t i_lab = 0, j = 0; i_lab < labs.size(); i_lab++) C[labs[i_lab]] = j++;
   
   // fill min, max
   for(R_len_t i_comp = 0; i_comp < nC; i_comp++) {
@@ -597,12 +616,12 @@ Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
   
   // define raw moments
   for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
-    if(Rcpp::is_true(Rcpp::any(Rcpp::is_na(msk(Rcpp::_,i_col))))) Rcpp::stop("hpp_features_hu3: NA - NaN value are not allowed in 'msk'");
     R_len_t i_col_1 = i_col + 1;
     for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
       R_len_t i_row_1 = i_row + 1;
-      R_len_t i_comp = msk(i_row, i_col) - 1;
-      if((i_comp >= 0) && (i_comp < nC)) {
+      if(msk(i_row, i_col) > 0 && C[msk(i_row, i_col)] >= 0) {
+        if(!R_finite(img(i_row, i_col))) Rcpp::stop("hpp_features_hu3: non-finite value are not allowed in masked 'img'");
+        R_len_t i_comp = C[msk(i_row, i_col)];
         // for centroid and ellipse
         // M00
         foo(i_comp, 40)++;
@@ -676,11 +695,6 @@ Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
     double Up02i = (foo(i_comp, 54) / foo(i_comp, 50) - cy_int * cy_int);
     double Up11i = (foo(i_comp, 53) / foo(i_comp, 50) - cx_int * cy_int);
     double Up20i = (foo(i_comp, 55) / foo(i_comp, 50) - cx_int * cx_int);
-    
-    // if(Up20 == Up02) {
-    //   circle or square
-    //   Rcpp::stop("Bad image segmentation");
-    // }
     
     // ellipse
     double d = Up20 - Up02;
@@ -823,5 +837,184 @@ Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
   return out;
 }
 
-#endif
+//' @name cpp_features_hu4
+//' @description
+//' This function is designed to compute mask features.
+//' @param msk an IntegerMatrix, containing msk components.
+//' @param labels a Nullable IntegerVector corresponding to the desired label(s) to retrieve features about.
+//' Default is \code{0} to retrieve features for all components.
+//' @param mag a double, magnification scale. Default is \code{1.0}. Use:\cr
+//' -1.0 for 20x\cr
+//' -4.0 for 40x\cr
+//' -9.0 for 60x.
+//' @return a NumericMatrix whose rows are component numbers and columns are:\cr
+//' -Area, area of the component\cr
+//' -circularity, circularity of the component\cr
+//' -Minor Axis, minor axis of the component\cr
+//' -Major Axis, major axis of the component\cr
+//' -Aspect Ratio, aspect ratio of the component\cr
+//' -Angle, angle of the component\cr
+//' -theta, theta of the component\cr
+//' -eccentricity, eccentricity of the component\cr
+//' -pix cx, x centroid of the component in pixels\cr
+//' -pix cy, y centroid of the component in pixels\cr
+//' -pix min axis, minor axis of the component in pixels\cr
+//' -pix maj axis, major axis of the component in pixels\cr
+//' -pix count, number of pixels occupied by the component\cr
+//' -Centroid Y, scaled Y centroid\cr
+//' -Centroid X, scaled X centroid.
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix hpp_features_hu4(const Rcpp::IntegerMatrix msk,
+                                     const Rcpp::Nullable<Rcpp::IntegerVector> labels = Rcpp::IntegerVector::create(0),
+                                     const double mag = 1.0) {
+  R_len_t mat_r = msk.nrow(), mat_c = msk.ncol();
+  R_len_t alw = ((mat_r >> 1) + (mat_r % 2) + 1) * ((mat_c >> 1) + (mat_c % 2) + 1);
+  
+  int label_max = 0;
+  for(R_len_t i_msk = 0; i_msk < mat_c * mat_r; i_msk++) {
+    if(msk[i_msk] < 0) {
+      if(msk[i_msk] == NA_INTEGER) Rcpp::stop("hpp_features_hu4: invalid non-finite value for 'msk'");
+      Rcpp::stop("hpp_features_hu4: invalid negative value for 'msk'"); 
+    }
+    if(msk[i_msk] >= alw) Rcpp::stop("hpp_features_hu4: invalid max number of labels for 'msk'");
+    label_max = std::max(label_max, msk[i_msk]);
+  }
+  
+  Rcpp::IntegerVector labs;
+  if(labels.isNotNull()) {
+    Rcpp::IntegerVector ll(labels.get());
+    if(ll.size() == 0) {
+      labs = Rcpp::IntegerVector::create(0);
+    } else {
+      if((ll.size() == 1) && (ll[0] == 0)) {
+        labs = seq_len(label_max);
+      } else {
+        int c = 0;
+        for(R_len_t i = 0; i < ll.size(); i++) if((ll[i] > 0) && (ll[i] <= label_max)) c++;
+        labs = Rcpp::IntegerVector(c);
+        for(R_len_t i = 0, j = 0; i < ll.size(); i++) if((ll[i] > 0) && (ll[i] <= label_max)) labs[j++] = ll[i];
+      }
+    }
+  } else {
+    labs = Rcpp::IntegerVector(0);
+  }
+  int nC = labs.size();
+  
+  // 15 values to return [00-14] 
+  // +  6 slots [20-25] for temporary computation
+  // +  5 extra slots for future computation ... [15-19]
+  
+  // initialize matrix
+  Rcpp::NumericMatrix foo(nC, 26);
+  
+  // // create colnames
+  Rcpp::StringVector N = Rcpp::StringVector({
+    "Area",
+    "circularity",
+    "Minor Axis","Major Axis","Aspect Ratio",
+    "Angle","theta","eccentricity",
+    "pix cx","pix cy","pix min axis","pix maj axis",
+    "pix count",
+    "Centroid Y","Centroid X"});
+  
+  if(nC == 0) {
+    Rcpp::NumericMatrix out(nC, 15);
+    Rcpp::colnames(out) = N;
+    return out;
+  }
+  
+  Rcpp::IntegerVector C(label_max + 1, NA_INTEGER);
+  for(R_len_t i_lab = 0, j = 0; i_lab < labs.size(); i_lab++) C[labs[i_lab]] = j++;
+  
+  // define raw moments
+  for(R_len_t i_col = 0; i_col < mat_c; i_col++) {
+    R_len_t i_col_1 = i_col + 1;
+    for(R_len_t i_row = 0; i_row < mat_r; i_row++) {
+      R_len_t i_row_1 = i_row + 1;
+      if(msk(i_row, i_col) > 0 && C[msk(i_row, i_col)] >= 0) {
+        R_len_t i_comp = C[msk(i_row, i_col)];
+        // for centroid and ellipse
+        // M00
+        foo(i_comp, 20)++;
+        // M01
+        foo(i_comp, 21) += i_col_1;
+        // M10
+        foo(i_comp, 22) += i_row_1;
+        // M11
+        foo(i_comp, 23) += i_row_1 * i_col_1;
+        // M02
+        foo(i_comp, 24) += i_col_1 * i_col_1;
+        // M20
+        foo(i_comp, 25) += i_row_1 * i_row_1;
+        
+        // pix_count
+        foo(i_comp, 12)++;
+      }
+    }
+  }
+  
+  for(R_len_t i_comp = 0; i_comp < nC; i_comp++) {
+    // size invariant
+    double cx = foo(i_comp, 22) / foo(i_comp, 20);
+    double cy = foo(i_comp, 21) / foo(i_comp, 20);
+    
+    // from https://doi.org/10.1016/j.patcog.2009.06.017
+    // A Hu moment invariant as a shape circularity measure
+    // Joviša Žunić, Kaoru Hirota, Paul L. Rosin
+    double circularity = foo(i_comp, 20) * foo(i_comp, 20) / (2 * M_PI * ( foo(i_comp, 25) + foo(i_comp, 24) ) );
+    
+    // define covariance
+    double Up02 = (foo(i_comp, 24) / foo(i_comp, 20) - cy * cy);
+    double Up11 = (foo(i_comp, 23) / foo(i_comp, 20) - cx * cy);
+    double Up20 = (foo(i_comp, 25) / foo(i_comp, 20) - cx * cx);
+    
+    // ellipse
+    double d = Up20 - Up02;
+    double s = Up20 + Up02;
+    double det = std::sqrt(4 * Up11 * Up11 + d * d);
+    double pix_maj_axis = std::sqrt( (s + det) / 2) * 4;
+    double pix_min_axis = std::sqrt( (s - det) / 2) * 4;
+    
+    // real size
+    double Up02r = Up02 / mag ;
+    double Up11r = Up11 / mag ;
+    double Up20r = Up20 / mag ;
+    double area = foo(i_comp, 20) / mag;
+    
+    // real size ellipse
+    double dr = Up20r - Up02r;
+    double sr = Up20r + Up02r;
+    double detr = std::sqrt(4 * Up11r * Up11r + dr * dr);
+    double maj_axis = std::sqrt( (sr + detr) / 2) * 4;
+    double min_axis = std::sqrt( (sr - detr) / 2) * 4;
+    double eccentricity = std::sqrt( 1 - (min_axis * min_axis) / (maj_axis * maj_axis) );
+    double theta = std::atan2(2 * Up11r, dr) / 2;
+    double angle = theta < 0.0 ? -theta:theta;
+    angle += M_PI /2;
+    
+    foo(i_comp,  0) = area;
+    foo(i_comp,  1) = circularity;
+    foo(i_comp,  2) = min_axis;
+    foo(i_comp,  3) = maj_axis;
+    foo(i_comp,  4) = min_axis / maj_axis;
+    foo(i_comp,  5) = angle;
+    foo(i_comp,  6) = theta;
+    foo(i_comp,  7) = eccentricity;
+    foo(i_comp,  8) = cx;
+    foo(i_comp,  9) = cy;
+    foo(i_comp, 10) = pix_min_axis;
+    foo(i_comp, 11) = pix_maj_axis;
+    // foo(i_comp, 12) is pix_count;
+    foo(i_comp, 13) = (cx - 1) / std::sqrt(mag);
+    foo(i_comp, 14) = (cy - 1) / std::sqrt(mag);
+  }
+  
+  // return results
+  Rcpp::NumericMatrix out = foo(Rcpp::_, Rcpp::Range(0,14));
+  Rcpp::colnames(out) = N;
+  return out;
+}
 
+#endif

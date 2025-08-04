@@ -518,7 +518,7 @@ Rcpp::NumericMatrix hpp_floodfill (const Rcpp::NumericMatrix img,
 //' @description
 //' This function is designed to fill contours.
 //' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-//' @param label a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
+//' @param labels a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
 //' Default is \code{0} to fill all sets of contours found.
 //' @param i_border a bool, to whether or not draw inside contours if some were identified. Default is \code{true}.
 //' @param i_fill a bool, to whether or not fill inside contours if some were identified. Default is \code{true}.
@@ -531,7 +531,7 @@ Rcpp::NumericMatrix hpp_floodfill (const Rcpp::NumericMatrix img,
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix hpp_fill (const List ctl,
-                              const Rcpp::Nullable<Rcpp::IntegerVector> label = Rcpp::IntegerVector::create(0),
+                              const Rcpp::Nullable<Rcpp::IntegerVector> labels = Rcpp::IntegerVector::create(0),
                               const bool i_border = true,
                               const bool i_fill = true,
                               const bool i_neg_border = false,
@@ -545,8 +545,8 @@ Rcpp::IntegerMatrix hpp_fill (const List ctl,
   
   // check whether to fill user-defined set(s) of contours or every sets of contours
   Rcpp::IntegerVector labs;
-  if(label.isNotNull()) {
-    Rcpp::IntegerVector ll(label.get());
+  if(labels.isNotNull()) {
+    Rcpp::IntegerVector ll(labels.get());
     labs = (ll.size() == 0) ? Rcpp::IntegerVector::create(-1) : ((ll.size() == 1) && (ll[0] == 0)) ? seq_len(label_max) : Rcpp::clone(ll);
   } else {
     labs = Rcpp::IntegerVector::create(-1);
@@ -615,12 +615,20 @@ Rcpp::IntegerMatrix hpp_fill (const List ctl,
   return out;
 }
 
+// [[Rcpp::export(rng = false)]]
+Rcpp::IntegerMatrix hpp_fill_default (const List ctl,
+                                  const Rcpp::Nullable<Rcpp::IntegerVector> labels = Rcpp::IntegerVector::create(0),
+                                  const bool i_neg_border = false,
+                                  const bool o_neg_border = false) {
+  return hpp_fill(ctl, labels, true, false, i_neg_border, true, true, o_neg_border);
+}
+
 //' @title Contours Filling Outer Only
 //' @name cpp_fill_out
 //' @description
 //' This function is designed to fill the most external contours.
 //' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`.
-//' @param label a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
+//' @param labels a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
 //' Default is \code{0} to fill all sets of contours found.
 //' @param o_border a bool, to whether or not draw external contours. Default is \code{true}.
 //' @param o_fill a bool, to whether or not fill external contours. Default is \code{true}.
@@ -630,7 +638,7 @@ Rcpp::IntegerMatrix hpp_fill (const List ctl,
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix hpp_fill_out (const List ctl,
-                                  const Rcpp::Nullable<Rcpp::IntegerVector> label = Rcpp::IntegerVector::create(0),
+                                  const Rcpp::Nullable<Rcpp::IntegerVector> labels = Rcpp::IntegerVector::create(0),
                                   const bool o_border = true,
                                   const bool o_fill = true,
                                   const bool o_neg_border = false) {
@@ -641,8 +649,8 @@ Rcpp::IntegerMatrix hpp_fill_out (const List ctl,
   
   // check whether to fill user-defined set(s) of contours or every sets of contours
   Rcpp::IntegerVector labs;
-  if(label.isNotNull()) {
-    Rcpp::IntegerVector ll(label.get());
+  if(labels.isNotNull()) {
+    Rcpp::IntegerVector ll(labels.get());
     labs = (ll.size() == 0) ? Rcpp::IntegerVector::create(-1) : ((ll.size() == 1) && (ll[0] == 0)) ? seq_len(label_max) : Rcpp::clone(ll);
   } else {
     labs = Rcpp::IntegerVector::create(-1);

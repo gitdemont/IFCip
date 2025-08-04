@@ -399,7 +399,7 @@ ExtractFeatures <- function(...,
                 }
                 class(msk) = "IFC_msk"
                 
-                hu = cpp_features_hu3(img = i_chan, msk = msk, components = 1, mag = mag)
+                hu = cpp_features_hu3(img = i_chan, msk = msk, labels = 1, mag = mag)
                 if((nrow(hu) == 0) || !is.finite(hu[1,1]) || (hu[1,1] == 0)) {
                   hu = no_hu
                   shape = no_shape

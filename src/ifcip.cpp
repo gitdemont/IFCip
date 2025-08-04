@@ -309,6 +309,7 @@ Rcpp::NumericVector cpp_features_hu2(const Rcpp::NumericMatrix img,
 //' @description
 //' This function is designed to compute very basic features based on Hu's moments + intensities.
 //' @param img a NumericMatrix, containing image intensity values.
+//' @param msk a LogicalMatrix, containing msk.
 //' @param mag a double, magnification scale. Default is 1.0. Use:\cr
 //' -1.0 for 20x\cr
 //' -4.0 for 40x\cr
@@ -334,11 +335,10 @@ Rcpp::NumericVector cpp_features_hu2(const Rcpp::NumericMatrix img,
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericVector cpp_basic(const Rcpp::NumericMatrix img,
-                              const Rcpp::NumericMatrix msk,
+                              const Rcpp::LogicalMatrix msk,
                               const double mag = 1.0) {
   return hpp_basic(img, msk, mag);
 }
-
 
 //' @title Image Features Extraction
 //' @name cpp_features_hu3
@@ -346,9 +346,9 @@ Rcpp::NumericVector cpp_basic(const Rcpp::NumericMatrix img,
 //' This function is designed to compute image features.
 //' @param img a NumericMatrix, containing image intensity values.
 //' @param msk an IntegerMatrix, containing msk components.
-//' @param components an unsigned integer. Maximal component component number to retrieve features about.
-//' Default is 0 to retrieve  features for all components.
-//' @param mag a double, magnification scale. Default is 1.0. Use:\cr
+//' @param labels a Nullable IntegerVector corresponding to the desired label(s) to retrieve features about.
+//' Default is \code{0} to retrieve features for all components.
+//' @param mag a double, magnification scale. Default is \code{1.0}. Use:\cr
 //' -1.0 for 20x\cr
 //' -4.0 for 40x\cr
 //' -9.0 for 60x.
@@ -378,7 +378,7 @@ Rcpp::NumericVector cpp_basic(const Rcpp::NumericMatrix img,
 //' -Raw Max Pixel, pixels intensity maximum of the component\cr
 //' -Std Dev, pixels intensity standard variation of the component\cr
 //' -skewness, component's skewness\cr
-//' -kurtosis, component's kurtosis
+//' -kurtosis, component's kurtosis\cr
 //' -Centroid Y, scaled Y centroid\cr
 //' -Centroid X, scaled X centroid\cr
 //' -Centroid Y Intensity, intensity weighted scaled Y centroid\cr
@@ -388,9 +388,44 @@ Rcpp::NumericVector cpp_basic(const Rcpp::NumericMatrix img,
 // [[Rcpp::export(rng = false)]]
 Rcpp::NumericMatrix cpp_features_hu3(const Rcpp::NumericMatrix img,
                                      const Rcpp::IntegerMatrix msk,
-                                     const unsigned int components = 0,
+                                     const Rcpp::Nullable<Rcpp::IntegerVector> labels = Rcpp::IntegerVector::create(0),
                                      const double mag = 1.0) {
-  return hpp_features_hu3(img, msk, components, mag);
+  return hpp_features_hu3(img, msk, labels, mag);
+}
+
+//' @name cpp_features_hu4
+//' @description
+//' This function is designed to compute image features.
+//' @param msk an IntegerMatrix, containing msk components.
+//' @param labels a Nullable IntegerVector corresponding to the desired label(s) to retrieve features about.
+//' Default is \code{0} to retrieve features for all components.
+//' @param mag a double, magnification scale. Default is \code{1.0}. Use:\cr
+//' -1.0 for 20x\cr
+//' -4.0 for 40x\cr
+//' -9.0 for 60x.
+//' @return a NumericMatrix whose rows are component numbers and columns are:\cr
+//' -Area, area of the component\cr
+//' -circularity, circularity of the component\cr
+//' -Minor Axis, minor axis of the component\cr
+//' -Major Axis, major axis of the component\cr
+//' -Aspect Ratio, aspect ratio of the component\cr
+//' -Angle, angle of the component\cr
+//' -theta, theta of the component\cr
+//' -eccentricity, eccentricity of the component\cr
+//' -pix cx, x centroid of the component in pixels\cr
+//' -pix cy, y centroid of the component in pixels\cr
+//' -pix min axis, minor axis of the component in pixels\cr
+//' -pix maj axis, major axis of the component in pixels\cr
+//' -pix count, number of pixels occupied by the component\cr
+//' -Centroid Y, scaled Y centroid\cr
+//' -Centroid X, scaled X centroid.
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+Rcpp::NumericMatrix cpp_features_hu4(const Rcpp::IntegerMatrix msk,
+                                     const Rcpp::Nullable<Rcpp::IntegerVector> labels = Rcpp::IntegerVector::create(0),
+                                     const double mag = 1.0) {
+  return hpp_features_hu4(msk, labels, mag);
 }
 // END hu
 
@@ -1522,7 +1557,7 @@ Rcpp::NumericMatrix cpp_polydraw (const Rcpp::IntegerMatrix poly,
 //' @description
 //' This function is designed to fill contours.
 //' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
-//' @param label a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
+//' @param labels a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
 //' Default is \code{0} to fill all sets of contours found.
 //' @param i_border a bool, to whether or not draw inside contours if some were identified. Default is \code{true}.
 //' @param i_fill a bool, to whether or not fill inside contours if some were identified. Default is \code{true}.
@@ -1535,14 +1570,34 @@ Rcpp::NumericMatrix cpp_polydraw (const Rcpp::IntegerMatrix poly,
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix cpp_fill(const List ctl,
-                             const Rcpp::Nullable<Rcpp::IntegerVector> label = Rcpp::IntegerVector::create(0),
+                             const Rcpp::Nullable<Rcpp::IntegerVector> labels = Rcpp::IntegerVector::create(0),
                              const bool i_border = true,
                              const bool i_fill = true,
                              const bool i_neg_border = false,
                              const bool o_border = true,
                              const bool o_fill = true,
                              const bool o_neg_border = false ) {
-  return hpp_fill(ctl, label, i_border, i_fill, i_neg_border, o_border, o_fill, o_neg_border);
+  return hpp_fill(ctl, labels, i_border, i_fill, i_neg_border, o_border, o_fill, o_neg_border);
+}
+
+//' @title Contours Default Filling
+//' @name cpp_fill_default
+//' @description
+//' This function is designed to apply default contours filling.
+//' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`
+//' @param labels a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
+//' Default is \code{0} to fill all sets of contours found.
+//' @param i_neg_border a bool, to whether or not inside border, if drawn, should be negated. Default is \code{false}.
+//' @param o_neg_border a bool, to whether or not external border, if drawn, should be negated. Default is \code{false}.
+//' @return an IntegerMatrix.
+//' @keywords internal
+////' @export
+// [[Rcpp::export(rng = false)]]
+Rcpp::IntegerMatrix cpp_fill_default (const List ctl,
+                                      const Rcpp::Nullable<Rcpp::IntegerVector> labels = Rcpp::IntegerVector::create(0),
+                                      const bool i_neg_border = false,
+                                      const bool o_neg_border = false) {
+  return hpp_fill_default(ctl, labels, i_neg_border, o_neg_border);
 }
 
 //' @title Contours Filling Outer Only
@@ -1550,7 +1605,7 @@ Rcpp::IntegerMatrix cpp_fill(const List ctl,
 //' @description
 //' This function is designed to fill the most external contours.
 //' @param ctl a List, containing contour tracing labeling, object of class `IFCip_ctl`.
-//' @param label a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
+//' @param labels a Nullable IntegerVector corresponding to the label(s) of desired set of contour to be filled.
 //' Default is \code{0} to fill all sets of contours found.
 //' @param o_border a bool, to whether or not draw external contours. Default is \code{true}.
 //' @param o_fill a bool, to whether or not fill external contours. Default is \code{true}.
@@ -1560,11 +1615,11 @@ Rcpp::IntegerMatrix cpp_fill(const List ctl,
 ////' @export
 // [[Rcpp::export(rng = false)]]
 Rcpp::IntegerMatrix cpp_fill_out(const List ctl,
-                                 const Rcpp::Nullable<Rcpp::IntegerVector> label = Rcpp::IntegerVector::create(0),
+                                 const Rcpp::Nullable<Rcpp::IntegerVector> labels = Rcpp::IntegerVector::create(0),
                                  const bool o_border = true,
                                  const bool o_fill = true,
                                  const bool o_neg_border = false) {
-  return hpp_fill_out(ctl, label, o_border, o_fill, o_neg_border);
+  return hpp_fill_out(ctl, labels, o_border, o_fill, o_neg_border);
 }
 
 //' @title Connected Region Flood Filling

@@ -151,27 +151,39 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_basic
-Rcpp::NumericVector cpp_basic(const Rcpp::NumericMatrix img, const Rcpp::NumericMatrix msk, const double mag);
+Rcpp::NumericVector cpp_basic(const Rcpp::NumericMatrix img, const Rcpp::LogicalMatrix msk, const double mag);
 RcppExport SEXP _IFCip_cpp_basic(SEXP imgSEXP, SEXP mskSEXP, SEXP magSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type msk(mskSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::LogicalMatrix >::type msk(mskSEXP);
     Rcpp::traits::input_parameter< const double >::type mag(magSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_basic(img, msk, mag));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_features_hu3
-Rcpp::NumericMatrix cpp_features_hu3(const Rcpp::NumericMatrix img, const Rcpp::IntegerMatrix msk, const unsigned int components, const double mag);
-RcppExport SEXP _IFCip_cpp_features_hu3(SEXP imgSEXP, SEXP mskSEXP, SEXP componentsSEXP, SEXP magSEXP) {
+Rcpp::NumericMatrix cpp_features_hu3(const Rcpp::NumericMatrix img, const Rcpp::IntegerMatrix msk, const Rcpp::Nullable<Rcpp::IntegerVector> labels, const double mag);
+RcppExport SEXP _IFCip_cpp_features_hu3(SEXP imgSEXP, SEXP mskSEXP, SEXP labelsSEXP, SEXP magSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type img(imgSEXP);
     Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix >::type msk(mskSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type components(componentsSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::IntegerVector> >::type labels(labelsSEXP);
     Rcpp::traits::input_parameter< const double >::type mag(magSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_features_hu3(img, msk, components, mag));
+    rcpp_result_gen = Rcpp::wrap(cpp_features_hu3(img, msk, labels, mag));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_features_hu4
+Rcpp::NumericMatrix cpp_features_hu4(const Rcpp::IntegerMatrix msk, const Rcpp::Nullable<Rcpp::IntegerVector> labels, const double mag);
+RcppExport SEXP _IFCip_cpp_features_hu4(SEXP mskSEXP, SEXP labelsSEXP, SEXP magSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix >::type msk(mskSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::IntegerVector> >::type labels(labelsSEXP);
+    Rcpp::traits::input_parameter< const double >::type mag(magSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_features_hu4(msk, labels, mag));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -866,33 +878,46 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_fill
-Rcpp::IntegerMatrix cpp_fill(const List ctl, const Rcpp::Nullable<Rcpp::IntegerVector> label, const bool i_border, const bool i_fill, const bool i_neg_border, const bool o_border, const bool o_fill, const bool o_neg_border);
-RcppExport SEXP _IFCip_cpp_fill(SEXP ctlSEXP, SEXP labelSEXP, SEXP i_borderSEXP, SEXP i_fillSEXP, SEXP i_neg_borderSEXP, SEXP o_borderSEXP, SEXP o_fillSEXP, SEXP o_neg_borderSEXP) {
+Rcpp::IntegerMatrix cpp_fill(const List ctl, const Rcpp::Nullable<Rcpp::IntegerVector> labels, const bool i_border, const bool i_fill, const bool i_neg_border, const bool o_border, const bool o_fill, const bool o_neg_border);
+RcppExport SEXP _IFCip_cpp_fill(SEXP ctlSEXP, SEXP labelsSEXP, SEXP i_borderSEXP, SEXP i_fillSEXP, SEXP i_neg_borderSEXP, SEXP o_borderSEXP, SEXP o_fillSEXP, SEXP o_neg_borderSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::IntegerVector> >::type label(labelSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::IntegerVector> >::type labels(labelsSEXP);
     Rcpp::traits::input_parameter< const bool >::type i_border(i_borderSEXP);
     Rcpp::traits::input_parameter< const bool >::type i_fill(i_fillSEXP);
     Rcpp::traits::input_parameter< const bool >::type i_neg_border(i_neg_borderSEXP);
     Rcpp::traits::input_parameter< const bool >::type o_border(o_borderSEXP);
     Rcpp::traits::input_parameter< const bool >::type o_fill(o_fillSEXP);
     Rcpp::traits::input_parameter< const bool >::type o_neg_border(o_neg_borderSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_fill(ctl, label, i_border, i_fill, i_neg_border, o_border, o_fill, o_neg_border));
+    rcpp_result_gen = Rcpp::wrap(cpp_fill(ctl, labels, i_border, i_fill, i_neg_border, o_border, o_fill, o_neg_border));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_fill_default
+Rcpp::IntegerMatrix cpp_fill_default(const List ctl, const Rcpp::Nullable<Rcpp::IntegerVector> labels, const bool i_neg_border, const bool o_neg_border);
+RcppExport SEXP _IFCip_cpp_fill_default(SEXP ctlSEXP, SEXP labelsSEXP, SEXP i_neg_borderSEXP, SEXP o_neg_borderSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::IntegerVector> >::type labels(labelsSEXP);
+    Rcpp::traits::input_parameter< const bool >::type i_neg_border(i_neg_borderSEXP);
+    Rcpp::traits::input_parameter< const bool >::type o_neg_border(o_neg_borderSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_fill_default(ctl, labels, i_neg_border, o_neg_border));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_fill_out
-Rcpp::IntegerMatrix cpp_fill_out(const List ctl, const Rcpp::Nullable<Rcpp::IntegerVector> label, const bool o_border, const bool o_fill, const bool o_neg_border);
-RcppExport SEXP _IFCip_cpp_fill_out(SEXP ctlSEXP, SEXP labelSEXP, SEXP o_borderSEXP, SEXP o_fillSEXP, SEXP o_neg_borderSEXP) {
+Rcpp::IntegerMatrix cpp_fill_out(const List ctl, const Rcpp::Nullable<Rcpp::IntegerVector> labels, const bool o_border, const bool o_fill, const bool o_neg_border);
+RcppExport SEXP _IFCip_cpp_fill_out(SEXP ctlSEXP, SEXP labelsSEXP, SEXP o_borderSEXP, SEXP o_fillSEXP, SEXP o_neg_borderSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const List >::type ctl(ctlSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::IntegerVector> >::type label(labelSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::IntegerVector> >::type labels(labelsSEXP);
     Rcpp::traits::input_parameter< const bool >::type o_border(o_borderSEXP);
     Rcpp::traits::input_parameter< const bool >::type o_fill(o_fillSEXP);
     Rcpp::traits::input_parameter< const bool >::type o_neg_border(o_neg_borderSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_fill_out(ctl, label, o_border, o_fill, o_neg_border));
+    rcpp_result_gen = Rcpp::wrap(cpp_fill_out(ctl, labels, o_border, o_fill, o_neg_border));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1062,6 +1087,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_features_hu2", (DL_FUNC) &_IFCip_cpp_features_hu2, 2},
     {"_IFCip_cpp_basic", (DL_FUNC) &_IFCip_cpp_basic, 3},
     {"_IFCip_cpp_features_hu3", (DL_FUNC) &_IFCip_cpp_features_hu3, 4},
+    {"_IFCip_cpp_features_hu4", (DL_FUNC) &_IFCip_cpp_features_hu4, 3},
     {"_IFCip_cpp_multi_otsu", (DL_FUNC) &_IFCip_cpp_multi_otsu, 4},
     {"_IFCip_cpp_distance_eucl", (DL_FUNC) &_IFCip_cpp_distance_eucl, 1},
     {"_IFCip_cpp_distance_eucl_norm", (DL_FUNC) &_IFCip_cpp_distance_eucl_norm, 1},
@@ -1120,6 +1146,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_ctl", (DL_FUNC) &_IFCip_cpp_ctl, 2},
     {"_IFCip_cpp_polydraw", (DL_FUNC) &_IFCip_cpp_polydraw, 6},
     {"_IFCip_cpp_fill", (DL_FUNC) &_IFCip_cpp_fill, 8},
+    {"_IFCip_cpp_fill_default", (DL_FUNC) &_IFCip_cpp_fill_default, 4},
     {"_IFCip_cpp_fill_out", (DL_FUNC) &_IFCip_cpp_fill_out, 5},
     {"_IFCip_cpp_floodfill", (DL_FUNC) &_IFCip_cpp_floodfill, 2},
     {"_IFCip_cpp_threshold", (DL_FUNC) &_IFCip_cpp_threshold, 4},
