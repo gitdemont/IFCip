@@ -7,14 +7,14 @@
 \item{img, }{a NumericVector.}
 
 \item{msk_, }{a NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
-Default is R_NilValue, for using all 'img' elements without masking anything.}
+Default is R_NilValue, for using all \code{'img'} elements without masking anything.}
 
-\item{n_comp, }{number of components to separate. Default is 2, should be at least 2.\cr
-Returned thresholds will be of length n_comp - 1.}
+\item{n_comp, }{number of components to separate. Default is \code{2}, should be at least \code{2}.\cr
+Returned thresholds will be of length \code{'n_comp'} - 1.}
 
-\item{n_lev, }{an unsigned short determining the number of grey levels used for the computation. Default is 256, should be at least 2.
-Despite being fast thanks to LUT pre-computation, performance will be highly impacted with large 'n_comp' or 'n_lev' values (typically n_comp = 5 and n_lev = 256).
-Alternatively, you can try to decrease 'n_lev' when 'n_comp' needs to be large (e.g. n_comp = 8 and n_lev = 32).}
+\item{n_lev, }{an unsigned short determining the number of grey levels used for the computation. Default is \code{256}, should be at least \code{2}.
+Despite being fast thanks to LUT pre-computation, performance will be highly impacted with large \code{'n_lev'} and \code{'n_comp'} values (typically \code{'n_comp'} = \code{5} and \code{'n_lev'} = \code{256}).
+Alternatively, you can try to decrease \code{'n_lev'} when \code{'n_comp'} needs to be large (e.g. \code{'n_comp'} = \code{8} and \code{'n_lev'} = \code{32}).}
 }
 \value{
 an NumericVector of threshold(s).
