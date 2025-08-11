@@ -45,8 +45,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_rescale
-SEXP cpp_rescale(const SEXP img, const Rcpp::Nullable<Rcpp::NumericVector> msk_, const double value, const int n_lev, const bool invert, const bool bin);
-RcppExport SEXP _IFCip_cpp_rescale(SEXP imgSEXP, SEXP msk_SEXP, SEXP valueSEXP, SEXP n_levSEXP, SEXP invertSEXP, SEXP binSEXP) {
+SEXP cpp_rescale(const SEXP img, const Rcpp::Nullable<Rcpp::NumericVector> msk_, const double value, const int n_lev, const bool invert, const bool bin, const double clipmin, const double clipmax, const uint8_t method);
+RcppExport SEXP _IFCip_cpp_rescale(SEXP imgSEXP, SEXP msk_SEXP, SEXP valueSEXP, SEXP n_levSEXP, SEXP invertSEXP, SEXP binSEXP, SEXP clipminSEXP, SEXP clipmaxSEXP, SEXP methodSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const SEXP >::type img(imgSEXP);
@@ -55,7 +55,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type n_lev(n_levSEXP);
     Rcpp::traits::input_parameter< const bool >::type invert(invertSEXP);
     Rcpp::traits::input_parameter< const bool >::type bin(binSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_rescale(img, msk_, value, n_lev, invert, bin));
+    Rcpp::traits::input_parameter< const double >::type clipmin(clipminSEXP);
+    Rcpp::traits::input_parameter< const double >::type clipmax(clipmaxSEXP);
+    Rcpp::traits::input_parameter< const uint8_t >::type method(methodSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_rescale(img, msk_, value, n_lev, invert, bin, clipmin, clipmax, method));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1076,7 +1079,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_background", (DL_FUNC) &_IFCip_cpp_background, 4},
     {"_IFCip_cpp_antipodalpairs", (DL_FUNC) &_IFCip_cpp_antipodalpairs, 1},
     {"_IFCip_cpp_bbox", (DL_FUNC) &_IFCip_cpp_bbox, 2},
-    {"_IFCip_cpp_rescale", (DL_FUNC) &_IFCip_cpp_rescale, 6},
+    {"_IFCip_cpp_rescale", (DL_FUNC) &_IFCip_cpp_rescale, 9},
     {"_IFCip_cpp_scalerev", (DL_FUNC) &_IFCip_cpp_scalerev, 2},
     {"_IFCip_cpp_cooc", (DL_FUNC) &_IFCip_cpp_cooc, 2},
     {"_IFCip_cpp_h_features", (DL_FUNC) &_IFCip_cpp_h_features, 2},

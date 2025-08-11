@@ -6,26 +6,35 @@
 \arguments{
 \item{img, }{a SEXP (logical, raw, integer or numeric) vector or matrix containing image intensity values.}
 
-\item{msk_, }{a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as true.
-Default is R_NilValue, for using all 'img' elements without masking anything.}
+\item{msk_, }{a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as \code{true}.
+Default is \code{R_NilValue}, for using all \code{'img'} elements without masking anything.}
 
-\item{value, }{a double; it is the replacement value that will be used when 'msk' element is false. Default is NA_REAL.}
+\item{value, }{a double; it is the replacement value that will be used when \code{'msk'} element is interpreted as \code{false}. Default is \code{NA_REAL}.}
 
-\item{n_lev, }{an int determining the number of levels used for the computation. Default is 256.}
+\item{n_lev, }{an int determining the number of levels used for the computation. Default is \code{256}.}
 
-\item{invert, }{a bool determining whether 'img' should be scaled from min to max (when false, [min(img),max(img)] becoming [0,n_lev-1]) or inverted (when true, with [max(img),min(img)] rescaled to [0,n_lev-1]) values. Default is false.}
+\item{invert, }{a bool determining whether '\code{'img'} should be scaled from min(\code{'img'}) to max(\code{'img'}) (when \code{'false'}, [min(\code{'img'}),max(\code{'img'})] becoming [0,sign(\code{'n_lev'})*abs(\code{'n_lev'}-1)]) or inverted (when \code{true}, with [max(\code{'img'}),min(\code{'img'})] rescaled to [0,sign(\code{'n_lev'})*\code{'n_lev'}-1]) values. Default is \code{false}.}
 
-\item{bin, }{a bool determining whether 'img' should be binned or if scaling should be continuous. Default is true to return discrete values.}
+\item{bin, }{a bool determining whether \code{'img'} should be binned or if scaling should be continuous. Default is \code{false}.}
+
+\item{clipmin, }{a double, minimal value under which \code{'img'} intensity values will be clipped to. Default is \code{NA_REAL}, to use no minimal clipping.}
+
+\item{clipmax, }{a double, maximal value above which '\code{'img'} intensity values will be clipped to. Default is \code{NA_REAL}, to use no maximal clipping.}
+
+\item{method, }{an uint8_t determining how scaling should be applied. Default is \code{1}.
+-when \code{1}, on [min(\code{'img'}),max(\code{'img'})]
+-when \code{2}, on [is_finite(\code{'clipmin'}) ? \code{'clipmin'} : min(\code{'img'}), is_finite(\code{'clipmax'}) ? \code{'clipmax'} : max(\code{'img'})]
+-when \code{3}, on [is_finite(\code{'clipmin'}) ? max(\code{'clipmin'}, min(\code{'img'})) : min(\code{'img'}), is_finite(\code{'clipmax'}) ? min(\code{'clipmax'}, max(\code{'img'})) : max(\code{'img'})]}
 }
 \value{
-a SEXP of same type as 'img' with class `IFCip_rescale`
+a SEXP of same type as \code{'img'} with class `IFCip_rescale`
 }
 \description{
 This function is designed to scale a SEXP to [0, n_lev - 1]
 }
 \details{
-when 'msk' is provided it has to be of the same dimensions as 'img', otherwise an error will be thrown.\cr
-an error will be thrown also if 'msk' contains non-finite value.\cr
-'img' range will be determined based on indices of non 0 'msk' values and only the values in 'img' at those indices will be scaled; the others will be filled with 'value'.
+when \code{'msk'} is provided it has to be of the same dimensions as \code{'img'}, otherwise an error will be thrown.\cr
+an error will be thrown also if \code{'msk'} contains non-finite value.\cr
+\code{'img'} range will be determined based on indices of non 0 finite \code{'msk'} values and only the values in \code{'img'} at those indices will be scaled; the others will be filled with \code{'value'}.
 }
 \keyword{internal}

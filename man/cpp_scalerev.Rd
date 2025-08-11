@@ -6,10 +6,10 @@
 \arguments{
 \item{img, }{a SEXP (logical, raw, integer or numeric) vector or matrix containing image intensity values.}
 
-\item{sca, }{a Rcpp::NumericVector of length 5 containing scaling information. Default is R_NilValue to use attr(img, "scale").}
+\item{sca_, }{a Rcpp::NumericVector of length 7 containing scaling information. Default is \code{R_NilValue} to use attr(img, "scale").}
 }
 \value{
-a SEXP of same type as 'img'
+a SEXP of same type as \code{'img'}
 }
 \description{
 This function is designed to revert scaling of a SEXP
