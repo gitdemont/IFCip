@@ -253,9 +253,10 @@ NULL
 #' @keywords internal
 NULL
 
+#' @title Mask Features Extraction
 #' @name cpp_features_hu4
 #' @description
-#' This function is designed to compute image features.
+#' This function is designed to compute mask features.
 #' @param msk an IntegerMatrix, containing msk components.
 #' @param labels a Nullable IntegerVector corresponding to the desired label(s) to retrieve features about.
 #' Default is \code{0} to retrieve features for all components.

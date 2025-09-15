@@ -26,25 +26,25 @@
 # along with IFCip. If not, see <http://www.gnu.org/licenses/>.                #
 ################################################################################
 
-#' @name assert
-#' @keywords internal
+# #' @name assert
+# #' @keywords internal
 assert <- getFromNamespace("assert", "IFC")
 
-#' @name whoami
-#' @keywords internal
+# #' @name whoami
+# #' @keywords internal
 whoami <- getFromNamespace("whoami", "IFC")
 
-#' @name cpp_getTAGS
-#' @keywords internal
+# #' @name cpp_getTAGS
+# #' @keywords internal
 cpp_getTAGS <- getFromNamespace("cpp_getTAGS", "IFC")
 
-#' @name num_to_string
-#' @keywords internal
+# #' @name num_to_string
+# #' @keywords internal
 num_to_string <- getFromNamespace("num_to_string", "IFC")
 
-#' @name ifcip_handler_winprogressbar
-#' @source modified from \link[progressr]{handler_winprogressbar} to allow to pass label argument
-#' @keywords internal
+# #' @name ifcip_handler_winprogressbar
+# #' @source modified from \link[progressr]{handler_winprogressbar} to allow to pass label argument
+# #' @keywords internal
 ifcip_handler_winprogressbar <- function(intrusiveness = getOption("progressr.intrusiveness.gui", 1), target = "gui", inputs = list(title = "sticky_message", label = "non_sticky_message"), ...) {
   backend_args <- list(...)
   not_fake <- TRUE

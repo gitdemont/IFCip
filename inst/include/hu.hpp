@@ -837,6 +837,7 @@ Rcpp::NumericMatrix hpp_features_hu3(const Rcpp::NumericMatrix img,
   return out;
 }
 
+//' @title Mask Features Extraction
 //' @name cpp_features_hu4
 //' @description
 //' This function is designed to compute mask features.
