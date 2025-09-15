@@ -17,11 +17,11 @@ ExtractFeatures(
 )
 }
 \arguments{
-\item{...}{arguments to be passed to \code{\link{objectExtract}} with the exception of 'ifd' and 'bypass'(=TRUE).\cr
-If 'param' is provided 'export'(="matrix"), 'mode'(="raw"), 'size'(="c(0,0)"), 'force_width'(="FALSE") and 'removal' will be overwritten.\cr
-If 'offsets' are not provided extra arguments can also be passed with ... to \code{\link{getOffsets}}.\cr
-/!\ If not any of 'fileName', 'info' and 'param' can be found in ... then attr(offsets, "fileName_image") will be used as 'fileName' input parameter to pass to \code{\link{objectParam}}.\cr
-Remaining arguments with the exception of 'strategy', 'envir' and '...' will be passed to \link[future]{plan}.}
+\item{...}{arguments to be passed to \link[IFC]{objectExtract} with the exception of \code{'ifd'} and \code{'bypass'(=TRUE)}.\cr
+If \code{'param'} is provided \code{'export'(="matrix")}, \code{'mode'(="raw")}, \code{'size'(="c(0,0)")}, \code{'force_width'(="FALSE")} and \code{'removal'} will be overwritten.\cr
+If \code{'offsets'} are not provided extra arguments can also be passed with \code{...} to \link[IFC]{getOffsets}.\cr
+\strong{/!\\} If not any of \code{'fileName'}, \code{'info'} and \code{'param'} can be found in \code{...} then \code{attr(offsets, "fileName_image")} will be used as \code{'fileName'} input parameter to pass to \link[IFC]{objectParam}.
+Remaining arguments with the exception of \code{'strategy'}, \code{'envir'} and \code{...} will be passed to \link[future]{plan}.}
 
 \item{objects}{integers, indices of objects to use.
 This argument is not mandatory, if missing, the default, all objects will be used.}
@@ -29,31 +29,31 @@ This argument is not mandatory, if missing, the default, all objects will be use
 \item{offsets}{object of class `IFC_offset`. 
 This argument is not mandatory but it may allow to save time for repeated image export on same file.}
 
-\item{removal}{whether to compute features on "masked" object fo each individual channels or on the globally detected object "MC".
-Allowed are "masked" or "MC". Default is "masked". Please note that it will overwrite 'param' value if provided.}
+\item{removal}{whether to compute features on "masked" object for each individual channels or on the globally detected object "MC".
+Allowed are \code{"masked"} or \code{"MC"}. Default is \code{"masked"}. Please note that it will overwrite \code{'param'} value if provided.}
 
-\item{zmax}{maximal order of Zernike polynomials to be computed. Default is -1L for no computation.
-Values outside [0,99] will be clipped. Be aware that computation of Zernike's Moments can be quite long when 'zmax' is high.}
+\item{zmax}{maximal order of Zernike polynomials to be computed. Default is \code{-1L} for no computation.
+Values outside [0,99] will be clipped. Be aware that computation of Zernike's Moments can be quite long when \code{'zmax'} is high.}
 
 \item{granularity}{an integer vector. Controls the grain of the Haralick texture.
-Default is -1L for no computation. Allowed are [1-20].
+Default is \code{-1L} for no computation. Allowed are [1-20].
 For very fine textures, this value is small (1-3 pixels), while for very coarse textures, it is large (>10).}
 
-\item{batch}{positive integer, number of objects to process at the same time. Default is 20L.}
+\item{batch}{positive integer, number of objects to process at the same time. Default is \code{20L}.}
 
-\item{display_progress}{whether to display a progress bar. Default is TRUE.\cr
-When NULL, execution will not be wrapped inside \link[progressr]{with_progress} nor \link[progressr]{withProgressShiny}. This allow user to call the function with \link[progressr]{with_progress} nor \link[progressr]{withProgressShiny} or to use global handler see \link[progressr]{handlers}.\cr
-When FALSE, execution will be performed inside \link[progressr]{without_progress}.\cr
-When TRUE, execution will be wrapped inside \link[progressr]{with_progress} or \link[progressr]{withProgressShiny}
+\item{display_progress}{whether to display a progress bar. Default is \code{TRUE}.\cr
+When \code{NULL}, execution will not be wrapped inside \link[progressr]{with_progress} nor \link[progressr]{withProgressShiny}. This allow user to call the function with \link[progressr]{with_progress} nor \link[progressr]{withProgressShiny} or to use global handler see \link[progressr]{handlers}.\cr
+When \code{FALSE}, execution will be performed inside \link[progressr]{without_progress}.\cr
+When \code{TRUE}, execution will be wrapped inside \link[progressr]{with_progress} or \link[progressr]{withProgressShiny}
 and \link[progressr]{handlers} will be automatically selected (the last available will be chosen between either):\cr
 - \link[progressr]{handler_txtprogressbar},\cr
 - a customized version of \link[progressr]{handler_winprogressbar}, (if on windows OS),\cr
 - \link[progressr]{handler_shiny} (if shiny is detected).}
 
-\item{parallel}{whether to use parallelization. Default is FALSE.\cr
-When NULL, current \pkg{future}'s plan 'strategy' will be used.\cr
-When FALSE, \link[future]{plan} will be called with \link[future]{sequential} 'strategy'.
-When TRUE, \link[future]{plan} will be called with \link[future.callr]{callr} 'strategy'.}
+\item{parallel}{whether to use parallelization. Default is \code{FALSE}.\cr
+When \code{NULL}, current \pkg{future}'s plan \code{'strategy'} will be used.\cr
+When \code{FALSE}, \link[future]{plan} will be called with \link[future]{sequential} \code{'strategy'}.
+When \code{TRUE}, \link[future]{plan} will be called with \link[future.callr]{callr} \code{'strategy'}.}
 }
 \value{
 a 3D array of features values whose dimensions are [object, features, channel] of class `IFCip_features`.
@@ -62,7 +62,7 @@ a 3D array of features values whose dimensions are [object, features, channel] o
 Function to extract features from objects stored within rif and cif files.
 }
 \details{
-arguments of objectExtract() from IFC package will be deduced from \code{\link{ExtractFeatures}} input arguments.
+arguments of \link[IFC]{objectExtract} will be deduced from \code{\link{ExtractFeatures}} input arguments.
 }
 \examples{
 if(!requireNamespace("IFCdata", quietly = TRUE)) {
