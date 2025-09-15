@@ -29,11 +29,6 @@ T. at McGill University.
 Available at https://escholarship.mcgill.ca/concern/theses/fx719p46g
 
 --------------------------------------------------------------------------------
-ray_pnt_in_poly is adapted from the Ray Casting  algorithm authored by 
-W. Randolph Franklin.
-Available at http://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
-
---------------------------------------------------------------------------------
 hpp_multi_otsu is adapted from 'A Fast Algorithm for Multilevel Thresholding'
 from L. Ping-Sung, C. Tse-Sheng, and C. Pau-Choo. Described in Jounal of 
 Information Science and Engineering. 2001(17), Pages 713-727.

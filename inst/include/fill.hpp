@@ -57,33 +57,6 @@ Rcpp::IntegerMatrix close_polygon (const Rcpp::IntegerMatrix poly) {
   return poly;
 }
 
-//' @title ray_pnt_in_poly
-//' @description
-//' This function checks if points lie within a polygon using an adaptation of the Ray Casting algorithm.
-//' @source adaptation from W. Randolph Franklin code \url{https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html}\cr
-//' /verb{
-//' Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
-//' 1.Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimers. 
-//' 2.Redistributions in binary form must reproduce the above copyright notice in the documentation and/or other materials provided with the distribution. 
-//' 3.The name of W. Randolph Franklin may not be used to endorse or promote products derived from this Software without specific prior written permission. 
-//' THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-//' }
-//' @param x,y x and y coordinates of point to test.
-//' @param poly a 2-column matrix defining the locations (x and y) of vertices of the polygon of interest.
-//' @keywords internal
-// [[Rcpp::export(rng = false)]]
-bool ray_pnt_in_poly (const R_len_t x,
-                      const R_len_t y,
-                      const Rcpp::IntegerMatrix poly) { 
-  bool inside = false;
-  for(R_len_t i = 0, j = poly.nrow() - 1; i < poly.nrow(); j = i++) {
-    if(((poly(i,1) > y) != (poly(j,1) > y)) &&
-       (x < (poly(j,0) - poly(i,0)) * (y - poly(i,1)) / (poly(j,1) - poly(i,1)) + poly(i,0))) 
-      inside = !inside;
-  }
-  return inside;
-}
-
 //' scanfill template
 template <int RTYPE>
 void scanfill_T (Rcpp::Matrix<RTYPE> m,
@@ -186,25 +159,11 @@ void polyidx (Rcpp::IntegerVector &Q,
   if((i_row >= 1) && ((i_row - 1) < nrow) && (i_col >= 1)) queue_push(Q, (i_col - 1) * nrow + i_row - 1);
 }
 
-//' @title Polygon Contours
-//' @name polycontour
-//' @description
-//' Determines contours indices
-//' @param poly, a 2 (x and y) columns matrix defining the vertices of the polygon of interest. Eventually, a 4th (direction) column can be provided to speed-ud computation.
-//' @param nrow, a R_len_t, number of rows of original image.
-//' @param typ, a uint8_t, type of contour to return. 'poly' itself (typ=0), internal (typ=1) or external(typ=2).
-//' @param inner, whether 'poly' is an inner or outer contour. Default is false.
-//' @param conn, a uint8_t, desired connectedness. Default is 4, unless 8 is provided.
-//' @return a Rcpp::IntegerVector of contour indices. 
-//' @keywords internal
 // [[Rcpp::export(rng = false)]]
-Rcpp::IntegerVector polycontour (const Rcpp::IntegerMatrix poly,
-                                 const R_len_t nrow = 0,
-                                 const uint8_t typ = 2,
-                                 const bool inner = false,
-                                 const uint8_t conn = 4) {
-  if(poly.ncol() < 2) Rcpp::stop("polycontour: 'poly' should have at least 4 columns");
+Rcpp::IntegerVector polycontour0 (const Rcpp::IntegerMatrix poly,
+                                  const R_len_t nrow = 0) {
   if(!(poly.nrow())) return 0;
+  if(poly.ncol() < 2) Rcpp::stop("polycontour0: 'poly' should have at least 2 columns");
   
   // close polygon;
   Rcpp::IntegerMatrix p = close_polygon(poly);
@@ -214,171 +173,40 @@ Rcpp::IntegerVector polycontour (const Rcpp::IntegerMatrix poly,
   
   // create vector to hold polygon indices
   for(R_len_t i = 0; i < p.nrow(); i++) polyidx(Q, p(i,1), p(i,0), nrow);
-  Rcpp::IntegerVector W = Rcpp::no_init_vector(Q[0]);
-  for(R_len_t i = 0; i < W.size(); i++) W[i] = Q[i + 1];
-  if(typ == 0) return(W); 
-  
-  // empty queue
-  Q[0] = 0;
-  
-  // define offsets
-  Rcpp::IntegerVector dx = Rcpp::IntegerVector::create( 1, 1, 0,-1,-1,-1, 0, 1);
-  Rcpp::IntegerVector dy = Rcpp::IntegerVector::create( 0, 1, 1, 1, 0,-1,-1,-1);
-  
-  if(poly.ncol() >= 4) {
-    Rcpp::LogicalVector dd = Rcpp::LogicalVector::create(true,false,true,false,true,false,true,false);
-    if(conn == 8) dd.fill(true);
-    if(inner) {
-      if(typ == 2) {
-        short j = poly(poly.nrow() - 1, 3) % 8;
-        j += 4;
-        if(j > 7) j -= 8;
-        for(R_len_t i = 0, ii = 1; i < p.nrow(); i++, ii++) {
-          if(ii >= p.nrow()) ii = 0;
-          for(short n = 0; n <= 7; n++) {
-            if(++j > 7) j = 0;
-            R_len_t x = p(i, 0) + dx[j];
-            R_len_t y = p(i, 1) + dy[j];
-            if((p(ii, 0) == x) && (p(ii, 1) == y)) { 
-              j += 4;
-              if(j > 7) j -= 8;
-              break;
-            }
-            if(dd[j]) polyidx(Q, y, x, nrow);
-          }
-        } 
-      } else {
-        dx = Rcpp::IntegerVector::create(-1,-1,-1, 0,+1,+1,+1, 0);
-        dy = Rcpp::IntegerVector::create(+1, 0,-1,-1,-1, 0,+1,+1);
-        if(conn != 8) dd = !dd;
-        for(R_len_t ii = p.nrow() - 1, i = ii - 1; ii >= 0 ; i--, ii--) {
-          if(i < 0) i = p.nrow() - 1;
-          short j = poly(ii, 3) % 8;
-          j += 4;
-          if(++j > 7) j -= 8;
-          for(short n = 0; n <= 7; n++) {
-            if(++j > 7) j = 0;
-            R_len_t x = p(ii, 0) + dx[j];
-            R_len_t y = p(ii, 1) + dy[j];
-            if((p(i, 0) == x) && (p(i, 1) == y)) break;
-            if(dd[j]) polyidx(Q, y, x, nrow);
-          }
-        }
-      }
-    } else {
-      if(typ == 2) {
-        short j = poly(poly.nrow() - 1, 3) % 8;
-        j += 4;
-        if(j > 7) j -= 8;
-        for(R_len_t i = 0, ii = 1; i < p.nrow(); i++, ii++) {
-          if(ii >= p.nrow()) ii = 0;
-          for(short n = 0; n <= 7; n++) {
-            if(--j < 0) j = 7;
-            R_len_t x = p(i, 0) + dx[j];
-            R_len_t y = p(i, 1) + dy[j];
-            if((p(ii, 0) == x) && (p(ii, 1) == y)) {
-              --j;
-              j += 4;
-              if(j > 7) j -= 8;
-              break;
-            }
-            if(dd[j]) polyidx(Q, y, x, nrow);
-          }
-        }
-        
-        Rcpp::IntegerVector V = Rcpp::no_init_vector(Q[0]);
-        for(R_len_t i = 0; i < V.size(); i++) V[i] = Q[i + 1];
-        return Rcpp::setdiff(Rcpp::setdiff(V,W), polycontour(poly, nrow, 1, inner, 8));
-      } else {
-        short j = poly(poly.nrow() - 1, 3) % 8;
-        j += 4;
-        if(j > 7) j -= 8;
-        for(R_len_t i = 0, ii = 1; i < p.nrow(); i++, ii++) {
-          if(ii >= p.nrow()) ii = 0;
-          for(short n = 0; n <= 7; n++) {
-            if(++j > 7) j = 0;
-            R_len_t x = p(i, 0) + dx[j];
-            R_len_t y = p(i, 1) + dy[j];
-            if((p(ii, 0) == x) && (p(ii, 1) == y)) {
-              j += 4;
-              if(j > 7) j -= 8;
-              break;
-            }
-            if(dd[j]) polyidx(Q, y, x, nrow);
-          }
-        }
-        
-        Rcpp::IntegerVector V = Rcpp::no_init_vector(Q[0]);
-        for(R_len_t i = 0; i < V.size(); i++) V[i] = Q[i + 1];
-        return Rcpp::unique(V);
-      }
-    }
-  }
-  if(conn != 8) {
-    dx = Rcpp::IntegerVector::create(+1, 0,-1, 0);
-    dy = Rcpp::IntegerVector::create( 0,+1, 0,-1); 
-  }
-  
-  for(R_len_t i = 0; i < p.nrow(); i++) {
-    for(R_len_t j = 0; j < dx.size(); j++) { // test points around current polygon vertex with connectedness of 'conn'
-      R_len_t x = p(i, 0) + dx[j], y = p(i, 1) + dy[j];
-      if(ray_pnt_in_poly(x, y, p) ^ (typ == 1)) polyidx(Q, y, x, nrow);
-    }
-  }
-  
-  // return values in queue
-  Rcpp::IntegerVector V = Rcpp::no_init(Q[0]);
+  Rcpp::IntegerVector V = Rcpp::no_init_vector(Q[0]);
   for(R_len_t i = 0; i < V.size(); i++) V[i] = Q[i + 1];
-  return Rcpp::setdiff(V, W);
+  return(V);
 }
 
-//' @title Polygon Seeds
-//' @name polyseeds
-//' @description
-//' Determines seeds of polygon contours
-//' @param poly, a 2 (x and y) columns matrix defining the vertices of the polygon of interest. Eventually, a 4th (direction) column can be provided to speed-ud computation.
-//' @param nrow, a R_len_t, number of rows of original image.
-//' @param inner, whether 'poly' is a inner or outer contour. Default is false.
-//' @return a Rcpp::IntegerVector of seeds indices. 
-//' @keywords internal
 // [[Rcpp::export(rng = false)]]
-Rcpp::IntegerVector polyseeds (const Rcpp::IntegerMatrix poly,
-                               const R_len_t nrow = 0,
-                               const bool inner = false) {
-  if(poly.ncol() < 4) return polycontour(poly, nrow, 2, inner, 4);
+Rcpp::IntegerVector polycontour1 (const Rcpp::IntegerMatrix poly,
+                                  const R_len_t nrow = 0,
+                                  const uint8_t conn = 8,
+                                  const bool seed = false) {
+  if(!(poly.nrow())) return 0;
+  if(poly.ncol() < 4) Rcpp::stop("polycontour1: 'poly' should have at least 4 columns");
   
   // close polygon
   Rcpp::IntegerMatrix p = close_polygon(poly);
   
-  // init x,y coordinates and dx,dy offsets to be tested by ray_pnt_in_poly
-  R_len_t x = 0, y = 0;
-  Rcpp::IntegerVector dx1 = Rcpp::IntegerVector::create(0,-1, 0,-1, 0,+1, 0,+1, 0);
-  Rcpp::IntegerVector dy2 = Rcpp::IntegerVector::create(0,+1, 0,-1, 0,-1, 0,+1, 0);
-  Rcpp::LogicalVector dd  = Rcpp::LogicalVector::create(false,true,false,true,false,true,false,true);
-  Rcpp::IntegerVector dy1(9), dx2 = dy1;
-  if(inner == 1) { dx1 = -dx1; dy2 = -dy2; }
+  // init dx, dy offsets
+  Rcpp::IntegerVector dx = Rcpp::IntegerVector::create(+1,+1, 0,-1,-1,-1, 0,+1);
+  Rcpp::IntegerVector dy = Rcpp::IntegerVector::create( 0,+1,+1,+1, 0,-1,-1,-1);
+  Rcpp::LogicalVector dd  = Rcpp::LogicalVector::create(true,false,true,false,true,false,true,false);
+  if(conn == 8) dd.fill(true);
   
   Rcpp::IntegerVector Q = queue_create(2 * p.nrow());
-  for(R_len_t i = 1; i < p.nrow(); i++) {
-    int j = p(i, 3) % 8;
-    if(dd[j]) { // only test when direction is diag
-      x = p(i, 0) + dx1[j]; y = p(i, 1) + dy1[j];
-      if(!((p(i - 1, 0) == x) && (p(i - 1, 1) == y))) if(ray_pnt_in_poly(x, y, p)) {
-        polyidx(Q, y, x, nrow);
-        if(inner) continue;
-      }
-      x = p(i, 0) + dx2[j]; y = p(i, 1) + dy2[j];
-      if(!((p(i - 1, 0) == x) && (p(i - 1, 1) == y))) if(ray_pnt_in_poly(x, y, p)) polyidx(Q, y, x, nrow);
-    }
-  }
-  // in case poly is a rectangle we add seed from diagonal offsets from 1st point
-  if(p.nrow()) { // if(p.nrow()) nrow() is at least 2 thanks to close_polygon so p(0,) and p(1,) exist
-    for(int j = 1; j <= 7; j += 2) {
-      x = p(0, 0) + dx1[j]; y = p(0, 1) + dy2[j];
-      if(!((p(1, 0) == x) && (p(1, 1) == y))) if(ray_pnt_in_poly(x, y, p)) {
-        polyidx(Q, y, x, nrow);
-        break;
-      }
+  for(R_len_t i = 0, ii = 1; i < p.nrow() - 1; i++, ii++) {
+    if(ii >= p.nrow()) ii = 0;
+    int j = (p(i, 3) + 4) % 8;
+    if(seed && (j < 4)) continue;
+    int v = p(ii, 3) % 8;
+    for(R_len_t k = 0; k < 8; k++) {
+      j++;
+      if(j >= 8) j = 0;
+      if(j == v) break;
+      if(!dd[j]) continue;
+      polyidx(Q, p(ii, 1) + dy[j], p(ii, 0) + dx[j], nrow);
     }
   }
   
@@ -386,6 +214,74 @@ Rcpp::IntegerVector polyseeds (const Rcpp::IntegerMatrix poly,
   Rcpp::IntegerVector V = Rcpp::no_init(Q[0]);
   for(R_len_t i = 0; i < V.size(); i++) V[i] = Q[i + 1];
   return V;
+}
+
+// [[Rcpp::export(rng = false)]]
+Rcpp::IntegerVector polycontour2 (const Rcpp::IntegerMatrix poly,
+                                  const R_len_t nrow = 0,
+                                  const uint8_t conn = 8,
+                                  const bool seed = false) {
+  if(!(poly.nrow())) return 0;
+  if(poly.ncol() < 4) Rcpp::stop("polycontour2: 'poly' should have at least 4 columns");
+  
+  // close polygon
+  Rcpp::IntegerMatrix p = close_polygon(poly);
+  
+  // init dx, dy offsets
+  Rcpp::IntegerVector dx = Rcpp::IntegerVector::create(+1,+1, 0,-1,-1,-1, 0,+1);
+  Rcpp::IntegerVector dy = Rcpp::IntegerVector::create( 0,+1,+1,+1, 0,-1,-1,-1);
+  Rcpp::LogicalVector dd  = Rcpp::LogicalVector::create(true,false,true,false,true,false,true,false);
+  if(conn == 8) dd.fill(true);
+  
+  Rcpp::IntegerVector Q = queue_create(2 * p.nrow());
+  for(R_len_t i = 0, ii = 1; i < p.nrow() - 1; i++, ii++) {
+    int j = (p(i, 3) + 4) % 8;
+    if(seed && (j < 4)) continue;
+    R_len_t iii = ii + 1;
+    if(iii >= p.nrow()) iii = 0;
+    int v = p(iii, 3) % 8;
+    for(R_len_t k = 0; k < 8; k++) {
+      j--;
+      if(j < 0) j = 7;
+      if(j == v) break;
+      if(!dd[j]) continue;
+      polyidx(Q, p(ii, 1) + dy[j], p(ii, 0) + dx[j], nrow);
+    }
+  }
+  
+  // return values in queue
+  Rcpp::IntegerVector V = Rcpp::no_init(Q[0]);
+  for(R_len_t i = 0; i < V.size(); i++) V[i] = Q[i + 1];
+  return Rcpp::setdiff(Rcpp::setdiff(V, polycontour1(poly, nrow, 8, false)), polycontour0(poly, nrow));
+}
+
+//' @title Polygon Contours
+//' @name polycontour
+//' @description
+//' Determines contours indices
+//' @param poly, a 2 (x and y) columns matrix defining the vertices of the polygon of interest. Eventually, a 4th (direction) column can be provided to speed-ud computation.
+//' @param nrow, a R_len_t, number of rows of original image.
+//' @param typ, a uint8_t, type of contour to return. 'poly' itself (typ=0), external (typ=1) or internal (typ=2).
+//' @param inner, whether 'poly' is an inner or outer contour. Default is false.
+//' @param conn, a uint8_t, desired connectedness. Default is 4, unless 8 is provided.
+//' @param seed, a bool, whether to compute seeds. Default is false.
+//' @return a Rcpp::IntegerVector of contour indices. 
+//' @keywords internal
+// [[Rcpp::export(rng = false)]]
+Rcpp::IntegerVector polycontour (const Rcpp::IntegerMatrix poly,
+                                 const R_len_t nrow = 0,
+                                 const uint8_t typ = 2,
+                                 const bool inner = false,
+                                 const uint8_t conn = 4,
+                                 const bool seed = false) {
+  if(inner) {
+    if(typ == 1) return polycontour2(poly, nrow, conn, seed);
+    if(typ == 2) return polycontour1(poly, nrow, conn, seed);
+  } else {
+    if(typ == 1) return polycontour1(poly, nrow, conn, seed);
+    if(typ == 2) return polycontour2(poly, nrow, conn, seed);
+  }
+  return polycontour0(poly, nrow);
 }
 
 //' polycheckNA_T template
@@ -397,7 +293,7 @@ bool polycheckNA_T (const Rcpp::IntegerMatrix poly,
                     const bool inner,
                     const short conn) {
   if(poly.ncol() < 2) Rcpp::stop("polycheckNA: 'poly' should have at least 2 columns");
-  Rcpp::IntegerVector nbr = polycontour(poly, img.nrow(), typ, inner, conn);
+  Rcpp::IntegerVector nbr = polycontour(poly, img.nrow(), typ, inner, conn, false);
   for(R_len_t i = 0; i < nbr.size(); i++) if((nbr[i] >= 0) && (nbr[i] < img.size())) if(traits::is_na<RTYPE>(img[nbr[i]])) return true;
   return false;
 }
@@ -416,7 +312,6 @@ void polyvoid_T (const Rcpp::IntegerMatrix poly,
   if(poly.nrow()) {
     // check that 4-connected points outside 'poly' are not NA to avoid propagation outside polygon
     if(checkNA) if(polycheckNA_T(poly, img, 1, inner, 4)) Rcpp::stop("polycheckNA: [NA] found outside 'poly'");
-    
     // a temporary polygon border is drawn with NA
     R_len_t mat_r = img.nrow();
     R_len_t mat_c = img.ncol();
@@ -430,7 +325,8 @@ void polyvoid_T (const Rcpp::IntegerMatrix poly,
     }
     
     // find internal seeds
-    Rcpp::IntegerVector seeds = polyseeds(poly, img.nrow(), inner);
+    // TODO change seed or conn values below if incorrectly filled 
+    Rcpp::IntegerVector seeds = polycontour(poly, img.nrow(), 2, inner, 4, true);
     
     // fill polygon
     // when 'tol' is NA polygon is temporarily filled with NA so Z is used to record modified pix
