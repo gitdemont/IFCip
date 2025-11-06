@@ -377,28 +377,13 @@ ExtractFeatures <- function(...,
                   back = cpp_background(i_chan, is_cif = is_cif)
                   bg_mean = back["BG_MEAN"]
                   bg_sd = back["BG_STD"]
-                  msk = mask_identify2(img = i_chan, threshold = 3 * bg_sd)
-                  msk_i = which.max(attr(msk, "perimeter"))
-                  if(length(msk_i) != 0) {
-                    msk = cpp_k_equal_M(msk, msk_i)
-                  } else {
-                    msk = msk
-                  }
+                  msk = mask_identify2(img = i_chan, threshold = 3 * bg_sd) != 0
                 } else {
                   bg_mean = attr(i_chan, "BG_MEAN")
                   bg_sd = attr(i_chan, "BG_STD")
-                  msk = !attr(i_chan, "mask")
-                  class(msk) = "IFC_msk"
-                  ctl = cpp_ctl(msk, global = TRUE)
-                  msk_i = which.max(ctl$perimeter)
-                  if(length(msk_i) != 0) {
-                    msk = cpp_k_equal_M(ctl$matrix, msk_i)
-                  } else {
-                    msk = msk
-                  }
+                  msk = attr(i_chan, "mask") == 0
                 }
                 class(msk) = "IFC_msk"
-                
                 hu = cpp_features_hu3(img = i_chan, msk = msk, labels = 1, mag = mag)
                 if((nrow(hu) == 0) || !is.finite(hu[1,1]) || (hu[1,1] == 0)) {
                   hu = no_hu
@@ -407,16 +392,10 @@ ExtractFeatures <- function(...,
                   hu = hu[1,]
                   ctl = cpp_ctl(msk, global = TRUE)
                   contours = ctl$contours
-                  contours = by(contours[, c(1,2,4,5), drop = FALSE], contours[, 3, drop = FALSE], FUN =function(d) by(d[,c(1,2,3), drop = FALSE], d[,4, drop = FALSE], FUN = function(dd) dd))
-                  contours = contours[as.integer(names(contours)) > 0] 
-                  contours = contours[[1]]
-                  if(inherits(contours, what = "by")) contours = contours[[1]]
+                  contours = contours[contours[, "type"] == 1, , drop = FALSE]
                   
                   perimeter = k * sum(ctl$perimeter)
-                  # if(length(perimeter) == 0) perimeter = 0
-                  
                   diameter = 2 * sqrt(hu["Area"] / pi)
-                  
                   # center = apply(contours[,1:2], 2, mean)
                   center = hu[c("pix cy", "pix cx")]
                   distance = k * apply(contours[,1:2], 1, FUN =function(coord)  sqrt((coord[1] - center[1])^2 + (coord[2] - center[2])^2))

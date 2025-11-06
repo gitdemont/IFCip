@@ -44,16 +44,16 @@
 compute_haralick = function(img, msk, granularity = 3, bits = 4) {
   # check inputs
   if(!any(inherits(img, what = "IFC_img"))) stop("'img' should be of class `IFC_img`")
-  if(missing(msk)) {
-    msk = attr(img, "mask")
-    if(attr(msk, "removal") == "raw") {
+  if(missing(msk)) msk = attr(img, "mask")
+  if(!any(inherits(msk, what = "IFC_msk"))) stop("'msk' should be of class `IFC_msk`")
+  if(length(attr(msk, "removal")) != 0) {
+    if(identical(attr(msk, "removal"), "raw")) {
       msk = (msk == 1)
     } else {
       msk = !msk
     }
   } else {
-    if(!any(inherits(msk, what = "IFC_msk"))) stop("When provided 'msk' should be of class `IFC_msk`")
-    msk = (msk > 0)
+    msk = msk != 0
   }
   assert(bits, len = 1, alw = 2:10)
   granularity = na.omit(as.integer(granularity));

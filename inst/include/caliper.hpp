@@ -121,7 +121,7 @@ Rcpp::NumericMatrix hpp_antipodalpairs_width (const Rcpp::IntegerMatrix pairs,
     Rcpp::stop("hpp_antipodalpairs: 'pts' should be of class `IFCip_convexhull`");
   }
   if(!Rf_inherits(pairs, "IFCip_antipodal")) {
-    Rcpp::stop("hpp_antipodalpairs: 'pts' should be of class `IFCip_antipodal`");
+    Rcpp::stop("hpp_antipodalpairs: 'pairs' should be of class `IFCip_antipodal`");
   }
   Rcpp::NumericMatrix out(pts.nrow(), 4);
   for(R_len_t vertex = 0; vertex < pts.nrow(); vertex++) {
@@ -160,7 +160,7 @@ Rcpp::NumericVector hpp_antipodalpairs_feat (const Rcpp::IntegerMatrix pairs,
     Rcpp::stop("hpp_antipodalpairs: 'pts' should be of class `IFCip_convexhull`");
   }
   if(!Rf_inherits(pairs, "IFCip_antipodal")) {
-    Rcpp::stop("hpp_antipodalpairs: 'pts' should be of class `IFCip_antipodal`");
+    Rcpp::stop("hpp_antipodalpairs: 'pairs' should be of class `IFCip_antipodal`");
   }
   Rcpp::NumericVector out =  Rcpp::NumericVector::create(R_NegInf, R_PosInf, 0.0, 0.0, 0.0, 0.0);
   R_len_t vertex = 0;
@@ -176,14 +176,13 @@ Rcpp::NumericVector hpp_antipodalpairs_feat (const Rcpp::IntegerMatrix pairs,
   out[4] /= pts.nrow();
   out[5] /= pts.nrow();
   
-  Rcpp::NumericVector dis(pairs.nrow());
   for(R_len_t anti = 0; anti < pairs.nrow(); anti++) {
     if((pairs(anti, 0) >= pts.nrow()) || (pairs(anti, 1) >= pts.nrow())) {
       Rcpp::stop("hpp_antipodalpairs_feat: 'pairs' and 'pts' are incompatible");
     }
-    dis[anti] = pt_distance_accu(pts(pairs(anti, 0), Rcpp::_), pts(pairs(anti, 1), Rcpp::_), scale);
-    if(out[0] < dis[anti]) out[0] = dis[anti];
-    if(out[1] > dis[anti]) out[1] = dis[anti];
+    double dis = pt_distance_accu(pts(pairs(anti, 0), Rcpp::_), pts(pairs(anti, 1), Rcpp::_), scale);
+    if(out[0] < dis) out[0] = dis;
+    if(out[1] > dis) out[1] = dis;
   }
   out[2] = out[0] / out[1];
   out.attr("names") = Rcpp::CharacterVector::create("Height", "Width", "Elongatedness", "convex perimeter", "convex cx", "convex cy");

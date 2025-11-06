@@ -328,28 +328,13 @@ ExtractBasic <- function(...,
                   back = cpp_background(i_chan, is_cif = is_cif)
                   bg_mean = back["BG_MEAN"]
                   bg_sd = back["BG_STD"]
-                  msk = mask_identify2(img = i_chan, threshold = 3 * bg_sd)
-                  msk_i = which.max(attr(msk, "perimeter"))
-                  if(length(msk_i) != 0) {
-                    msk = !cpp_k_equal_M(msk, msk_i)
-                  } else {
-                    msk = !msk
-                  }
-                  hu = cpp_basic(img = i_chan, msk = msk, mag = mag)
+                  msk = mask_identify2(img = i_chan, threshold = 3 * bg_sd) == 0
                 } else {
                   bg_mean = attr(i_chan, "BG_MEAN")
                   bg_sd = attr(i_chan, "BG_STD")
-                  msk = attr(i_chan, "mask")
-                  class(msk) = "IFC_msk"
-                  ctl = cpp_ctl(!msk, global = TRUE)
-                  msk_i = which.max(ctl$perimeter)
-                  if(length(msk_i) != 0) {
-                    msk = !cpp_k_equal_M(ctl$matrix, msk_i)
-                  } else {
-                    msk = msk
-                  }
-                  hu = cpp_basic(img = i_chan, msk = msk, mag = mag)
+                  msk = attr(i_chan, "mask") != 0
                 }
+                hu = cpp_basic(img = i_chan, msk = msk, mag = mag)
                 avg_intensity = hu["Raw Mean Pixel"] - bg_mean
                 min_intensity = hu["Raw Min Pixel"] - bg_mean
                 max_intensity = hu["Raw Max Pixel"] - bg_mean

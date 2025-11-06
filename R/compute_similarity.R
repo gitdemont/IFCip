@@ -41,15 +41,30 @@ compute_similarity <- function(img1, img2, msk) {
   if(!any(inherits(img1, what = "IFC_img"))) stop("'img1' should be of class `IFC_img`")
   if(!any(inherits(img2, what = "IFC_img"))) stop("'img2' should be of class `IFC_img`")
   if(missing(msk)) {
-    msk = attr(img1, "mask")
-    if(attr(msk, "removal") == "raw") {
+    msk1 = attr(img1, "mask")
+    if(attr(msk1, "removal") == "raw") {
+      msk1 = (msk1 == 1)
+    } else {
+      msk1 = !msk1
+    }
+    msk2 = attr(img2, "mask")
+    if(attr(msk2, "removal") == "raw") {
+      msk2 = (msk2 == 1)
+    } else {
+      msk2 = !msk2
+    }
+    msk = msk1 | msk2
+    class(msk) = "IFC_msk"
+  }
+  if(!any(inherits(msk, what = "IFC_msk"))) stop("'msk' should be of class `IFC_msk`")
+  if(length(attr(msk, "removal")) != 0) {
+    if(identical(attr(msk, "removal"), "raw")) {
       msk = (msk == 1)
     } else {
       msk = !msk
     }
   } else {
-    if(!any(inherits(msk, what = "IFC_msk"))) stop("When provided 'msk' should be of class `IFC_msk`")
-    msk = (msk > 0)
+    msk = msk != 0
   }
   return(structure(cpp_similarity(img1 = img1, img2 = img2, msk = msk), names = "Similarity"))
 } 

@@ -46,16 +46,16 @@
 #' @export
 moments_Zernike <- function(img, msk, centroid, zmax = 15, radius = 30, full = FALSE) {
   if(!any(inherits(img, what = c("IFC_img", "IFC_msk")))) stop("'img' be should of class `IFC_img` or `IFC_msk`")
-  if(missing(msk)) {
-    msk = attr(img, "mask")
-    if(attr(msk, "removal") == "raw") {
+  if(missing(msk)) msk = attr(img, "mask")
+  if(!any(inherits(msk, what = "IFC_msk"))) stop("'msk' should be of class `IFC_msk`")
+  if(length(attr(msk, "removal")) != 0) {
+    if(identical(attr(msk, "removal"), "raw")) {
       msk = (msk == 1)
     } else {
       msk = !msk
     }
   } else {
-    if(!any(inherits(msk, what = "IFC_msk"))) stop("When provided 'msk' should be of class `IFC_msk`")
-    msk = (msk > 0)
+    msk = msk != 0    
   }
   if(missing(centroid)) {
     centroid = cpp_centroid(msk)

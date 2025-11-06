@@ -36,16 +36,16 @@
 #' @export
 compute_intensity <- function(img, msk) {
   if(!any(inherits(img, what = "IFC_img"))) stop("'img' should be of class `IFC_img`")
-  if(missing(msk)) {
-    msk = attr(img, "mask")
-    if(attr(msk, "removal") == "raw") {
+  if(missing(msk)) msk = attr(img, "mask")
+  if(!any(inherits(msk, what = "IFC_msk"))) stop("'msk' should be of class `IFC_msk`")
+  if(length(attr(msk, "removal")) != 0) {
+    if(identical(attr(msk, "removal"), "raw")) {
       msk = (msk == 1)
     } else {
       msk = !msk
     }
   } else {
-    if(!any(inherits(msk, what = "IFC_msk"))) stop("When provided 'msk' should be of class `IFC_msk`")
-    msk = (msk > 0)
+    msk = msk != 0
   }
   observed = sum(img * (msk == 1))
   expected = sum(msk == 1) * attr(img, "BG_MEAN")
