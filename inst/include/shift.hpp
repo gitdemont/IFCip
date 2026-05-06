@@ -33,36 +33,25 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-//' @title Image Row Shift
-//' @name cpp_shift_row
-//' @description Function to shift matrix's rows.
-//' @param mat a numeric matrix.
-//' @param d_row an integer, giving row shift. Default is 0 for no change.
-//' @param add_noise logical, if true adds normal noise when at least one new dimension is larger than original mat dimensions
-//' Rcpp::rnorm() function is used. Default is true.
-//' @param bg double, mean value of the background added if add_noise is true. Default is 0.
-//' @param sd double, standard deviation of the background added if add_noise is true. Default is 0.
-//' @return a shifted matrix with additional rows/columns if d_row or d_col are different from 0.
-//' @keywords internal
-////' @export
-// [[Rcpp::export]]
-Rcpp::NumericMatrix hpp_shift_row( const Rcpp::NumericMatrix mat, 
-                                   const int d_row = 0,
-                                   const bool add_noise = true, 
-                                   const double bg = 0.0,
-                                   const double sd = 0.0) {
+template <int RTYPE>  
+Rcpp::Matrix<RTYPE> shift_row_T (Rcpp::Matrix<RTYPE> mat, 
+                                 const int d_row = 0,
+                                 const bool add_noise = true, 
+                                 const double bg = 0.0,
+                                 const double sd = 0.0,
+                                 const bool keep_size = false) {
   if(d_row == 0) return mat;
   R_len_t M_row = mat.nrow();
   R_len_t M_col = mat.ncol();
   R_len_t i_row;
   R_len_t new_row = M_row + std::abs(d_row);
   
-  Rcpp::NumericMatrix out(new_row, M_col);
+  Rcpp::Matrix<RTYPE> out = Rcpp::no_init_matrix(new_row, M_col);
   if(d_row < 0) {
     if(add_noise) {
       for(i_row = 0; i_row < -d_row; i_row++) out(i_row, Rcpp::_) = Rcpp::rnorm(M_col, bg, sd);
     } else {
-      for(i_row = 0; i_row < -d_row; i_row++) out(i_row, Rcpp::_) = Rcpp::NumericVector(M_col, bg);
+      for(i_row = 0; i_row < -d_row; i_row++) out(i_row, Rcpp::_) = Rcpp::Vector<RTYPE>(M_col, bg);
     }
     for(; i_row < new_row; i_row++) out(i_row, Rcpp::_) = mat(i_row + d_row, Rcpp::_);
   } else {
@@ -70,42 +59,32 @@ Rcpp::NumericMatrix hpp_shift_row( const Rcpp::NumericMatrix mat,
     if(add_noise) {
       for(; i_row < new_row; i_row++) out(i_row, Rcpp::_) = Rcpp::rnorm(M_col, bg, sd);
     } else {
-      for(; i_row < new_row; i_row++) out(i_row, Rcpp::_) = Rcpp::NumericVector(M_col, bg);
+      for(; i_row < new_row; i_row++) out(i_row, Rcpp::_) = Rcpp::Vector<RTYPE>(M_col, bg);
     }
   }
+  if(keep_size) return out(Range(std::max(0, d_row), std::max(M_row - 1, M_row - 1 + d_row)), Rcpp::_ );
   return out;
 }
 
-//' @title Image Column Shift
-//' @name cpp_shift_col
-//' @description Function to shift matrix's columns.
-//' @param mat a numeric matrix.
-//' @param d_col an integer, giving col shift. Default is 0 for no change.
-//' @param add_noise logical, if true adds normal noise when at least one new dimension is larger than original mat dimensions
-//' Rcpp::rnorm() function is used. Default is true.
-//' @param bg double, mean value of the background added if add_noise is true. Default is 0.
-//' @param sd double, standard deviation of the background added if add_noise is true. Default is 0.
-//' @return a shifted matrix with additional rows/columns if d_row or d_col are different from 0.
-//' @keywords internal
-////' @export
-// [[Rcpp::export]]
-Rcpp::NumericMatrix hpp_shift_col( const Rcpp::NumericMatrix mat, 
-                                   const int d_col = 0,
-                                   const bool add_noise = true, 
-                                   const double bg = 0.0,
-                                   const double sd = 0.0) {
+template <int RTYPE>  
+Rcpp::Matrix<RTYPE> shift_col_T (Rcpp::Matrix<RTYPE> mat, 
+                                 const int d_col = 0,
+                                 const bool add_noise = true, 
+                                 const double bg = 0.0,
+                                 const double sd = 0.0,
+                                 const bool keep_size = false) {
   if(d_col == 0) return mat;
   R_len_t M_row = mat.nrow();
   R_len_t M_col = mat.ncol();
   R_len_t i_col;
   R_len_t new_col = M_col + std::abs(d_col);
   
-  Rcpp::NumericMatrix out(M_row, new_col);
+  Rcpp::Matrix<RTYPE> out = Rcpp::no_init_matrix(M_row, new_col);
   if(d_col < 0) {
     if(add_noise) {
       for(i_col = 0; i_col < -d_col; i_col++) out(Rcpp::_, i_col) = Rcpp::rnorm(M_row, bg, sd);
     } else {
-      for(i_col = 0; i_col < -d_col; i_col++) out(Rcpp::_, i_col) = Rcpp::NumericVector(M_row, bg);
+      for(i_col = 0; i_col < -d_col; i_col++) out(Rcpp::_, i_col) = Rcpp::Vector<RTYPE>(M_row, bg);
     }
     for(; i_col < new_col; i_col++) out(Rcpp::_,i_col) = mat(Rcpp::_, i_col + d_col);
   } else {
@@ -113,10 +92,71 @@ Rcpp::NumericMatrix hpp_shift_col( const Rcpp::NumericMatrix mat,
     if(add_noise) {
       for(; i_col < new_col; i_col++) out(Rcpp::_, i_col) = Rcpp::rnorm(M_row, bg, sd);
     } else {
-      for(; i_col < new_col; i_col++) out(Rcpp::_, i_col) = Rcpp::NumericVector(M_row, bg);
+      for(; i_col < new_col; i_col++) out(Rcpp::_, i_col) = Rcpp::Vector<RTYPE>(M_row, bg);
     }
   }
+  if(keep_size) return out(Rcpp::_, Range(std::max(0, d_col), std::max(M_col - 1, M_col - 1 + d_col)));
   return out;
+}
+
+//' @title Image Row Shift
+//' @name cpp_shift_row
+//' @description Function to shift matrix's rows.
+//' @param mat a numeric matrix.
+//' @param d_row an integer, giving row shift. Default is \code{0} for no change.
+//' @param add_noise logical, if \code{true} adds normal noise when at least one new dimension is larger than original mat dimensions
+//' Rcpp::rnorm() function is used. Default is \code{true}.
+//' @param bg double, mean value of the background added if \code{'add_noise'} is \code{true}. Default is \code{0.0}.
+//' @param sd double, standard deviation of the background added if \code{'add_noise'} is \code{true}. Default is \code{0.0}.
+//' @param keep_size, a bool whether initial \code{'mat'} dimension should be kept. Default is \code{false}.
+//' @return a shifted matrix with additional rows if \code{'d_row'} is different from \code{0}.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+SEXP hpp_shift_row (SEXP mat,
+                    const int d_col = 0,
+                    const bool add_noise = true, 
+                    const double bg = 0.0,
+                    const double sd = 0.0,
+                    const bool keep_size = false) {
+  switch(TYPEOF(mat)) {
+  case NILSXP : return mat;
+  case RAWSXP : return shift_row_T<RAWSXP>(mat, d_col, add_noise, bg, sd, keep_size);
+  case LGLSXP : return shift_row_T<LGLSXP>(mat, d_col, add_noise, bg, sd, keep_size);
+  case INTSXP : return shift_row_T<INTSXP>(mat, d_col, add_noise, bg, sd, keep_size);
+  case REALSXP : return shift_row_T<REALSXP>(mat, d_col, add_noise, bg, sd, keep_size);
+  default: Rcpp::stop("hpp_shift_row: not supported type in 'mat'");
+  }
+}
+
+//' @title Image Column Shift
+//' @name cpp_shift_col
+//' @description Function to shift matrix's columns.
+//' @param mat a numeric matrix.
+//' @param d_col an integer, giving col shift. Default is \code{0} for no change.
+//' @param add_noise logical, if \code{true} adds normal noise when at least one new dimension is larger than original mat dimensions
+//' Rcpp::rnorm() function is used. Default is \code{true}.
+//' @param bg double, mean value of the background added if \code{'add_noise'} is \code{true}. Default is \code{0.0}.
+//' @param sd double, standard deviation of the background added if \code{'add_noise'} is \code{true}. Default is \code{0.0}.
+//' @param keep_size, a bool whether initial \code{'mat'} dimension should be kept. Default is \code{false}.
+//' @return a shifted matrix with additional columns if \code{'d_col'} is different from \code{0}.
+//' @keywords internal
+////' @export
+// [[Rcpp::export]]
+SEXP hpp_shift_col (SEXP mat,
+                    const int d_col = 0,
+                    const bool add_noise = true, 
+                    const double bg = 0.0,
+                    const double sd = 0.0,
+                    const bool keep_size = false) {
+  switch(TYPEOF(mat)) {
+  case NILSXP : return mat;
+  case RAWSXP : return shift_col_T<RAWSXP>(mat, d_col, add_noise, bg, sd, keep_size);
+  case LGLSXP : return shift_col_T<LGLSXP>(mat, d_col, add_noise, bg, sd, keep_size);
+  case INTSXP : return shift_col_T<INTSXP>(mat, d_col, add_noise, bg, sd, keep_size);
+  case REALSXP : return shift_col_T<REALSXP>(mat, d_col, add_noise, bg, sd, keep_size);
+  default: Rcpp::stop("hpp_shift_col: not supported type in 'mat'");
+  }
 }
 
 #endif

@@ -6,21 +6,23 @@
 \arguments{
 \item{mat}{a numeric matrix.}
 
-\item{d_row}{an integer, giving row shift. Default is 0 for no change.}
+\item{d_row}{an integer, giving row shift. Default is \code{0} for no change.}
 
-\item{d_col}{an integer, giving col shift. Default is 0 for no change.}
+\item{d_col}{an integer, giving col shift. Default is \code{0} for no change.}
 
-\item{add_noise}{logical, if true adds normal noise when at least one new dimension is larger than original mat dimensions
-Rcpp::rnorm() function is used. Default is true.}
+\item{add_noise}{logical, if \code{true} adds normal noise when at least one new dimension is larger than original mat dimensions
+Rcpp::rnorm() function is used. Default is \code{true}.}
 
-\item{bg}{double, mean value of the background added if add_noise is true. Default is 0.}
+\item{bg}{double, mean value of the background added if \code{'add_noise'} is \code{true}. Default is \code{0.0}.}
 
-\item{sd}{double, standard deviation of the background added if add_noise is true. Default is 0.}
+\item{sd}{double, standard deviation of the background added if \code{'add_noise'} is \code{true}. Default is \code{0.0}.}
+
+\item{keep_size, }{a bool whether initial \code{'mat'} dimension should be kept. Default is \code{false}.}
 }
 \value{
-a shifted matrix with additional rows/columns if d_row or d_col are different from 0.
+a shifted matrix with additional rows/columns if \code{'d_row'} or \code{'d_col'} are different from \code{0}.
 }
 \description{
-Function that shifts mat according to d_row and d_col parameters
+Function that shifts matrix rows and columns.
 }
 \keyword{internal}

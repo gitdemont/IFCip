@@ -721,15 +721,16 @@ Rcpp::LogicalMatrix cpp_k_inf_equal_M(const Rcpp::NumericMatrix mat, const doubl
 //' @title Image Shift
 //' @name cpp_shift
 //' @description
-//' Function that shifts mat according to d_row and d_col parameters
+//' Function that shifts matrix rows and columns.
 //' @param mat a numeric matrix.
-//' @param d_row an integer, giving row shift. Default is 0 for no change.
-//' @param d_col an integer, giving col shift. Default is 0 for no change.
-//' @param add_noise logical, if true adds normal noise when at least one new dimension is larger than original mat dimensions
-//' Rcpp::rnorm() function is used. Default is true.
-//' @param bg double, mean value of the background added if add_noise is true. Default is 0.
-//' @param sd double, standard deviation of the background added if add_noise is true. Default is 0.
-//' @return a shifted matrix with additional rows/columns if d_row or d_col are different from 0.
+//' @param d_row an integer, giving row shift. Default is \code{0} for no change.
+//' @param d_col an integer, giving col shift. Default is \code{0} for no change.
+//' @param add_noise logical, if \code{true} adds normal noise when at least one new dimension is larger than original mat dimensions
+//' Rcpp::rnorm() function is used. Default is \code{true}.
+//' @param bg double, mean value of the background added if \code{'add_noise'} is \code{true}. Default is \code{0.0}.
+//' @param sd double, standard deviation of the background added if \code{'add_noise'} is \code{true}. Default is \code{0.0}.
+//' @param keep_size, a bool whether initial \code{'mat'} dimension should be kept. Default is \code{false}.
+//' @return a shifted matrix with additional rows/columns if \code{'d_row'} or \code{'d_col'} are different from \code{0}.
 //' @keywords internal
 ////' @export
 // [[Rcpp::export]]
@@ -738,11 +739,12 @@ Rcpp::NumericMatrix cpp_shift( const Rcpp::NumericMatrix mat,
                                const int d_col = 0,
                                const bool add_noise = true,
                                const double bg = 0.0,
-                               const double sd = 0.0) {
-  if(d_row == 0) return hpp_shift_col(mat, d_col, add_noise, bg, sd);
-  if(d_col == 0) return hpp_shift_row(mat, d_row, add_noise, bg, sd);
-  Rcpp::NumericMatrix M0 = hpp_shift_row(mat, d_row, add_noise, bg, sd);
-  Rcpp::NumericMatrix M1 = hpp_shift_col(M0, d_col, add_noise, bg, sd);
+                               const double sd = 0.0,
+                               const bool keep_size = false) {
+  if(d_row == 0) return hpp_shift_col(mat, d_col, add_noise, bg, sd, keep_size);
+  if(d_col == 0) return hpp_shift_row(mat, d_row, add_noise, bg, sd, keep_size);
+  Rcpp::NumericMatrix M0 = hpp_shift_row(mat, d_row, add_noise, bg, sd, keep_size);
+  Rcpp::NumericMatrix M1 = hpp_shift_col(M0, d_col, add_noise, bg, sd, keep_size);
   return M1;
 }
 // END shift

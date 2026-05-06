@@ -377,8 +377,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_shift
-Rcpp::NumericMatrix cpp_shift(const Rcpp::NumericMatrix mat, const int d_row, const int d_col, const bool add_noise, const double bg, const double sd);
-RcppExport SEXP _IFCip_cpp_shift(SEXP matSEXP, SEXP d_rowSEXP, SEXP d_colSEXP, SEXP add_noiseSEXP, SEXP bgSEXP, SEXP sdSEXP) {
+Rcpp::NumericMatrix cpp_shift(const Rcpp::NumericMatrix mat, const int d_row, const int d_col, const bool add_noise, const double bg, const double sd, const bool keep_size);
+RcppExport SEXP _IFCip_cpp_shift(SEXP matSEXP, SEXP d_rowSEXP, SEXP d_colSEXP, SEXP add_noiseSEXP, SEXP bgSEXP, SEXP sdSEXP, SEXP keep_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -388,7 +388,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const bool >::type add_noise(add_noiseSEXP);
     Rcpp::traits::input_parameter< const double >::type bg(bgSEXP);
     Rcpp::traits::input_parameter< const double >::type sd(sdSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_shift(mat, d_row, d_col, add_noise, bg, sd));
+    Rcpp::traits::input_parameter< const bool >::type keep_size(keep_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_shift(mat, d_row, d_col, add_noise, bg, sd, keep_size));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1108,7 +1109,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_IFCip_cpp_k_equal_M", (DL_FUNC) &_IFCip_cpp_k_equal_M, 2},
     {"_IFCip_cpp_k_sup_equal_M", (DL_FUNC) &_IFCip_cpp_k_sup_equal_M, 2},
     {"_IFCip_cpp_k_inf_equal_M", (DL_FUNC) &_IFCip_cpp_k_inf_equal_M, 2},
-    {"_IFCip_cpp_shift", (DL_FUNC) &_IFCip_cpp_shift, 6},
+    {"_IFCip_cpp_shift", (DL_FUNC) &_IFCip_cpp_shift, 7},
     {"_IFCip_cpp_flip", (DL_FUNC) &_IFCip_cpp_flip, 2},
     {"_IFCip_cpp_padding", (DL_FUNC) &_IFCip_cpp_padding, 5},
     {"_IFCip_cpp_filter", (DL_FUNC) &_IFCip_cpp_filter, 5},
