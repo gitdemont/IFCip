@@ -117,10 +117,10 @@ Rcpp::NumericVector cpp_bbox(const Rcpp::NumericMatrix pts,
 //' @param img, a SEXP (logical, raw, integer or numeric) vector or matrix containing image intensity values.
 //' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as \code{true}.
 //' Default is \code{R_NilValue}, for using all \code{'img'} elements without masking anything.
-//' @param value, a double; it is the replacement value that will be used when \code{'msk'} element is interpreted as \code{false}. Default is \code{NA_REAL}.
+//' @param value, a double; it is the replacement value that will be used when \code{'msk'} element is interpreted as \code{false}. Default is \code{NA_REAL}. /!\ Note that it will be silently cast to \code{'img'} type.
 //' @param n_lev, an int determining the number of levels used for the computation. Default is \code{256}.
-//' @param invert, a bool determining whether '\code{'img'} should be scaled from min(\code{'img'}) to max(\code{'img'}) (when \code{'false'}, [min(\code{'img'}),max(\code{'img'})] becoming [0,sign(\code{'n_lev'})*abs(\code{'n_lev'}-1)]) or inverted (when \code{true}, with [max(\code{'img'}),min(\code{'img'})] rescaled to [0,sign(\code{'n_lev'})*\code{'n_lev'}-1]) values. Default is \code{false}.
-//' @param bin, a bool determining whether \code{'img'} should be binned or if scaling should be continuous. Default is \code{false}.
+//' @param invert, a bool determining whether \code{'img'} should be scaled from min(\code{'img'}) to max(\code{'img'}) (when \code{false}, [min(\code{'img'}),max(\code{'img'})] becoming [0,sign(\code{'n_lev'})*abs(\code{'n_lev'}-1)]) or inverted (when \code{true}, with [max(\code{'img'}),min(\code{'img'})] rescaled to [0,sign(\code{'n_lev'})*\code{'n_lev'}-1]) values. Default is \code{false}.
+//' @param bin, a bool determining whether \code{'img'} should be binned or if scaling should be continuous. Default is \code{false}. It will be forced to \code{true} if \code{'img'} is not of numeric type.
 //' @param clipmin, a double, minimal value under which \code{'img'} intensity values will be clipped to. Default is \code{NA_REAL}, to use no minimal clipping.
 //' @param clipmax, a double, maximal value above which '\code{'img'} intensity values will be clipped to. Default is \code{NA_REAL}, to use no maximal clipping.
 //' @param method, an uint8_t determining how scaling should be applied. Default is \code{1}.

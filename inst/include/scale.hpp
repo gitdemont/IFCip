@@ -165,7 +165,7 @@ void hpp_scalerev(SEXP img,
   }
 }
 
-template <int RTYPE>
+template <typename T, int RTYPE>
 Rcpp::NumericVector scale_T(Rcpp::Vector<RTYPE> img,
                             const Rcpp::Nullable<Rcpp::NumericVector> msk_ = R_NilValue,
                             const double value = NA_REAL,
@@ -175,9 +175,15 @@ Rcpp::NumericVector scale_T(Rcpp::Vector<RTYPE> img,
                             const double clipmin = NA_REAL,
                             const double clipmax = NA_REAL,
                             const uint8_t method = 1) {
+  bool as_bin = bin || RTYPE != REALSXP;
+  T val =
+    RTYPE == INTSXP ? value > 2147483647.0 || value < -2147483647.0 ? NA_INTEGER : value :
+      RTYPE == LGLSXP ? Rcpp::traits::is_na<REALSXP>(value) ? NA_LOGICAL : value != 0 :
+        RTYPE == RAWSXP ? value > 255.0 || value < 0.0 ? 0.0 : value : value;
+  double val_out = RTYPE == REALSXP ? value : Rcpp::traits::is_na<RTYPE>(val) ? NA_REAL : val;
   if(is_scaled_T(img)) {
     Rcpp::NumericVector sca = img.attr("scale");
-    if(sca[3] == invert && sca[5] == bin && sca[6] == n_lev) {
+    if(sca[3] == invert && sca[5] == as_bin && sca[6] == n_lev) {
       return img.attr("scale"); 
     } else {
       hpp_scalerev(img, sca);
@@ -186,12 +192,12 @@ Rcpp::NumericVector scale_T(Rcpp::Vector<RTYPE> img,
   } else {
   }
   if(std::abs(n_lev) < 2) Rcpp::stop("hpp_scale: abs(n_lev) should be at least 2.0");
-  Rcpp::NumericVector out = Rcpp::NumericVector::create(_["min"]=R_NegInf, _["max"]=R_PosInf, _["factor"]=1.0, _["invert"]=invert, _["value"]=value, _["bin"]=bin, _["levels"]=n_lev);
-  double MAX_LEV_SCA = bin + std::abs(n_lev) - 1;
-  double MAX_LEV_BIN = std::abs(n_lev) - 1;
+  Rcpp::NumericVector out = Rcpp::NumericVector::create(_["min"]=R_NegInf, _["max"]=R_PosInf, _["factor"]=1.0, _["invert"]=invert, _["value"]=val_out, _["bin"]=as_bin, _["levels"]=n_lev);
+  T MAX_LEV_SCA = as_bin + std::abs(n_lev) - 1;
+  T MAX_LEV_BIN = std::abs(n_lev) - 1;
   Rcpp::NumericVector ran = range_T(img, msk_);
-  double MN = std::max(ran[0],R_finite(clipmin) ? clipmin : R_NegInf);
-  double MX = std::min(ran[1],R_finite(clipmax) ? clipmax : R_PosInf);
+  double MN = std::max(ran[0],R_finite(clipmin) && method != 1 ? clipmin : R_NegInf);
+  double MX = std::min(ran[1],R_finite(clipmax) && method != 1 ? clipmax : R_PosInf);
   switch(method) {
   case 1 :{
     // don't modify ran
@@ -215,55 +221,39 @@ Rcpp::NumericVector scale_T(Rcpp::Vector<RTYPE> img,
   }
   out[0] = ran[0];
   out[1] = ran[1];
-  out[2] = bin ? MAX_LEV_BIN : MAX_LEV_SCA;
+  out[2] = as_bin ? MAX_LEV_BIN : MAX_LEV_SCA;
   out[2] /= (out[1] - out[0]);
   double K = MAX_LEV_SCA / (out[1] - out[0]), Q = out[0];
-  double W = 0.0, Z = MAX_LEV_BIN;
+  T V = MAX_LEV_BIN, W = invert ? MAX_LEV_BIN : 0, Z = invert ? 0 : MAX_LEV_BIN;
   if(invert) { K *= -1.0; Q = out[1]; }
-  if(bin) { 
-    W = std::trunc(K * (MN - Q));
-    Z = std::trunc(K * (MX - Q));
-    if(n_lev < 0) {
-      W = std::max(W, MAX_LEV_BIN);
-      Z = std::max(Z, MAX_LEV_BIN);
-    } else {
-      W = std::min(W, MAX_LEV_BIN);
-      Z = std::min(Z, MAX_LEV_BIN);
-    }
-  } else {
-    W = K * (MN - Q);
-    Z = K * (MX - Q);
-  }
-  double V = invert ? W : Z;
-  
   if(n_lev < 0) {
     if(msk_.isNotNull()) {
       Rcpp::NumericVector msk = getmask_T(img, msk_);
-      if(bin) {
-        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? img[i] > MX ? Z : img[i] < MN ? W : std::max(std::trunc(K * (img[i] - Q)), V) : value;
+      if(as_bin) {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? img[i] >= MX ? Z : img[i] <= MN ? W : std::max((T) std::trunc(K * (img[i] - Q)), V) : val; 
       } else {
-        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? img[i] > MX ? Z : img[i] < MN ? W : std::max(K * (img[i] - Q),V) : value;
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? img[i] >= MX ? Z : img[i] <= MN ? W : std::max((T) (K * (img[i] - Q)), V) : val;
       }
     } else {
-      if(bin) {
-        for(R_len_t i = 0; i < img.size(); i++) img[i] = img[i] > MX ? Z : img[i] < MN ? W : std::max(std::trunc(K * (img[i] - Q)), V); 
+      if(as_bin) {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = img[i] >= MX ? Z : img[i] <= MN ? W : std::max((T) std::trunc(K * (img[i] - Q)), V); 
       } else {
-        for(R_len_t i = 0; i < img.size(); i++) img[i] = img[i] > MX ? Z : img[i] < MN ? W : std::max(K * (img[i] - Q), V);
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = img[i] >= MX ? Z : img[i] <= MN ? W : std::max((T) (K * (img[i] - Q)), V);
       }
     }
   } else {
     if(msk_.isNotNull()) {
       Rcpp::NumericVector msk = getmask_T(img, msk_);
-      if(bin) {
-        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? img[i] > MX ? Z : img[i] < MN ? W : std::min(std::trunc(K * (img[i] - Q)), V) : value;
+      if(as_bin) {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? img[i] >= MX ? Z : img[i] <= MN ? W : std::min((T) std::trunc(K * (img[i] - Q)), V) : val;
       } else {
-        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? img[i] > MX ? Z : img[i] < MN ? W : std::min(K * (img[i] - Q), V) : value;
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = msk[i] ? img[i] >= MX ? Z : img[i] <= MN ? W : std::min((T) (K * (img[i] - Q)), V) : val;
       }
     } else {
-      if(bin) {
-        for(R_len_t i = 0; i < img.size(); i++) img[i] = img[i] > MX ? Z : img[i] < MN ? W : std::min(std::trunc(K * (img[i] - Q)), V);
+      if(as_bin) {
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = img[i] >= MX ? Z : img[i] <= MN ? W : std::min((T) std::trunc(K * (img[i] - Q)), V);
       } else {
-        for(R_len_t i = 0; i < img.size(); i++) img[i] = img[i] > MX ? Z : img[i] < MN ? W : std::min(K * (img[i] - Q), V);
+        for(R_len_t i = 0; i < img.size(); i++) img[i] = img[i] >= MX ? Z : img[i] <= MN ? W : std::min((T) (K * (img[i] - Q)), V);
       }
     }
   }
@@ -289,10 +279,10 @@ Rcpp::NumericVector hpp_scale(SEXP img,
                               const double clipmax = NA_REAL,
                               const uint8_t method = 1) {
   switch( TYPEOF(img) ) {
-  case LGLSXP : return scale_T(as<Rcpp::LogicalVector>(img), msk_, value, n_lev, invert, bin, clipmin, clipmax, method);
-  case INTSXP : return scale_T(as<Rcpp::IntegerVector>(img), msk_, value, n_lev, invert, bin, clipmin, clipmax, method);
-  case REALSXP : return scale_T(as<Rcpp::NumericVector>(img), msk_, value, n_lev, invert, bin, clipmin, clipmax, method);
-  case RAWSXP : return scale_T(as<Rcpp::RawVector>(img), msk_, value, n_lev, invert, bin, clipmin, clipmax, method);
+  case LGLSXP : return scale_T<int>(as<Rcpp::LogicalVector>(img), msk_, value, n_lev, invert, bin, clipmin, clipmax, method);
+  case INTSXP : return scale_T<int>(as<Rcpp::IntegerVector>(img), msk_, value, n_lev, invert, bin, clipmin, clipmax, method);
+  case REALSXP : return scale_T<double>(as<Rcpp::NumericVector>(img), msk_, value, n_lev, invert, bin, clipmin, clipmax, method);
+  case RAWSXP : return scale_T<uint8_t>(as<Rcpp::RawVector>(img), msk_, value, n_lev, invert, bin, clipmin, clipmax, method);
   default : Rcpp::stop("hpp_scale: not supported SEXP in 'img'");
   }
 }
@@ -320,10 +310,10 @@ Rcpp::Vector<RTYPE> rescale_T(const Rcpp::Vector<RTYPE>& img,
 //' @param img, a SEXP (logical, raw, integer or numeric) vector or matrix containing image intensity values.
 //' @param msk_, a Rcpp::NumericVector with finite values. Non-finite values will trigger an error. All non 0 values will be interpreted as \code{true}.
 //' Default is \code{R_NilValue}, for using all \code{'img'} elements without masking anything.
-//' @param value, a double; it is the replacement value that will be used when \code{'msk'} element is interpreted as \code{false}. Default is \code{NA_REAL}.
+//' @param value, a double; it is the replacement value that will be used when \code{'msk'} element is interpreted as \code{false}. Default is \code{NA_REAL}. /!\ Note that it will be silently cast to \code{'img'} type.
 //' @param n_lev, an int determining the number of levels used for the computation. Default is \code{256}.
-//' @param invert, a bool determining whether '\code{'img'} should be scaled from min(\code{'img'}) to max(\code{'img'}) (when \code{'false'}, [min(\code{'img'}),max(\code{'img'})] becoming [0,sign(\code{'n_lev'})*abs(\code{'n_lev'}-1)]) or inverted (when \code{true}, with [max(\code{'img'}),min(\code{'img'})] rescaled to [0,sign(\code{'n_lev'})*\code{'n_lev'}-1]) values. Default is \code{false}.
-//' @param bin, a bool determining whether \code{'img'} should be binned or if scaling should be continuous. Default is \code{false}.
+//' @param invert, a bool determining whether \code{'img'} should be scaled from min(\code{'img'}) to max(\code{'img'}) (when \code{false}, [min(\code{'img'}),max(\code{'img'})] becoming [0,sign(\code{'n_lev'})*abs(\code{'n_lev'}-1)]) or inverted (when \code{true}, with [max(\code{'img'}),min(\code{'img'})] rescaled to [0,sign(\code{'n_lev'})*\code{'n_lev'}-1]) values. Default is \code{false}.
+//' @param bin, a bool determining whether \code{'img'} should be binned or if scaling should be continuous. Default is \code{false}. It will be forced to \code{true} if \code{'img'} is not of numeric type.
 //' @param clipmin, a double, minimal value under which \code{'img'} intensity values will be clipped to. Default is \code{NA_REAL}, to use no minimal clipping.
 //' @param clipmax, a double, maximal value above which '\code{'img'} intensity values will be clipped to. Default is \code{NA_REAL}, to use no maximal clipping.
 //' @param method, an uint8_t determining how scaling should be applied. Default is \code{1}.
@@ -347,7 +337,7 @@ SEXP hpp_rescale(const SEXP img,
                  const double clipmax = NA_REAL,
                  const uint8_t method = 1) {
   switch( TYPEOF(img) ) {
-  case LGLSXP : return rescale_T(as<Rcpp::RawVector>(img), msk_, value, n_lev, invert, bin, clipmin, clipmax, method); 
+  case LGLSXP : return rescale_T(as<Rcpp::LogicalVector>(img), msk_, value, n_lev, invert, bin, clipmin, clipmax, method); 
   case INTSXP: return rescale_T(as<Rcpp::IntegerVector>(img), msk_, value, n_lev, invert, bin, clipmin, clipmax, method); 
   case REALSXP: return rescale_T(as<Rcpp::NumericVector>(img), msk_, value, n_lev, invert, bin, clipmin, clipmax, method); 
   case RAWSXP : return rescale_T(as<Rcpp::RawVector>(img), msk_, value, n_lev, invert, bin, clipmin, clipmax, method); 
